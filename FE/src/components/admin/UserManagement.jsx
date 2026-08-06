@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import {
   ArrowClockwise,
@@ -38,12 +39,12 @@ async function apiFetch(path, options = {}) {
   });
 }
 
-async function readError(res) {
+async function readError(res, t) {
   try {
     const j = await res.json();
-    return j?.message || j?.error || `Lỗi ${res.status}`;
+    return j?.message || j?.error || t('admin.users.error.http', { status: res.status });
   } catch {
-    return `Lỗi ${res.status}`;
+    return t('admin.users.error.http', { status: res.status });
   }
 }
 
@@ -68,17 +69,18 @@ function Spinner({ size = 18, className = "" }) {
 
 /* ─────────────────────────── Badges ──────────────────────────────── */
 function RoleBadge({ role }) {
+  const { t } = useTranslation();
   let style = "bg-slate-100 text-slate-700 ring-1 ring-slate-200";
-  let label = "Khách hàng";
+  let label = t('admin.users.role.customer');
   let icon = <User size={11} weight="fill" />;
 
   if (role === "admin") {
     style = "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
-    label = "Admin";
+    label = t('admin.users.role.admin');
     icon = <Shield size={11} weight="fill" />;
   } else if (role === "manager") {
     style = "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200";
-    label = "Quản lý";
+    label = t('admin.users.role.manager');
     icon = <Crown size={11} weight="fill" />;
   }
 
@@ -93,17 +95,18 @@ function RoleBadge({ role }) {
 }
 
 function StatusBadge({ status }) {
+  const { t } = useTranslation();
   let style = "bg-slate-100 text-slate-500 ring-1 ring-slate-200";
-  let label = "Không hoạt động";
+  let label = t('admin.users.status.inactive');
   let icon = <XCircle size={11} weight="fill" />;
 
   if (status === "active") {
     style = "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
-    label = "Hoạt động";
+    label = t('admin.users.status.active');
     icon = <CheckCircle size={11} weight="fill" />;
   } else if (status === "suspended") {
     style = "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-    label = "Bị khóa";
+    label = t('admin.users.status.suspended');
     icon = <Warning size={11} weight="fill" />;
   }
 
@@ -214,6 +217,7 @@ const EMPTY = {
 };
 
 function CreateForm({ onSave, onCancel, saving }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
 
@@ -224,18 +228,18 @@ function CreateForm({ onSave, onCancel, saving }) {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Vui lòng nhập tên người dùng";
+    if (!form.name.trim()) e.name = t('admin.users.create.errorName');
     if (!form.email.trim()) {
-      e.email = "Vui lòng nhập email";
+      e.email = t('admin.users.create.errorEmail');
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      e.email = "Email không hợp lệ";
+      e.email = t('admin.users.create.errorEmailInvalid');
     }
     if (!form.password) {
-      e.password = "Vui lòng nhập mật khẩu";
+      e.password = t('admin.users.create.errorPassword');
     } else if (form.password.length < 6) {
-      e.password = "Mật khẩu phải từ 6 ký tự";
+      e.password = t('admin.users.create.errorPasswordShort');
     }
-    if (!form.role) e.role = "Vui lòng chọn vai trò";
+    if (!form.role) e.role = t('admin.users.create.errorRole');
     return e;
   };
 
@@ -250,15 +254,15 @@ function CreateForm({ onSave, onCancel, saving }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Họ và tên" required error={errors.name}>
+        <Field label={t('admin.users.create.nameLabel')} required error={errors.name}>
           <input
             className={inp}
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
-            placeholder="Nguyễn Văn A"
+            placeholder={t('admin.users.create.namePlaceholder')}
           />
         </Field>
-        <Field label="Số điện thoại" error={errors.phone}>
+        <Field label={t('admin.users.create.phoneLabel')} error={errors.phone}>
           <input
             className={inp}
             value={form.phone}
@@ -268,7 +272,7 @@ function CreateForm({ onSave, onCancel, saving }) {
         </Field>
       </div>
 
-      <Field label="Email (Tài khoản đăng nhập)" required error={errors.email}>
+      <Field label={t('admin.users.create.emailLabel')} required error={errors.email}>
         <input
           type="email"
           className={inp}
@@ -278,24 +282,24 @@ function CreateForm({ onSave, onCancel, saving }) {
         />
       </Field>
 
-      <Field label="Mật khẩu" required error={errors.password}>
+      <Field label={t('admin.users.create.passwordLabel')} required error={errors.password}>
         <input
           type="password"
           className={inp}
           value={form.password}
           onChange={(e) => set("password", e.target.value)}
-          placeholder="Mật khẩu từ 6 ký tự trở lên"
+          placeholder={t('admin.users.create.passwordPlaceholder')}
         />
       </Field>
 
-      <Field label="Vai trò" required error={errors.role}>
+      <Field label={t('admin.users.create.roleLabel')} required error={errors.role}>
         <select
           className={inp}
           value={form.role}
           onChange={(e) => set("role", e.target.value)}
         >
-          <option value="manager">Quản lý</option>
-          <option value="admin">Quản trị viên (admin)</option>
+          <option value="manager">{t('admin.users.create.optionManager')}</option>
+          <option value="admin">{t('admin.users.create.optionAdmin')}</option>
         </select>
       </Field>
 
@@ -306,7 +310,7 @@ function CreateForm({ onSave, onCancel, saving }) {
           disabled={saving}
           className="rounded-lg border border-slate-200 px-4 py-2 text-sm !text-black hover:bg-slate-50 transition-colors"
         >
-          Hủy
+          {t('admin.users.create.cancel')}
         </button>
         <button
           type="submit"
@@ -314,7 +318,7 @@ function CreateForm({ onSave, onCancel, saving }) {
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
         >
           {saving && <Spinner size={14} className="text-white" />}
-          {saving ? "Đang tạo…" : "Tạo người dùng"}
+          {saving ? t('admin.users.create.creating') : t('admin.users.create.submit')}
         </button>
       </div>
     </form>
@@ -322,6 +326,7 @@ function CreateForm({ onSave, onCancel, saving }) {
 }
 
 function EditForm({ initial, onSave, onCancel, saving }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: initial.name || "",
     phone: initial.phone || "",
@@ -337,7 +342,7 @@ function EditForm({ initial, onSave, onCancel, saving }) {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Vui lòng nhập tên người dùng";
+    if (!form.name.trim()) e.name = t('admin.users.create.errorName');
     return e;
   };
 
@@ -352,15 +357,15 @@ function EditForm({ initial, onSave, onCancel, saving }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Họ và tên" required error={errors.name}>
+        <Field label={t('admin.users.edit.nameLabel')} required error={errors.name}>
           <input
             className={inp}
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
-            placeholder="Nguyễn Văn A"
+            placeholder={t('admin.users.edit.namePlaceholder')}
           />
         </Field>
-        <Field label="Số điện thoại" error={errors.phone}>
+        <Field label={t('admin.users.edit.phoneLabel')} error={errors.phone}>
           <input
             className={inp}
             value={form.phone}
@@ -371,26 +376,26 @@ function EditForm({ initial, onSave, onCancel, saving }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Vai trò" error={errors.role}>
+        <Field label={t('admin.users.edit.roleLabel')} error={errors.role}>
           <select
             className={inp}
             value={form.role}
             onChange={(e) => set("role", e.target.value)}
           >
-            <option value="manager">Quản lý (manager)</option>
-            <option value="admin">Quản trị viên (admin)</option>
+            <option value="manager">{t('admin.users.edit.optionManager')}</option>
+            <option value="admin">{t('admin.users.edit.optionAdmin')}</option>
           </select>
         </Field>
 
-        <Field label="Trạng thái tài khoản" error={errors.status}>
+        <Field label={t('admin.users.edit.statusLabel')} error={errors.status}>
           <select
             className={inp}
             value={form.status}
             onChange={(e) => set("status", e.target.value)}
           >
-            <option value="active">Hoạt động (Active)</option>
-            <option value="inactive">Ngừng hoạt động (Inactive)</option>
-            <option value="suspended">Bị khóa (Suspended)</option>
+            <option value="active">{t('admin.users.edit.optionActive')}</option>
+            <option value="inactive">{t('admin.users.edit.optionInactive')}</option>
+            <option value="suspended">{t('admin.users.edit.optionSuspended')}</option>
           </select>
         </Field>
       </div>
@@ -402,7 +407,7 @@ function EditForm({ initial, onSave, onCancel, saving }) {
           disabled={saving}
           className="rounded-lg border border-slate-200 px-4 py-2 text-sm !text-black hover:bg-slate-50 transition-colors"
         >
-          Hủy
+          {t('admin.users.edit.cancel')}
         </button>
         <button
           type="submit"
@@ -410,7 +415,7 @@ function EditForm({ initial, onSave, onCancel, saving }) {
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors"
         >
           {saving && <Spinner size={14} className="text-white" />}
-          {saving ? "Đang lưu…" : "Lưu thay đổi"}
+          {saving ? t('admin.users.edit.saving') : t('admin.users.edit.submit')}
         </button>
       </div>
     </form>
@@ -419,15 +424,16 @@ function EditForm({ initial, onSave, onCancel, saving }) {
 
 /* ─────────────────────────── Detail View ─────────────────────────── */
 function DetailView({ user }) {
+  const { t } = useTranslation();
   const createdDate = user.createdAt
     ? new Date(user.createdAt).toLocaleString("vi-VN")
-    : "Không rõ";
+    : t('admin.users.detail.unknown');
   const lastLoginDate = user.lastLogin
     ? new Date(user.lastLogin).toLocaleString("vi-VN")
-    : "Chưa từng đăng nhập";
+    : t('admin.users.detail.neverLoggedIn');
   const dob = user.dateOfBirth
     ? new Date(user.dateOfBirth).toLocaleDateString("vi-VN")
-    : "Chưa cập nhật";
+    : t('admin.users.detail.notUpdated');
 
   return (
     <div className="space-y-5 text-sm text-slate-600">
@@ -461,35 +467,35 @@ function DetailView({ user }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 border-t border-b border-slate-100 py-4">
         <div>
           <span className="block text-xs text-slate-400 font-medium">
-            Số điện thoại
+            {t('admin.users.detail.phone')}
           </span>
           <span className="font-semibold text-slate-700 flex items-center gap-1.5 mt-0.5">
             <Phone size={14} className="text-slate-400" />
-            {user.phone || "Chưa cung cấp"}
+            {user.phone || t('admin.users.detail.notProvided')}
           </span>
         </div>
         <div>
           <span className="block text-xs text-slate-400 font-medium">
-            Ngày sinh
+            {t('admin.users.detail.birthdate')}
           </span>
           <span className="font-semibold text-slate-700 mt-0.5">{dob}</span>
         </div>
         <div>
           <span className="block text-xs text-slate-400 font-medium">
-            Điểm tích lũy
+            {t('admin.users.detail.points')}
           </span>
           <span className="font-semibold text-slate-700 flex items-center gap-1 mt-0.5">
             <Coins size={14} weight="fill" className="text-amber-500" />
-            {user.loyaltyPoints || 0} điểm
+            {t('admin.users.detail.pointsValue', { points: user.loyaltyPoints || 0 })}
           </span>
         </div>
         <div>
           <span className="block text-xs text-slate-400 font-medium">
-            Điểm trọn đời (Lifetime)
+            {t('admin.users.detail.lifetimePoints')}
           </span>
           <span className="font-semibold text-slate-700 flex items-center gap-1 mt-0.5">
             <Coins size={14} weight="duotone" className="text-slate-400" />
-            {user.lifetimePoints || 0} điểm
+            {t('admin.users.detail.pointsValue', { points: user.lifetimePoints || 0 })}
           </span>
         </div>
       </div>
@@ -497,11 +503,11 @@ function DetailView({ user }) {
       {/* Registration info */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-xs text-slate-400">
         <div>
-          <span>Lần đăng nhập cuối:</span>
+          <span>{t('admin.users.detail.lastLoginLabel')}</span>
           <p className="font-medium text-slate-600 mt-0.5">{lastLoginDate}</p>
         </div>
         <div>
-          <span>Ngày đăng ký tài khoản:</span>
+          <span>{t('admin.users.detail.registeredLabel')}</span>
           <p className="font-medium text-slate-600 mt-0.5">{createdDate}</p>
         </div>
       </div>
@@ -533,17 +539,18 @@ function parseBlockedMessage(msg = '') {
 
 /* ─────────────────────────── Block Delete Modal ─────────────────── */
 function BlockDeleteModal({ title, message, onClose }) {
+  const { t } = useTranslation();
   const { header, items, footer } = useMemo(() => parseBlockedMessage(message), [message]);
 
   return (
-    <Modal title={title || 'Không thể xóa'} onClose={onClose}>
+    <Modal title={title || t('admin.users.blocked.title')} onClose={onClose}>
       <div className="space-y-4 py-1">
         <div className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200/70">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 mt-0.5 font-bold shadow-xs">
             <Warning size={20} weight="fill" />
           </div>
           <div className="space-y-1 min-w-0 flex-1">
-            <h4 className="text-sm font-bold text-amber-900">Bảo vệ liên kết dữ liệu hệ thống</h4>
+            <h4 className="text-sm font-bold text-amber-900">{t('admin.users.blocked.protectTitle')}</h4>
             <p className="text-xs text-amber-800 leading-relaxed font-medium">{header}</p>
           </div>
         </div>
@@ -551,7 +558,7 @@ function BlockDeleteModal({ title, message, onClose }) {
         {items.length > 0 && (
           <div className="space-y-2">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-              Các dữ liệu đang liên kết hoạt động:
+              {t('admin.users.blocked.linkedDataLabel')}
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {items.map((it, idx) => (
@@ -575,7 +582,7 @@ function BlockDeleteModal({ title, message, onClose }) {
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <button type="button" onClick={onClose}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
-            Đóng
+            {t('admin.users.blocked.close')}
           </button>
         </div>
       </div>
@@ -585,8 +592,9 @@ function BlockDeleteModal({ title, message, onClose }) {
 
 /* ─────────────────────────── Confirm delete ─────────────────────── */
 function ConfirmDelete({ user, onConfirm, onCancel, deleting }) {
+  const { t } = useTranslation();
   return (
-    <Modal title="Xác nhận xóa tài khoản" onClose={onCancel}>
+    <Modal title={t('admin.users.delete.title')} onClose={onCancel}>
       <div className="space-y-4">
         <div className="flex gap-3 rounded-xl bg-red-50 p-4 ring-1 ring-red-100">
           <Warning
@@ -595,10 +603,9 @@ function ConfirmDelete({ user, onConfirm, onCancel, deleting }) {
             className="mt-0.5 shrink-0 text-red-500"
           />
           <div className="text-sm text-red-700">
-            <p className="font-bold">Bạn chắc chắn muốn xóa tài khoản "{user.name}"?</p>
+            <p className="font-bold">{t('admin.users.delete.confirm', { name: user.name })}</p>
             <p className="mt-1">
-              Nếu người dùng đang có lịch đặt chưa hoàn thành, gói lượt còn hiệu lực,
-              lịch định kỳ hoặc điểm tích lũy, hệ thống sẽ bảo vệ dữ liệu và không cho phép xóa.
+              {t('admin.users.delete.warning')}
             </p>
           </div>
         </div>
@@ -608,7 +615,7 @@ function ConfirmDelete({ user, onConfirm, onCancel, deleting }) {
             disabled={deleting}
             className="rounded-lg border border-slate-200 px-4 py-2 text-sm !text-black hover:bg-slate-50 transition-colors"
           >
-            Hủy
+            {t('admin.users.delete.cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -616,7 +623,7 @@ function ConfirmDelete({ user, onConfirm, onCancel, deleting }) {
             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
           >
             {deleting && <Spinner size={14} className="text-white" />}
-            {deleting ? "Đang xóa…" : "Xóa tài khoản"}
+            {deleting ? t('admin.users.delete.deleting') : t('admin.users.delete.submit')}
           </button>
         </div>
       </div>
@@ -628,6 +635,7 @@ function ConfirmDelete({ user, onConfirm, onCancel, deleting }) {
    Main Component
    ─────────────────────────────────────────────────────────────────── */
 export default function UserManagement() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
@@ -679,7 +687,7 @@ export default function UserManagement() {
         setTotal(pag?.total || 0);
         setPage(pg);
       } catch (err) {
-        setFetchError(err.message || "Không thể tải dữ liệu người dùng");
+        setFetchError(err.message || t('admin.users.error.load'));
       } finally {
         setLoading(false);
       }
@@ -725,9 +733,9 @@ export default function UserManagement() {
       await userService.createUser(data);
       fetchUsers(1);
       setModal(null);
-      notify("Tạo tài khoản người dùng thành công!");
+      notify(t('admin.users.toast.createSuccess'));
     } catch (err) {
-      notify(err.message || "Tạo người dùng thất bại", "error");
+      notify(err.message || t('admin.users.error.create'), "error");
     } finally {
       setSaving(false);
     }
@@ -739,9 +747,9 @@ export default function UserManagement() {
       await userService.updateUser(selected._id, data);
       fetchUsers(page);
       setModal(null);
-      notify("Cập nhật tài khoản thành công!");
+      notify(t('admin.users.toast.updateSuccess'));
     } catch (err) {
-      notify(err.message || "Cập nhật thất bại", "error");
+      notify(err.message || t('admin.users.error.update'), "error");
     } finally {
       setSaving(false);
     }
@@ -754,17 +762,17 @@ export default function UserManagement() {
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         if (errorData.code === 'USER_IN_USE') {
-          setBlockedMsg(errorData.message || 'Không thể xóa người dùng');
+          setBlockedMsg(errorData.message || t('admin.users.blocked.errorBlocked'));
           setModal('blocked');
           return;
         }
-        throw new Error(errorData.message || `Lỗi ${res.status}`);
+        throw new Error(errorData.message || t('admin.users.error.http', { status: res.status }));
       }
       fetchUsers(page);
       setModal(null);
-      notify("Đã xóa vĩnh viễn tài khoản người dùng.");
+      notify(t('admin.users.toast.deleteSuccess'));
     } catch (err) {
-      notify(err.message || "Xóa tài khoản thất bại", "error");
+      notify(err.message || t('admin.users.error.delete'), "error");
     } finally {
       setDeleting(false);
     }
@@ -781,7 +789,7 @@ export default function UserManagement() {
           />
           <input
             className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
-            placeholder="Tìm theo tên, email, SĐT..."
+            placeholder={t('admin.users.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -792,10 +800,10 @@ export default function UserManagement() {
           onChange={(e) => handleRoleFilter(e.target.value)}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
         >
-          <option value="">Tất cả vai trò</option>
-          <option value="admin">Admin</option>
-          <option value="manager">Quản lý</option>
-          <option value="customer">Khách hàng</option>
+          <option value="">{t('admin.users.allRoles')}</option>
+          <option value="admin">{t('admin.users.role.admin')}</option>
+          <option value="manager">{t('admin.users.role.manager')}</option>
+          <option value="customer">{t('admin.users.role.customer')}</option>
         </select>
 
         <select
@@ -803,16 +811,16 @@ export default function UserManagement() {
           onChange={(e) => handleStatusFilter(e.target.value)}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="active">Hoạt động</option>
-          <option value="inactive">Ngừng hoạt động</option>
-          <option value="suspended">Bị khóa</option>
+          <option value="">{t('admin.users.allStatuses')}</option>
+          <option value="active">{t('admin.users.status.active')}</option>
+          <option value="inactive">{t('admin.users.status.inactive')}</option>
+          <option value="suspended">{t('admin.users.status.suspended')}</option>
         </select>
 
         {(search || roleFilter || statusFilter) && (
           <button onClick={clearFilters}
             className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50 transition-colors">
-            <X size={14} /> Xóa lọc
+            <X size={14} /> {t('admin.users.clearFilters')}
           </button>
         )}
 
@@ -821,7 +829,7 @@ export default function UserManagement() {
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm ml-auto"
         >
           <UserPlus size={15} weight="bold" />
-          Thêm tài khoản
+          {t('admin.users.addAccount')}
         </button>
       </div>
 
@@ -829,7 +837,7 @@ export default function UserManagement() {
       {loading ? (
         <div className="flex flex-col items-center gap-3 py-28 text-slate-400">
           <Spinner size={28} />
-          <span className="text-sm">Đang tải danh sách người dùng…</span>
+          <span className="text-sm">{t('admin.users.loading')}</span>
         </div>
       ) : fetchError ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-red-100 bg-red-50 py-16">
@@ -839,14 +847,14 @@ export default function UserManagement() {
             onClick={() => fetchUsers(page)}
             className="rounded-lg border border-red-200 px-4 py-1.5 text-sm text-red-600 hover:bg-red-100 transition-colors"
           >
-            Thử lại
+            {t('admin.users.retry')}
           </button>
         </div>
       ) : users.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-20">
           <Users size={40} weight="thin" className="text-slate-300" />
           <p className="text-sm font-medium text-slate-500">
-            Không tìm thấy người dùng phù hợp
+            {t('admin.users.noResults')}
           </p>
         </div>
       ) : (
@@ -855,11 +863,11 @@ export default function UserManagement() {
             <table className="w-full border-collapse text-left text-sm text-slate-600">
               <thead className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-4">Tên người dùng / Email</th>
-                  <th className="px-6 py-4">Vai trò</th>
-                  <th className="px-6 py-4">Hạng / Điểm</th>
-                  <th className="px-6 py-4">Trạng thái</th>
-                  <th className="px-6 py-4 text-right">Thao tác</th>
+                  <th className="px-6 py-4">{t('admin.users.columns.user')}</th>
+                  <th className="px-6 py-4">{t('admin.users.columns.role')}</th>
+                  <th className="px-6 py-4">{t('admin.users.columns.tier')}</th>
+                  <th className="px-6 py-4">{t('admin.users.columns.status')}</th>
+                  <th className="px-6 py-4 text-right">{t('admin.users.columns.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -891,25 +899,25 @@ export default function UserManagement() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => { setSelected(u); setModal("detail"); }}
-                          title="Xem chi tiết"
+                          title={t('admin.users.tooltip.view')}
                           className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
                           <Eye size={15} />
                         </button>
                         <button
                           onClick={() => { setSelected(u); setModal("edit"); }}
-                          title="Chỉnh sửa"
+                          title={t('admin.users.tooltip.edit')}
                           className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                           <PencilSimple size={15} />
                         </button>
                         {u.role !== 'admin' ? (
                           <button
                             onClick={() => { setSelected(u); setModal("delete"); }}
-                            title="Xóa tài khoản"
+                            title={t('admin.users.tooltip.delete')}
                             className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors">
                             <Trash size={15} />
                           </button>
                         ) : (
-                          <span className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-200 cursor-not-allowed" title="Không thể xóa tài khoản admin">
+                          <span className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-200 cursor-not-allowed" title={t('admin.users.tooltip.deleteForbidden')}>
                             <Trash size={15} />
                           </span>
                         )}
@@ -925,12 +933,12 @@ export default function UserManagement() {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-4 border-t border-slate-100 px-4 py-3">
               <p className="text-xs text-slate-500">
-                {total > 0 ? `${(page - 1) * 10 + 1}–${Math.min(page * 10, total)} / ${total}` : '0 kết quả'}
+                {total > 0 ? `${(page - 1) * 10 + 1}–${Math.min(page * 10, total)} / ${total}` : t('admin.users.zeroResults')}
               </p>
               <div className="flex items-center gap-1">
                 <button onClick={() => fetchUsers(page - 1)} disabled={page <= 1 || loading}
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  Trước
+                  {t('admin.users.previous')}
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
@@ -951,7 +959,7 @@ export default function UserManagement() {
                   )}
                 <button onClick={() => fetchUsers(page + 1)} disabled={page >= totalPages || loading}
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  Sau
+                  {t('admin.users.next')}
                 </button>
               </div>
             </div>
@@ -961,13 +969,13 @@ export default function UserManagement() {
 
       {/* Modals */}
       {modal === "create" && (
-        <Modal title="Thêm tài khoản quản trị mới" onClose={() => setModal(null)} wide>
+        <Modal title={t('admin.users.create.title')} onClose={() => setModal(null)} wide>
           <CreateForm onSave={handleCreate} onCancel={() => setModal(null)} saving={saving} />
         </Modal>
       )}
 
       {modal === "edit" && selected && (
-        <Modal title={`Chỉnh sửa tài khoản: ${selected.name}`} onClose={() => setModal(null)} wide>
+        <Modal title={t('admin.users.edit.title', { name: selected.name })} onClose={() => setModal(null)} wide>
           <EditForm
             initial={selected}
             onSave={handleUpdate}
@@ -978,14 +986,14 @@ export default function UserManagement() {
       )}
 
       {modal === "detail" && selected && (
-        <Modal title="Thông tin chi tiết người dùng" onClose={() => setModal(null)}>
+        <Modal title={t('admin.users.detail.title')} onClose={() => setModal(null)}>
           <DetailView user={selected} />
         </Modal>
       )}
 
       {modal === "blocked" && (
         <BlockDeleteModal
-          title="Không thể xóa tài khoản"
+          title={t('admin.users.blocked.blockedTitle')}
           message={blockedMsg}
           onClose={() => { setModal(null); setBlockedMsg(''); }}
         />

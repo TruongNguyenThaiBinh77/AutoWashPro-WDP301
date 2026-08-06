@@ -1,4 +1,5 @@
 import { getApiBaseUrl, getStoredToken } from './authStorage.js';
+import i18n from '../i18n/index';
 
 const SESSION_KEY = 'aw_chat_session';
 
@@ -26,8 +27,8 @@ export async function sendChatMessage(message) {
   });
 
   const payload = await res.json();
-  if (!res.ok) throw new Error(payload.message || 'Lỗi kết nối chatbot');
-  return payload.data?.reply || 'Xin lỗi, có lỗi xảy ra.';
+  if (!res.ok) throw new Error(payload.message || i18n.t('shared.chatbot.error'));
+  return payload.data?.reply || i18n.t('shared.chatbot.fallback');
 }
 
 export function clearChatSession() {

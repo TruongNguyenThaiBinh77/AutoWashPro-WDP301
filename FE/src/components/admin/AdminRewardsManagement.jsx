@@ -17,7 +17,6 @@ import {
 } from '@phosphor-icons/react';
 import TierBadge from '@/components/ui/TierBadge';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
-import { translateText } from '@/utils/notifTranslator';
 
 function api(path, opts = {}) {
   return fetch(`${getApiBaseUrl()}${path}`, {
@@ -68,21 +67,21 @@ const FALLBACK_TIER_OPTIONS = [
 ];
 
 const REDEMPTION_STATUS = {
-  claimed: { label: 'Chờ gửi quà', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  sent: { label: 'Đã gửi cho khách', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  received: { label: 'Khách đã nhận', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  cancelled: { label: 'Đã hủy', cls: 'bg-rose-50 text-rose-600 border-rose-200' },
+  claimed: { label: 'Chờ gửi quà', labelKey: 'admin.rewardsManagement.statusClaimed', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  sent: { label: 'Đã gửi cho khách', labelKey: 'admin.rewardsManagement.statusSent', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  received: { label: 'Khách đã nhận', labelKey: 'admin.rewardsManagement.statusReceived', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  cancelled: { label: 'Đã hủy', labelKey: 'admin.rewardsManagement.statusCancelled', cls: 'bg-rose-50 text-rose-600 border-rose-200' },
 };
 
 function StatusBadge({ status }) {
-  const { i18n } = useTranslation();
-  const lang = i18n.language || 'vi';
+  const { t } = useTranslation();
   const s = REDEMPTION_STATUS[status] || { label: status, cls: 'bg-slate-50 text-slate-600 border-slate-200' };
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${s.cls}`}>{translateText(s.label, lang)}</span>;
+  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${s.cls}`}>{s.labelKey ? t(s.labelKey) : s.label}</span>;
 }
 
 /* ═══ Cấu hình quà tặng vật lý (Reward CRUD) ═══ */
 function RewardModal({ initial, onSave, onClose, saving, tierOptions = FALLBACK_TIER_OPTIONS }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(initial || {
     name: '', description: '', imageUrl: '', pointCost: '', stock: '',
     requiredTier: 'bronze', status: 'active', sortOrder: 0,
@@ -98,9 +97,9 @@ function RewardModal({ initial, onSave, onClose, saving, tierOptions = FALLBACK_
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = 'Nhập tên phần quà';
-    if (!form.pointCost || Number(form.pointCost) < 1) e.pointCost = 'Nhập số điểm (> 0)';
-    if (form.stock === '' || form.stock == null || Number(form.stock) < 0) e.stock = 'Nhập số lượng tồn kho';
+    if (!form.name.trim()) e.name = t('admin.rewardsManagement.modal.errorNameRequired');
+    if (!form.pointCost || Number(form.pointCost) < 1) e.pointCost = t('admin.rewardsManagement.modal.errorPointsRequired');
+    if (form.stock === '' || form.stock == null || Number(form.stock) < 0) e.stock = t('admin.rewardsManagement.modal.errorStockRequired');
     return e;
   };
 
@@ -123,56 +122,56 @@ function RewardModal({ initial, onSave, onClose, saving, tierOptions = FALLBACK_
       onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-[15px] font-semibold text-slate-800">{isEdit ? 'Chỉnh sửa phần quà' : 'Thêm phần quà vật lý mới'}</h2>
+          <h2 className="text-[15px] font-semibold text-slate-800">{isEdit ? t('admin.rewardsManagement.modal.editTitle') : t('admin.rewardsManagement.modal.addTitle')}</h2>
           <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"><X size={16} /></button>
         </div>
         <form onSubmit={submit} className="max-h-[72vh] space-y-4 overflow-y-auto px-6 py-5">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Tên phần quà <span className="text-red-500">*</span></label>
-            <input className={inp} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Nước hoa khử mùi xe" />
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.modal.nameLabel')} <span className="text-red-500">*</span></label>
+            <input className={inp} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder={t('admin.rewardsManagement.modal.namePlaceholder')} />
             {errors.name && <p className="mt-0.5 text-[11px] text-red-500">{errors.name}</p>}
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Mô tả</label>
-            <textarea className={`${inp} min-h-[70px] resize-y`} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Mô tả ngắn về phần quà..." />
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.modal.descriptionLabel')}</label>
+            <textarea className={`${inp} min-h-[70px] resize-y`} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder={t('admin.rewardsManagement.modal.descriptionPlaceholder')} />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Ảnh (URL)</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.modal.imageUrlLabel')}</label>
             <input className={inp} value={form.imageUrl} onChange={(e) => set('imageUrl', e.target.value)} placeholder="https://..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Số điểm đổi <span className="text-red-500">*</span></label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.modal.pointsCostLabel')} <span className="text-red-500">*</span></label>
               <input type="number" min="1" className={inp} value={form.pointCost} onChange={(e) => set('pointCost', e.target.value)} placeholder="100" />
               {errors.pointCost && <p className="mt-0.5 text-[11px] text-red-500">{errors.pointCost}</p>}
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Số lượng tồn kho <span className="text-red-500">*</span></label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.modal.stockLabel')} <span className="text-red-500">*</span></label>
               <input type="number" min="0" className={inp} value={form.stock} onChange={(e) => set('stock', e.target.value)} placeholder="50" />
               {errors.stock && <p className="mt-0.5 text-[11px] text-red-500">{errors.stock}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Hạng tối thiểu</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.minTier')}</label>
               <select className={inp} value={form.requiredTier || 'bronze'} onChange={(e) => set('requiredTier', e.target.value)}>
-                {tierOptions.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                {tierOptions.map(opt => <option key={opt.id} value={opt.id}>{opt.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Trạng thái</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.rewardsManagement.status')}</label>
               <select className={inp} value={form.status} onChange={(e) => set('status', e.target.value)}>
-                <option value="active">Kích hoạt</option>
-                <option value="inactive">Tắt</option>
+                <option value="active">{t('admin.rewardsManagement.statusActive')}</option>
+                <option value="inactive">{t('admin.rewardsManagement.statusInactive')}</option>
               </select>
             </div>
           </div>
           <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
             <button type="button" onClick={onClose} disabled={saving}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">Hủy</button>
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">{t('admin.rewardsManagement.modal.cancel')}</button>
             <button type="submit" disabled={saving}
               className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors">
-              {saving && <Spinner size={14} />}{saving ? 'Đang lưu…' : 'Lưu'}
+              {saving && <Spinner size={14} />}{saving ? t('admin.rewardsManagement.modal.saving') : t('admin.rewardsManagement.modal.save')}
             </button>
           </div>
         </form>
@@ -182,6 +181,7 @@ function RewardModal({ initial, onSave, onClose, saving, tierOptions = FALLBACK_
 }
 
 export function RewardsConfigTab({ isManager = false }) {
+  const { t } = useTranslation();
   const [rewards, setRewards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -220,7 +220,7 @@ export function RewardsConfigTab({ isManager = false }) {
       if (!res.ok) throw new Error(await readErr(res));
       const p = await res.json();
       setRewards(Array.isArray(p?.data) ? p.data : []);
-    } catch (err) { setError(err.message || 'Không thể tải phần quà'); }
+    } catch (err) { setError(err.message || t('admin.rewardsManagement.errorLoadRewards')); }
     finally { setLoading(false); }
   }, [search]);
 
@@ -235,20 +235,20 @@ export function RewardsConfigTab({ isManager = false }) {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error(await readErr(res));
-      setModal(null); notify(isEdit ? 'Cập nhật phần quà thành công!' : 'Thêm phần quà thành công!');
+      setModal(null); notify(isEdit ? t('admin.rewardsManagement.updateSuccess') : t('admin.rewardsManagement.addSuccess'));
       fetch_();
-    } catch (err) { notify(err.message || 'Lưu thất bại', 'error'); }
+    } catch (err) { notify(err.message || t('admin.rewardsManagement.saveFailed'), 'error'); }
     finally { setSaving(false); }
   };
 
   const handleDelete = async (id) => {
-    if (!(await confirmDialog({ title: 'Xóa phần quà', message: 'Bạn có chắc chắn muốn xóa phần quà này?', confirmLabel: 'Xóa', danger: true }))) return;
+    if (!(await confirmDialog({ title: t('admin.rewardsManagement.deleteTitle'), message: t('admin.rewardsManagement.deleteMessage'), confirmLabel: t('admin.rewardsManagement.deleteConfirmLabel'), danger: true }))) return;
     try {
       const res = await api(`/rewards/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(await readErr(res));
       setRewards((prev) => prev.filter((r) => r._id !== id));
-      notify('Xóa phần quà thành công!');
-    } catch (err) { notify(err.message || 'Xóa thất bại', 'error'); }
+      notify(t('admin.rewardsManagement.deleteSuccess'));
+    } catch (err) { notify(err.message || t('admin.rewardsManagement.deleteFailed'), 'error'); }
   };
 
   return (
@@ -262,7 +262,7 @@ export function RewardsConfigTab({ isManager = false }) {
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Tìm theo tên phần quà..."
+            placeholder={t('admin.rewardsManagement.searchRewardsPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-colors"
@@ -276,7 +276,7 @@ export function RewardsConfigTab({ isManager = false }) {
         </div>
         <button onClick={() => { setSelected(null); setModal('create'); }}
           className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors shadow-sm">
-          <Plus size={14} weight="bold" />Thêm phần quà
+          <Plus size={14} weight="bold" />{t('admin.rewardsManagement.addButton')}
         </button>
       </div>
 
@@ -289,10 +289,10 @@ export function RewardsConfigTab({ isManager = false }) {
       ) : rewards.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-20">
           <Package size={40} weight="thin" className="text-slate-300" />
-          <p className="text-sm text-slate-500">Chưa có phần quà vật lý nào</p>
+          <p className="text-sm text-slate-500">{t('admin.rewardsManagement.emptyState')}</p>
           <button onClick={() => { setSelected(null); setModal('create'); }}
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
-            <Plus size={13} weight="bold" />Thêm phần quà đầu tiên
+            <Plus size={13} weight="bold" />{t('admin.rewardsManagement.addFirstButton')}
           </button>
         </div>
       ) : (
@@ -301,11 +301,11 @@ export function RewardsConfigTab({ isManager = false }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold text-slate-500">
-                  <th className="px-4 py-3">Quà tặng</th>
-                  <th className="px-4 py-3">Điểm đổi</th>
-                  <th className="px-4 py-3">Tồn kho</th>
-                  <th className="px-4 py-3">Hạng tối thiểu</th>
-                  <th className="px-4 py-3">Trạng thái</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.gift')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.points')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.stock')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.minTier')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.status')}</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -332,17 +332,17 @@ export function RewardsConfigTab({ isManager = false }) {
                     <td className="px-4 py-3"><TierBadge tier={r.requiredTier || 'bronze'} /></td>
                     <td className="px-4 py-3">
                       <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${r.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
-                        {r.status === 'active' ? 'Kích hoạt' : 'Tắt'}
+                        {r.status === 'active' ? t('admin.rewardsManagement.statusActive') : t('admin.rewardsManagement.statusInactive')}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => { setSelected(r); setModal('edit'); }} title="Chỉnh sửa"
+                        <button onClick={() => { setSelected(r); setModal('edit'); }} title={t('admin.rewardsManagement.editTooltip')}
                           className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                           <PencilSimple size={14} />
                         </button>
                         {!isManager && (
-                          <button onClick={() => handleDelete(r._id)} title="Xóa"
+                          <button onClick={() => handleDelete(r._id)} title={t('admin.rewardsManagement.deleteTooltip')}
                             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors">
                             <Trash size={14} />
                           </button>
@@ -376,6 +376,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const { t } = useTranslation();
   const notify = (msg, type = 'success') => showToast(msg, type);
 
   const fetch_ = useCallback(async () => {
@@ -391,7 +392,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
       const p = await res.json();
       setRedemptions(Array.isArray(p?.data) ? p.data : []);
       if (p?.pagination) setPagination(p.pagination);
-    } catch (err) { setError(err.message || 'Không thể tải danh sách đổi thưởng'); }
+    } catch (err) { setError(err.message || t('admin.rewardsManagement.errorLoadRedemptions')); }
     finally { setLoading(false); }
   }, [search, statusFilter, page]);
 
@@ -399,9 +400,9 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
 
   const handleSent = async (rd) => {
     const ok = await confirmDialog({
-      title: 'Xác nhận đã gửi quà',
-      message: `Xác nhận bạn đã giao "${rd.rewardSnapshot?.name || 'phần quà'}" cho khách hàng? Khách sẽ dùng mã đổi thưởng để nhận quà.`,
-      confirmLabel: 'Đã gửi quà',
+      title: t('admin.rewardsManagement.confirmSentTitle'),
+      message: t('admin.rewardsManagement.confirmSentMessage', { gift: rd.rewardSnapshot?.name || t('admin.rewardsManagement.giftNameFallback') }),
+      confirmLabel: t('admin.rewardsManagement.confirmSentLabel'),
     });
     if (!ok) return;
 
@@ -412,15 +413,15 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
         body: JSON.stringify(managerBranchId ? { branchId: managerBranchId } : {}),
       });
       if (!res.ok) throw new Error(await readErr(res));
-      notify('Đã gửi quà cho khách hàng!');
+      notify(t('admin.rewardsManagement.sentSuccess'));
       fetch_();
-    } catch (err) { notify(err.message || 'Cập nhật thất bại', 'error'); }
+    } catch (err) { notify(err.message || t('admin.rewardsManagement.updateFailed'), 'error'); }
     finally { setSending(null); }
   };
 
   const handleVerifyReceived = async (rd) => {
     const code = (codeInput[rd._id] || '').trim();
-    if (!code) { notify('Vui lòng nhập mã đổi thưởng của khách', 'error'); return; }
+    if (!code) { notify(t('admin.rewardsManagement.enterCodeRequired'), 'error'); return; }
     setVerifying(rd._id);
     try {
       const res = await api(`/rewards/redemptions/${rd._id}/received`, {
@@ -428,15 +429,12 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
         body: JSON.stringify({ code }),
       });
       if (!res.ok) throw new Error(await readErr(res));
-      notify('Đã xác nhận khách nhận quà!');
+      notify(t('admin.rewardsManagement.receivedSuccess'));
       setCodeInput(prev => ({ ...prev, [rd._id]: '' }));
       fetch_();
-    } catch (err) { notify(err.message || 'Xác nhận thất bại', 'error'); }
+    } catch (err) { notify(err.message || t('admin.rewardsManagement.verifyFailed'), 'error'); }
     finally { setVerifying(null); }
   };
-
-  const { i18n } = useTranslation();
-  const lang = i18n.language || 'vi';
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
@@ -450,7 +448,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder={translateText('Tìm theo mã đổi thưởng hoặc tên quà...', lang)}
+            placeholder={t('admin.rewardsManagement.searchRedemptionsPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-colors"
@@ -464,11 +462,11 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
         </div>
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-colors">
-          <option value="">{translateText('Tất cả trạng thái', lang)}</option>
-          <option value="claimed">{translateText('Chờ gửi quà', lang)}</option>
-          <option value="sent">{translateText('Đã gửi cho khách', lang)}</option>
-          <option value="received">{translateText('Khách đã nhận', lang)}</option>
-          <option value="cancelled">{translateText('Đã hủy', lang)}</option>
+          <option value="">{t('admin.rewardsManagement.allStatuses')}</option>
+          <option value="claimed">{t('admin.rewardsManagement.statusClaimed')}</option>
+          <option value="sent">{t('admin.rewardsManagement.statusSent')}</option>
+          <option value="received">{t('admin.rewardsManagement.statusReceived')}</option>
+          <option value="cancelled">{t('admin.rewardsManagement.statusCancelled')}</option>
         </select>
       </div>
 
@@ -481,7 +479,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
       ) : redemptions.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-20">
           <Package size={40} weight="thin" className="text-slate-300" />
-          <p className="text-sm text-slate-500">{translateText('Chưa có lượt đổi thưởng nào', lang)}</p>
+          <p className="text-sm text-slate-500">{t('admin.rewardsManagement.emptyRedemptions')}</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -489,11 +487,11 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold text-slate-500">
-                  <th className="px-4 py-3">{translateText('Khách hàng', lang)}</th>
-                  <th className="px-4 py-3">{translateText('Quà tặng', lang)}</th>
-                  <th className="px-4 py-3">{translateText('Ngày đổi', lang)}</th>
-                  <th className="px-4 py-3">{translateText('Trạng thái', lang)}</th>
-                  <th className="px-4 py-3">{translateText('Chi nhánh / Người gửi', lang)}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.customer')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.gift')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.redeemedDate')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.status')}</th>
+                  <th className="px-4 py-3">{t('admin.rewardsManagement.branchSender')}</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -512,7 +510,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-slate-800 line-clamp-1">{snap.name || '—'}</p>
-                        <p className="text-[11px] text-amber-600 font-semibold">{Number(snap.pointCost || rd.pointsSpent || 0).toLocaleString('vi-VN')} {translateText('điểm', lang)}</p>
+                        <p className="text-[11px] text-amber-600 font-semibold">{Number(snap.pointCost || rd.pointsSpent || 0).toLocaleString('vi-VN')} {t('admin.rewardsManagement.pointsUnit')}</p>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500">{formatDate(rd.createdAt)}</td>
                       <td className="px-4 py-3"><StatusBadge status={rd.status} /></td>
@@ -521,7 +519,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                           <>
                             {rd.sentAt && <p>{formatDate(rd.sentAt)}</p>}
                             {rd.branchId?.name && <p className="text-slate-400">{rd.branchId.name}</p>}
-                            {rd.sentBy?.name && <p className="text-slate-400">{lang === 'en' ? 'by ' : 'bởi '}{rd.sentBy.name}</p>}
+                            {rd.sentBy?.name && <p className="text-slate-400">{t('admin.rewardsManagement.sentBy', { name: rd.sentBy.name })}</p>}
                           </>
                         ) : <span className="text-slate-300">—</span>}
                       </td>
@@ -530,7 +528,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                           <button onClick={() => handleSent(rd)} disabled={sending === rd._id}
                             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors">
                             {sending === rd._id ? <Spinner size={12} /> : <PaperPlaneTilt size={13} />}
-                            {sending === rd._id ? (lang === 'en' ? 'Sending...' : 'Đang gửi...') : translateText('Đã gửi quà cho khách', lang)}
+                            {sending === rd._id ? t('admin.rewardsManagement.sending') : t('admin.rewardsManagement.markSentButton')}
                           </button>
                         ) : canVerify ? (
                           <div className="flex items-center gap-1.5">
@@ -539,13 +537,13 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                               value={codeInput[rd._id] || ''}
                               onChange={(e) => setCodeInput(prev => ({ ...prev, [rd._id]: e.target.value }))}
                               onKeyDown={(e) => { if (e.key === 'Enter') handleVerifyReceived(rd); }}
-                              placeholder="Nhập mã của khách"
+                              placeholder={t('admin.rewardsManagement.enterCodePlaceholder')}
                               className="w-36 rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-mono text-slate-700 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-colors"
                             />
                             <button onClick={() => handleVerifyReceived(rd)} disabled={verifying === rd._id}
                               className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors">
                               {verifying === rd._id ? <Spinner size={12} /> : <CheckCircle size={13} />}
-                              {verifying === rd._id ? 'Đang xác nhận...' : 'Xác nhận đã nhận'}
+                              {verifying === rd._id ? t('admin.rewardsManagement.verifying') : t('admin.rewardsManagement.confirmReceived')}
                             </button>
                           </div>
                         ) : (
@@ -564,10 +562,10 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">Trước</button>
-          <span className="text-xs text-slate-500">Trang {page} / {pagination.totalPages}</span>
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">{t('admin.rewardsManagement.prevPage')}</button>
+          <span className="text-xs text-slate-500">{t('admin.rewardsManagement.pageInfo', { page, total: pagination.totalPages })}</span>
           <button onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))} disabled={page >= pagination.totalPages}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">Sau</button>
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">{t('admin.rewardsManagement.nextPage')}</button>
         </div>
       )}
     </div>

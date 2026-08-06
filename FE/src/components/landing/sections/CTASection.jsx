@@ -2,12 +2,14 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, CheckCircle2, ShieldCheck, ArrowRight, Star } from 'lucide-react';
 
 export default function CTASection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <section className="relative py-20 md:py-32 bg-slate-95 overflow-hidden" ref={ref}>
@@ -58,20 +60,20 @@ export default function CTASection() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
                 <Sparkles size={14} className="text-emerald-400 animate-pulse" />
-                <span>BẮT ĐẦU NGAY — ƯU ĐÃI 20% LẦN ĐẦU</span>
+                <span>{t('landing.cta.badge')}</span>
               </div>
 
               {/* Main Headline */}
               <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-6">
-                Sẵn sàng để xe bạn <br className="hidden sm:block" />
+                {t('landing.cta.titlePart1')} <br className="hidden sm:block" />
                 <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 bg-clip-text text-transparent">
-                  luôn sạch bóng như mới?
+                  {t('landing.cta.titlePart2')}
                 </span>
               </h2>
 
               {/* Subtitle */}
               <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl mb-8">
-                Đăng ký ngay để nhận ưu đãi lần đầu và trải nghiệm hệ thống đặt lịch thông minh 30s của AutoWashPro.
+                {t('landing.cta.subtitle')}
               </p>
 
               {/* CTA Action & Trust Features */}
@@ -83,7 +85,7 @@ export default function CTASection() {
                   className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-base shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-300 cursor-pointer overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    Đăng ký miễn phí
+                    {t('landing.cta.register')}
                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -94,15 +96,15 @@ export default function CTASection() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-slate-800/80 pt-6 w-full text-slate-400 text-xs">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={15} className="text-emerald-400 shrink-0" />
-                  <span>Miễn phí đăng ký</span>
+                  <span>{t('landing.cta.trustFreeSignup')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={15} className="text-emerald-400 shrink-0" />
-                  <span>Không cần thẻ tín dụng</span>
+                  <span>{t('landing.cta.trustNoCard')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles size={15} className="text-emerald-400 shrink-0" />
-                  <span>Đặt lịch trong 30 giây</span>
+                  <span>{t('landing.cta.trust30s')}</span>
                 </div>
               </div>
             </motion.div>
@@ -117,7 +119,7 @@ export default function CTASection() {
               <div className="relative rounded-3xl overflow-hidden border border-emerald-500/30 bg-slate-900/60 shadow-2xl group">
                 <img
                   src="/images/cta_banner.jpg"
-                  alt="AutoWashPro Detailing Showroom"
+                  alt={t('landing.cta.imageAlt')}
                   className="w-full h-80 sm:h-96 object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
@@ -132,8 +134,8 @@ export default function CTASection() {
                     <Star size={16} fill="currentColor" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">4.9 / 5.0 ⭐</div>
-                    <div className="text-[10px] text-slate-400">2,500+ Đánh giá hài lòng</div>
+                    <div className="text-xs font-bold text-white">{t('landing.cta.rating')}</div>
+                    <div className="text-[10px] text-slate-400">{t('landing.cta.ratingLabel')}</div>
                   </div>
                 </motion.div>
 
@@ -147,8 +149,8 @@ export default function CTASection() {
                     <CheckCircle2 size={16} />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-white">10,000+ Xe đã rửa</div>
-                    <div className="text-[10px] text-slate-400">Cam kết chất lượng 100%</div>
+                    <div className="text-xs font-bold text-white">{t('landing.cta.carsWashed')}</div>
+                    <div className="text-[10px] text-slate-400">{t('landing.cta.qualityLabel')}</div>
                   </div>
                 </motion.div>
               </div>

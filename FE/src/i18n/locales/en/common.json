@@ -26,5 +26,596 @@
   "yes": "Yes",
   "no": "No",
   "retry": "Retry",
-  "system": "System"
+  "system": "System",
+  "menu": {
+    "overview": "Overview",
+    "bookings": "Bookings Management",
+    "payments": "Payments Management",
+    "reviews": "Reviews",
+    "branches": "Branch Management",
+    "users": "User Management",
+    "slot-packs": "Slot Packs",
+    "rewards": "Promotions & Gifts",
+    "policies": "Policies & Services Management",
+    "activity": "Recent Activity",
+    "system-config": "Business Rules Configuration",
+    "profile": "Profile",
+    "schedule": "Daily Schedule",
+    "customers": "Customers",
+    "feedbacks": "Feedbacks",
+    "packages": "Service Packages",
+    "vouchers": "Promotions & Gifts",
+    "revenue": "Revenue Reports",
+    "branch": "My Branch"
+  },
+  "landing": {
+    "footer": {
+      "serviceSnowFoam": "Premium Snow Foam Car Wash",
+      "serviceEngine": "Detailed Engine Bay Cleaning",
+      "serviceCeramic": "Ceramic Nano Coating",
+      "serviceInterior": "Interior Cleaning & Sanitizing",
+      "servicePolish": "Polishing & Paint Restoration",
+      "policyPrivacy": "Privacy Policy",
+      "policyTerms": "Terms of Use",
+      "policyPayment": "Flexible Payment",
+      "policyCancellation": "Cancellation Policy",
+      "policyRefund": "100% Refund",
+      "openHoursLabel": "Opening hours:",
+      "allDays": "(Open all days)",
+      "networkLabel": "Network:",
+      "networkValue": "15+ Nationwide Branches",
+      "hotline": "24/7 Hotline:",
+      "badgeVersion": "System 5.0 ✨",
+      "tagline": "The leading smart car wash & car care booking system. Modern technology, transparent pricing and optimized time for car owners.",
+      "connectTitle": "Connect with us",
+      "servicesTitle": "Featured Services",
+      "policiesTitle": "Policies & Support",
+      "contactTitle": "Contact Us",
+      "emailCsLabel": "Customer Support Email",
+      "warrantyLabel": "Service Warranty",
+      "warrantyValue": "100% Satisfaction Guarantee",
+      "copyrightText": "All rights reserved. Designed with",
+      "privacyLink": "Privacy",
+      "termsLink": "Terms",
+      "backToTop": "Back to top"
+    },
+    "hero": {
+      "badge": "Smart Booking System",
+      "titleCare": "Car Care",
+      "titleWay": "in a",
+      "titleProfessional": "Professional Way",
+      "subtitle": "Fast online car wash booking system. Experience premium automotive cleaning and care at AutoWash Pro.",
+      "bookNow": "Start Booking Now",
+      "scrollExplore": "Scroll to Explore",
+      "stats": {
+        "washes": "CAR WASHES",
+        "satisfaction": "SATISFACTION",
+        "branches": "BRANCHES"
+      }
+    },
+    "cta": {
+      "badge": "START NOW — 20% FIRST-TIME OFFER",
+      "titlePart1": "Ready to keep your car",
+      "titlePart2": "always spotless like new?",
+      "subtitle": "Sign up now to get your first-time discount and experience AutoWashPro's 30-second smart booking system.",
+      "register": "Sign Up Free",
+      "trustFreeSignup": "Free to sign up",
+      "trustNoCard": "No credit card required",
+      "trust30s": "Book in 30 seconds",
+      "imageAlt": "AutoWashPro Detailing Showroom",
+      "rating": "4.9 / 5.0 ⭐",
+      "ratingLabel": "2,500+ Happy Reviews",
+      "carsWashed": "10,000+ Cars Washed",
+      "qualityLabel": "100% Quality Guarantee"
+    },
+    "how": {
+      "stepLabel": "STEP",
+      "step1Title": "Choose a Branch",
+      "step1Desc": "Pick the nearest branch that suits your location on the AutoWash Pro nationwide system.",
+      "step1Tag": "📍 Nationwide Network",
+      "step2Title": "Choose a Service Package",
+      "step2Desc": "Select a wash package from basic to premium, plus optional add-ons as needed.",
+      "step2Tag": "✨ Wide Range of Wash Packages",
+      "step3Title": "Choose Vehicle & Time",
+      "step3Desc": "Select a saved vehicle or enter a new one, then pick a suitable date and time slot.",
+      "step3Tag": "⏰ 30s Appointment Precision",
+      "step4Title": "Confirm & Pick Up",
+      "step4Desc": "Confirm your booking and apply a discount code if available. Bring your car and get it back spotless.",
+      "step4Tag": "🛡 100% Perfect Clean Car",
+      "label": "HOW IT WORKS",
+      "titlePart1": "Book in",
+      "titlePart2": "4 steps",
+      "subtitle": "Simple and fast. Just choose a branch, pick a service, select a time and confirm your booking.",
+      "cta": "Book Now ✨"
+    },
+    "about": {
+      "badge": "#1 Car Wash Service in Vietnam",
+      "heroTitle1": "We love your car",
+      "heroTitle2": "like you do",
+      "heroSubtitle": "AutoWashPro was founded with the mission of delivering professional, convenient and reliable car care experiences to every car owner in Vietnam.",
+      "trustedPrefix": "Trusted by",
+      "trustedSuffix": "customers nationwide",
+      "stats": {
+        "washes": "Car Washes",
+        "branches": "Branches",
+        "rating": "Average Rating",
+        "experience": "Years of Experience"
+      },
+      "storyLabel": "OUR STORY",
+      "storyTitle1": "From a small idea",
+      "storyTitle2": "to a leading chain",
+      "storyTitle3": "of car wash stores",
+      "storyPara1": "AutoWashPro was founded in 2019 by a team of car enthusiasts and customer service advocates. We realized that car washing in Vietnam still had many shortcomings: long waiting times, inconsistent quality, and difficulty booking appointments.",
+      "storyPara2": "From there, we built a professional car wash system with standardized processes, a smart booking app, and a quality commitment for every car. After more than 5 years, AutoWashPro has become one of the most loved car wash brands in Ho Chi Minh City and is expanding to other provinces.",
+      "cardTagline": "Devoted Car Care",
+      "valuesLabel": "CORE VALUES",
+      "valuesTitle": "Why Choose Us?",
+      "values": {
+        "qualityTitle": "Superior Quality",
+        "qualityDesc": "Using advanced technology and premium professional solutions to keep your car always shiny and like new.",
+        "timeTitle": "Time Saving",
+        "timeDesc": "Book ahead through the app, arrive and get washed immediately — no waiting. Optimized process takes only 15-45 minutes.",
+        "teamTitle": "Professional Team",
+        "teamDesc": "Well-trained technicians who are dedicated to every smallest detail of your car.",
+        "safetyTitle": "Safe & Protected",
+        "safetyDesc": "Compensation commitment in case of damage. Eco-friendly products that are safe for your health."
+      },
+      "historyLabel": "OUR HISTORY",
+      "historyTitle": "Our Journey",
+      "timeline": {
+        "founding": {
+          "title": "Founded",
+          "desc": "AutoWashPro launched with its first branch in Ho Chi Minh City, bringing professional car wash services."
+        },
+        "expansion": {
+          "title": "Expansion",
+          "desc": "Grew to 3 branches and launched the online booking app so customers can manage their time."
+        },
+        "innovation": {
+          "title": "Innovation",
+          "desc": "Introduced slot pack system and loyalty program, reaching 10,000 washes."
+        },
+        "leadership": {
+          "title": "Leadership",
+          "desc": "15+ branches nationwide, serving over 50,000 vehicles, becoming a leading trusted car wash brand."
+        },
+        "future": {
+          "title": "The Future",
+          "desc": "Expanding a comprehensive car care ecosystem: maintenance, accessories, and home car care."
+        }
+      },
+      "teamLabel": "OUR TEAM",
+      "teamTitle": "The People Behind the Brand",
+      "teamRole": "Member"
+    },
+    "branch": {
+      "voucherPercentage": "Percentage Off",
+      "voucherFixed": "Fixed Amount Off",
+      "notFound": "Branch not found",
+      "backToMap": "Back to Map",
+      "store": "Stores",
+      "clickToZoom": "🔍 Click to Zoom",
+      "mapTitle": "Map",
+      "getDirections": "Directions",
+      "directionsInline": "Get directions on page",
+      "directionsInlineDesc": "View the map right here",
+      "openGoogleMaps": "Open Google Maps",
+      "openGoogleMapsDesc": "Navigate using the app",
+      "address": "Address",
+      "openHours": "Opening Hours",
+      "phone": "Phone Number",
+      "email": "Email",
+      "bookHere": "Book Here",
+      "packages": "Service Packages",
+      "noPackages": "No service packages yet",
+      "minutes": "{{minutes}} min",
+      "vatNote": "* Price already includes 10% VAT",
+      "vouchers": "Vouchers & Offers",
+      "noVouchers": "No vouchers yet",
+      "voucherDiscount": "Discount {{value}}",
+      "voucherMax": "(up to {{value}})",
+      "voucherMinOrder": "Min order {{value}}",
+      "voucherHs": "Exp: {{date}}",
+      "close": "Close",
+      "branch": "Branch"
+    },
+    "policy": {
+      "listTitle": "List of Policies",
+      "heroBadge": "📜 Policies & Terms",
+      "heroTitle": "Service Policies",
+      "heroSubtitle": "AutoWashPro is committed to transparency in providing services and protecting customer rights with an insurance policy that compensates for damage arising during car washing, including luxury and super-luxury cars.",
+      "updatedAt": "Last updated: {{date}}",
+      "backToTop": "Back to top",
+      "privacy": {
+        "0": {
+          "subtitle": "1. Purpose and scope of information collection",
+          "body": "AutoWashPro collects customers' personal information including: full name, email, phone number, license plate, address and payment information. This information is only collected when customers voluntarily register an account, book a car wash, or use the services on the system."
+        },
+        "1": {
+          "subtitle": "2. Scope of information use",
+          "body": "Personal information collected is used only internally by AutoWashPro for: confirming and managing appointments, customer support, sending notifications about appointments and promotions, and improving service quality."
+        },
+        "2": {
+          "subtitle": "3. Information retention period",
+          "body": "AutoWashPro retains customers' personal information for as long as the account remains active. Customers have the right to request deletion of their account and personal information at any time by contacting the support team."
+        },
+        "3": {
+          "subtitle": "4. Security commitment",
+          "body": "AutoWashPro commits to protecting customers' personal information using technical and management measures. The system uses SSL/TLS encryption for all transmitted data and password encryption using bcrypt technology."
+        },
+        "4": {
+          "subtitle": "5. Sharing information with third parties",
+          "body": "AutoWashPro does not sell, share or disclose customers' personal information to third parties except in the following cases: with customer consent, upon request of legal authorities, or payment partners (VNPay, MoMo) for processing transactions."
+        },
+        "title": "Privacy Policy"
+      },
+      "terms": {
+        "0": {
+          "subtitle": "1. Acceptance of terms",
+          "body": "By accessing and using the AutoWashPro system, customers confirm that they have read, understood and agreed to all the terms set out in this document."
+        },
+        "1": {
+          "subtitle": "2. User accounts",
+          "body": "Customers are responsible for keeping their account information and password secure. All activities on the account are deemed to be performed by the customer. AutoWashPro is not responsible for losses arising from unauthorized access."
+        },
+        "2": {
+          "subtitle": "3. Customer rights and obligations",
+          "body": "Customers have the right to book, cancel, review services and join the loyalty program. Customers are obligated to provide accurate information, arrive on time and comply with branch rules."
+        },
+        "3": {
+          "subtitle": "4. AutoWashPro's rights and obligations",
+          "body": "AutoWashPro has the right to refuse service if customers violate the terms. We commit to providing services as described and are responsible if the service does not meet quality standards."
+        },
+        "4": {
+          "subtitle": "5. Terms amendments",
+          "body": "AutoWashPro has the right to amend the terms of use at any time. Changes will be announced on the system. Continuing to use the service after changes is deemed acceptance of the new terms."
+        },
+        "title": "Terms of Use"
+      },
+      "payment": {
+        "0": {
+          "subtitle": "1. Payment methods",
+          "body": "AutoWashPro accepts the following payment methods: cash at the branch, bank transfer, and online payment via VNPay and MoMo."
+        },
+        "1": {
+          "subtitle": "2. Deposit payment",
+          "body": "Some service packages require a minimum deposit of {{depositPercent}}% of the order value when booking. The deposit will be deducted from the total amount when the customer completes the service."
+        },
+        "2": {
+          "subtitle": "3. Online payment",
+          "body": "Online payments via VNPay/MoMo are processed immediately. Successful transactions will be confirmed and the payment status updated within 24 hours."
+        },
+        "3": {
+          "subtitle": "4. Invoices and receipts",
+          "body": "E-invoices are sent by email after the transaction is completed. Customers who need a VAT invoice should contact the support team and provide their tax code before payment."
+        },
+        "4": {
+          "subtitle": "5. Payment information security",
+          "body": "All payment transactions are secured through a PCI DSS standard payment gateway. AutoWashPro does not store credit card information or customers' bank account passwords."
+        },
+        "title": "Payment Policy"
+      },
+      "cancellation": {
+        "0": {
+          "subtitle": "1. Cancelling before the appointment",
+          "body": "Customers can cancel their appointment at least 2 hours before the start time. Cancellation is done directly on the system via the 'Car Wash History' section."
+        },
+        "1": {
+          "subtitle": "2. Late cancellation (under 2 hours)",
+          "body": "If the booking is cancelled less than 2 hours before the appointment, the deposit (if any) will not be refunded. Customers should contact the branch by phone for support."
+        },
+        "2": {
+          "subtitle": "3. No-show",
+          "body": "If the customer does not arrive within {{noShowGraceMinutes}} minutes of the appointment time, the appointment will be automatically cancelled by the system. The deposit will not be refunded and the customer will be recorded with a 'no-show'."
+        },
+        "3": {
+          "subtitle": "4. Cancellation by the branch",
+          "body": "If the branch must cancel an appointment due to force majeure (power outage, equipment failure, natural disaster), AutoWashPro will notify as early as possible and help the customer rebook free of charge."
+        },
+        "4": {
+          "subtitle": "5. Cancellation limit",
+          "body": "Customers who cancel frequently (5 or more times in a month) may have their booking rights limited or be required to make a 100% deposit for future bookings."
+        },
+        "title": "Cancellation Policy"
+      },
+      "refund": {
+        "0": {
+          "subtitle": "1. Refund conditions",
+          "body": "Customers are automatically refunded to their AutoWash wallet when cancelling a paid/deposited order. For completed orders, customers can submit a refund request within 24 hours of completion. In addition, customers are refunded when the branch cancels a booking due to a system error."
+        },
+        "1": {
+          "subtitle": "2. Refund process",
+          "body": "Cancel order: money is automatically refunded to the AutoWash wallet right after cancellation, no request needed. Post-completion refund: customers submit a request via the system (within 24 hours), admin reviews and approves, and the money is transferred to the AutoWash wallet."
+        },
+        "2": {
+          "subtitle": "3. Refund methods",
+          "body": "All refunds are transferred directly to the customer's AutoWash wallet and can be used immediately for the next booking."
+        },
+        "3": {
+          "subtitle": "4. Refunds for slot packs",
+          "body": "Unused slot packs can be refunded for the value corresponding to the remaining slots, after deducting a 10% management fee. Slot pack refund requests are only accepted within 30 days from the purchase date."
+        },
+        "title": "Refund Policy"
+      },
+      "insurance": {
+        "0": {
+          "subtitle": "1. Insurance coverage",
+          "body": "AutoWashPro applies service liability insurance to the entire car wash process at all branches. This insurance covers cases where the customer's car is scratched, dented, has a broken window or exterior damage arising directly from the washing and care process by AutoWashPro staff. The insurance does not apply to pre-existing damage before receiving the car or damage caused by external factors (natural disasters, theft)."
+        },
+        "1": {
+          "subtitle": "2. Pre-wash vehicle inspection process",
+          "body": "Before washing, AutoWashPro staff and the customer jointly inspect the current condition of the car. Any existing scratches, dents or damage will be recorded with photos and a handover record. This process protects the interests of both parties and is the basis for determining responsibility when incidents occur. Customers are kindly asked to spend 3-5 minutes to inspect and sign."
+        },
+        "2": {
+          "subtitle": "3. Incident handling process",
+          "body": "As soon as damage is discovered, the customer notifies staff or the branch manager within 24 hours of leaving the branch. AutoWashPro will: (1) create an incident record signed by both parties, (2) take photos of the scene, (3) assess the damage at a reputable garage or repair center agreed by both parties. Request processing time is up to 48 working hours."
+        },
+        "3": {
+          "subtitle": "4. Compensation level",
+          "body": "AutoWashPro commits to compensating 100% of repair costs to fix damage at a mutually agreed garage. In cases where the damage cannot be repaired, the maximum compensation is based on the market value of the damaged part at the time of the incident. The maximum compensation for each incident is VND 50,000,000. Compensation is made within 7 working days after both parties agree on the amount."
+        },
+        "4": {
+          "subtitle": "5. Handling luxury and expensive cars",
+          "body": "For luxury and super-luxury cars (Mercedes-Benz, BMW, Audi, Lexus, Porsche, Rolls-Royce, Bentley, Ferrari, Lamborghini, McLaren and similar brands), AutoWashPro applies a specialized hand-wash process by technicians certified in luxury car care. Owners of luxury cars should book at branches equipped with a dedicated wash area (VIP Zone). If damage occurs, the maximum compensation for luxury cars can be up to VND 200,000,000 per incident, depending on the assessment of an independent appraiser."
+        },
+        "5": {
+          "subtitle": "6. Cases of compensation refusal",
+          "body": "AutoWashPro has the right to refuse compensation in the following cases: (1) pre-existing damage before washing that was not recorded in the handover record, (2) damage caused by vehicle technical faults or pre-existing deterioration, (3) customer fails to notify within 24 hours, (4) damage occurring after the car has left the branch and the cause cannot be determined, (5) customer requests services contrary to procedures or refuses the pre-wash inspection."
+        },
+        "title": "Insurance & Compensation Policy"
+      },
+      "booking": {
+        "0": {
+          "subtitle": "1. Booking process",
+          "body": "Customers choose a branch, service package, time and vehicle. The system checks available slots and confirms the appointment. Each appointment is issued a unique code used for check-in at the branch."
+        },
+        "1": {
+          "subtitle": "2. Booking time",
+          "body": "Customers can book at least {{minAdvanceMinutes}} minutes and at most 30 days in advance from the current time. Each time slot is 30 minutes apart to ensure sufficient service time."
+        },
+        "2": {
+          "subtitle": "3. Check-in and Check-out",
+          "body": "Customers arrive at the branch on time and present their appointment code (QR code) to check in. After the service is completed, staff perform check-out and confirm completion."
+        },
+        "3": {
+          "subtitle": "4. Recurring appointments",
+          "body": "Customers can set up weekly recurring appointments. The system automatically creates new appointments based on the registered schedule. Customers can cancel or adjust recurring appointments at any time."
+        },
+        "4": {
+          "subtitle": "5. Priority scheduling",
+          "body": "Loyal customers at Silver, Gold and Diamond tiers get priority scheduling. Priority order is based on membership tier and accumulated points."
+        },
+        "title": "Booking Policy"
+      },
+      "loyalty": {
+        "0": {
+          "subtitle": "1. Membership tiers",
+          "body": "AutoWashPro has 4 membership tiers: Bronze (0-99 points), Silver (100-499 points), Gold (500-999 points), Diamond (1,000+ points). Points are earned based on the value of completed orders."
+        },
+        "1": {
+          "subtitle": "2. Earning points",
+          "body": "Every VND 10,000 spent earns 1 point. Points are automatically added to the account after the appointment is completed and paid successfully. Points are valid for 12 months from the date earned."
+        },
+        "2": {
+          "subtitle": "3. Tier benefits",
+          "body": "Silver members get 5% off slot packs, Gold members 10%, and Diamond members 15%. Gold and Diamond members get priority scheduling and priority support."
+        },
+        "3": {
+          "subtitle": "4. Redeeming rewards with points",
+          "body": "Accumulated points can be redeemed for gifts and discount vouchers in the 'Rewards & Points' section. Redeemed points cannot be refunded or converted into cash."
+        },
+        "title": "Loyalty Program Policy"
+      },
+      "data-protection": {
+        "0": {
+          "subtitle": "1. Data processing principles",
+          "body": "AutoWashPro complies with the following principles: minimal data collection (only collecting necessary data), transparency about the purpose of use, clear consent from customers, and ensuring data accuracy."
+        },
+        "1": {
+          "subtitle": "2. Customer rights over data",
+          "body": "Customers have the right to: access personal data, request correction of inaccurate data, request deletion of data (the right to be forgotten), object to data processing, and request data export."
+        },
+        "2": {
+          "subtitle": "3. Cookies and tracking technologies",
+          "body": "The system uses cookies to improve user experience and analyze behavior. Customers can choose to disable cookies in browser settings."
+        },
+        "3": {
+          "subtitle": "4. Technical protection measures",
+          "body": "Data is protected by firewalls, SSL/TLS encryption, multi-factor authentication and strict access control. The system is regularly security-tested to detect and fix vulnerabilities."
+        },
+        "title": "Personal Data Protection Policy"
+      }
+    },
+    "navbar": {
+      "profile": "Profile",
+      "logout": "Sign out",
+      "login": "Sign in",
+      "bookingDone": "Service completed!",
+      "bookingDoneDesc": "Your booking is complete. You received {{count}} lucky wheel spin. Good luck!",
+      "bookingDoneDesc1": "Your booking is complete. You received ",
+      "bookingDoneDesc2": ". Good luck!",
+      "spinCount": "1 lucky wheel spin",
+      "goToWheel": "🎯 Go to Lucky Wheel",
+      "close": "Close",
+      "timeAgo": {
+        "justNow": "Just now",
+        "minutesAgo": "{{mins}} minutes ago",
+        "hoursAgo": "{{hours}} hours ago",
+        "daysAgo": "{{days}} days ago"
+      }
+    }
+  },
+  "admin": {
+    "layout": {
+      "brandTagline": "Admin Dashboard",
+      "adminRole": "Administrator",
+      "roleLabel": "Role"
+    },
+    "placeholder": {
+      "featureInDevelopment": "Feature Under Development",
+      "description": "This screen will be filled in with more details soon. You can continue navigating through the menu on the left."
+    },
+    "rewardsManagement": {
+      "addButton": "Add Gift",
+      "addFirstButton": "Add First Gift",
+      "addSuccess": "Gift added successfully!",
+      "allStatuses": "All Statuses",
+      "branchSender": "Branch / Sender",
+      "confirmReceived": "Confirm Received",
+      "confirmSentLabel": "Gift Sent",
+      "confirmSentMessage": "Confirm you have handed \"{{gift}}\" to the customer? The customer will use the redemption code to receive the gift.",
+      "confirmSentTitle": "Confirm Gift Sent",
+      "customer": "Customer",
+      "deleteConfirmLabel": "Delete",
+      "deleteFailed": "Delete failed",
+      "deleteMessage": "Are you sure you want to delete this gift?",
+      "deleteSuccess": "Gift deleted successfully!",
+      "deleteTitle": "Delete Gift",
+      "deleteTooltip": "Delete",
+      "editTooltip": "Edit",
+      "emptyRedemptions": "No redemptions yet",
+      "emptyState": "No physical gifts yet",
+      "enterCodePlaceholder": "Enter customer code",
+      "enterCodeRequired": "Please enter the customer's redemption code",
+      "errorLoadRedemptions": "Could not load redemptions list",
+      "errorLoadRewards": "Could not load gifts",
+      "gift": "Gift",
+      "giftNameFallback": "the gift",
+      "markSentButton": "Mark Sent to Customer",
+      "minTier": "Minimum Tier",
+      "nextPage": "Next",
+      "pageInfo": "Page {{page}} / {{total}}",
+      "points": "Points",
+      "pointsUnit": "pts",
+      "prevPage": "Previous",
+      "receivedSuccess": "Confirmed customer received the gift!",
+      "redeemedDate": "Redeemed Date",
+      "saveFailed": "Save failed",
+      "searchRedemptionsPlaceholder": "Search by redemption code or gift name...",
+      "searchRewardsPlaceholder": "Search by gift name...",
+      "sending": "Sending...",
+      "sentBy": "by {{name}}",
+      "sentSuccess": "Gift sent to customer!",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusCancelled": "Cancelled",
+      "statusClaimed": "Pending Delivery",
+      "statusInactive": "Inactive",
+      "statusReceived": "Received by Customer",
+      "statusSent": "Sent to Customer",
+      "stock": "Stock",
+      "updateFailed": "Update failed",
+      "updateSuccess": "Gift updated successfully!",
+      "verifyFailed": "Verification failed",
+      "verifying": "Verifying...",
+      "modal": {
+        "addTitle": "Add New Physical Gift",
+        "cancel": "Cancel",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Short description of the gift...",
+        "editTitle": "Edit Gift",
+        "errorNameRequired": "Enter gift name",
+        "errorPointsRequired": "Enter points (> 0)",
+        "errorStockRequired": "Enter stock quantity",
+        "imageUrlLabel": "Image (URL)",
+        "nameLabel": "Gift Name",
+        "namePlaceholder": "Car deodorizer",
+        "pointsCostLabel": "Points to Redeem",
+        "save": "Save",
+        "saving": "Saving…",
+        "stockLabel": "Stock Quantity"
+      }
+    }
+  },
+  "manager": {
+    "layout": {
+      "manager": "Manager",
+      "branchManager": "Branch Manager",
+      "scanQr": "Scan QR Code"
+    },
+    "systemConfig": {
+      "viewModeLabel": "View Mode:",
+      "readOnlyNotice": "You are viewing the system configuration (Business Rules) in read-only mode. Only Admin can modify these settings."
+    }
+  },
+  "shared": {
+    "confirm": {
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "tierBadge": {
+      "icon": {
+        "circle": "Circle",
+        "medal": "Medal",
+        "crown": "Crown",
+        "diamond": "Diamond",
+        "trophy": "Trophy",
+        "star": "Star",
+        "sparkle": "Sparkle",
+        "shield": "Shield",
+        "shieldStar": "Shield Star",
+        "medalMilitary": "Military Medal",
+        "flame": "Flame",
+        "lightning": "Lightning",
+        "gift": "Gift",
+        "coin": "Coin",
+        "heart": "Heart",
+        "rocket": "Rocket",
+        "sun": "Sun",
+        "sealCheck": "Seal Check",
+        "magicWand": "Magic Wand",
+        "fire": "Fire",
+        "checkCircle": "Check Circle"
+      },
+      "color": {
+        "bronze": "Bronze",
+        "silver": "Silver",
+        "gold": "Gold",
+        "diamond": "Diamond",
+        "purple": "Purple",
+        "rose": "Rose",
+        "emerald": "Emerald",
+        "indigo": "Indigo"
+      },
+      "tier": {
+        "bronze": "Bronze Tier",
+        "silver": "Silver Tier",
+        "gold": "Gold Tier",
+        "diamond": "Diamond Tier",
+        "member": "Member"
+      }
+    },
+    "chatbot": {
+      "error": "Unable to reach the chatbot. Please try again later.",
+      "fallback": "Sorry, I didn't understand your question. Could you rephrase it?"
+    },
+    "languageSwitcher": {
+      "switchToEn": "Switch to English",
+      "switchToVi": "Chuyển sang Tiếng Việt (Vietnamese)",
+      "switchToEnShort": "Switch to English",
+      "switchToViShort": "Chuyển sang Tiếng Việt"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "booking": "Booking",
+    "gifts": "Gifts",
+    "stores": "Stores"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read",
+    "all": "All",
+    "unread": "Unread",
+    "empty": "No notifications yet",
+    "view_all": "View all"
+  },
+  "sidebar": {
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "logout": "Sign out",
+    "new_items": "new items",
+    "mainMenu": "Main menu"
+  }
 }

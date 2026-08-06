@@ -9,7 +9,6 @@ import {
 import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
 import DirectionsMap from '../widgets/DirectionsMap';
-import { translateText } from '@/utils/notifTranslator';
 
 const API_BASE = getApiBaseUrl() || 'http://localhost:5000/api';
 
@@ -18,13 +17,12 @@ function fmtCurrency(n) {
 }
 
 const VOUCHER_TYPE_MAP = {
-  percentage: 'Giảm %',
-  fixed: 'Giảm tiền',
+  percentage: 'landing.branch.voucherPercentage',
+  fixed: 'landing.branch.voucherFixed',
 };
 
 export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToProfile, onGoToHistory, onGoToPayments, onGoToNotifications }) {
-  const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'vi';
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.pathname.split('/').filter(Boolean).pop();
@@ -95,9 +93,9 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
         <Navbar onOpenAuth={onOpenAuth} user={user} onLogout={onLogout} onGoToProfile={onGoToProfile} onGoToHistory={onGoToHistory} onGoToPayments={onGoToPayments} onGoToNotifications={onGoToNotifications} />
         <div className="flex flex-col items-center justify-center py-24 text-slate-400">
           <MapPin size={48} weight="duotone" />
-          <p className="mt-4 text-sm">Không tìm thấy chi nhánh</p>
+          <p className="mt-4 text-sm">{t('landing.branch.notFound')}</p>
           <button onClick={() => navigate('/map')} className="mt-3 text-xs font-medium text-emerald-600 hover:underline">
-            Quay lại bản đồ
+            {t('landing.branch.backToMap')}
           </button>
         </div>
         <Footer />
@@ -136,7 +134,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
       <div className="border-b border-slate-100 bg-slate-50/50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 text-xs text-slate-500">
           <button onClick={() => navigate('/map')} className="flex items-center gap-1 hover:text-emerald-600 transition-colors">
-            <CaretLeft size={12} /> Cửa hàng
+            <CaretLeft size={12} /> {t('landing.branch.store')}
           </button>
           <span className="text-slate-300">/</span>
           <span className="text-slate-700 font-medium">{branch.name}</span>
@@ -162,7 +160,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
             </div>
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
               <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-semibold px-4 py-2 rounded-full shadow-lg">
-                🔍 Click để phóng to
+                {t('landing.branch.clickToZoom')}
               </span>
             </div>
           </div>
@@ -186,7 +184,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
               <>
                 <iframe
                   src={mapSrc}
-                  title="Bản đồ"
+                  title={t('landing.branch.mapTitle')}
                   className="w-full h-full border-0"
                   allowFullScreen
                   loading="lazy"
@@ -199,7 +197,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                       className="flex items-center gap-2 rounded-xl bg-white/95 backdrop-blur-md px-4 py-2.5 shadow-lg border border-slate-200 text-sm font-semibold text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all"
                     >
                       <Compass size={16} weight="bold" />
-                      Chỉ đường
+                      {t('landing.branch.getDirections')}
                     </button>
                     {dirMenuOpen && (
                       <div className="absolute bottom-full mb-2 right-0 w-52 rounded-xl bg-white shadow-xl border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-bottom-1 duration-150">
@@ -209,8 +207,8 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                         >
                           <MapPin size={16} weight="duotone" className="shrink-0" />
                           <div>
-                            <p className="font-medium">Chỉ đường trong trang</p>
-                            <p className="text-[11px] text-slate-400">Xem bản đồ ngay tại đây</p>
+                            <p className="font-medium">{t('landing.branch.directionsInline')}</p>
+                            <p className="text-[11px] text-slate-400">{t('landing.branch.directionsInlineDesc')}</p>
                           </div>
                         </button>
                         <button
@@ -219,8 +217,8 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                         >
                           <Compass size={16} weight="duotone" className="shrink-0" />
                           <div>
-                            <p className="font-medium">Mở Google Maps</p>
-                            <p className="text-[11px] text-slate-400">Chỉ đường bằng ứng dụng</p>
+                            <p className="font-medium">{t('landing.branch.openGoogleMaps')}</p>
+                            <p className="text-[11px] text-slate-400">{t('landing.branch.openGoogleMapsDesc')}</p>
                           </div>
                         </button>
                       </div>
@@ -243,7 +241,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                   <MapPin size={16} weight="duotone" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-slate-400 font-medium">Địa chỉ</p>
+                  <p className="text-xs text-slate-400 font-medium">{t('landing.branch.address')}</p>
                   <p className="text-sm font-medium text-slate-700 mt-0.5">{branch.address}</p>
                 </div>
               </div>
@@ -252,7 +250,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                   <Clock size={16} weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 font-medium">Giờ mở cửa</p>
+                  <p className="text-xs text-slate-400 font-medium">{t('landing.branch.openHours')}</p>
                   <p className="text-sm font-medium text-slate-700 mt-0.5">{formattedHours}</p>
                 </div>
               </div>
@@ -262,7 +260,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                     <Phone size={16} weight="duotone" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 font-medium">Số điện thoại</p>
+                    <p className="text-xs text-slate-400 font-medium">{t('landing.branch.phone')}</p>
                     <p className="text-sm font-medium text-slate-700 mt-0.5">{branch.phone}</p>
                   </div>
                 </div>
@@ -273,7 +271,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                     <Envelope size={16} weight="duotone" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 font-medium">Email</p>
+                    <p className="text-xs text-slate-400 font-medium">{t('landing.branch.email')}</p>
                     <p className="text-sm font-medium text-slate-700 mt-0.5">{branch.email}</p>
                   </div>
                 </div>
@@ -282,7 +280,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
 
             <button onClick={() => navigate(`/booking?branchId=${branch._id}`)}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors shadow-sm">
-              Đặt lịch tại đây
+              {t('landing.branch.bookHere')}
               <ArrowRight size={16} weight="bold" />
             </button>
           </div>
@@ -305,10 +303,10 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
         <div className="mb-10">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Tag size={18} weight="duotone" className="text-emerald-500" />
-            Gói dịch vụ
+            {t('landing.branch.packages')}
           </h2>
           {packages.length === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center bg-slate-50 rounded-2xl">Chưa có gói dịch vụ nào</p>
+            <p className="text-sm text-slate-400 py-8 text-center bg-slate-50 rounded-2xl">{t('landing.branch.noPackages')}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {packages.map(pkg => (
@@ -317,9 +315,9 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                   {pkg.description && <p className="text-xs text-slate-500 mb-3 line-clamp-2">{pkg.description}</p>}
                   <div className="flex items-center justify-between">
                     <span className="text-base font-bold text-emerald-600">{fmtCurrency(pkg.price)}</span>
-                    {pkg.duration && <span className="text-xs text-slate-400">{pkg.duration} phút</span>}
+                    {pkg.duration && <span className="text-xs text-slate-400">{t('landing.branch.minutes', { minutes: pkg.duration })}</span>}
                   </div>
-                  <p className="text-[10px] font-medium text-slate-400 mt-1">* Giá đã bao gồm VAT 10%</p>
+                  <p className="text-[10px] font-medium text-slate-400 mt-1">{t('landing.branch.vatNote')}</p>
                   {pkg.rating && (
                     <div className="flex items-center gap-1 mt-2 text-xs text-amber-500">
                       <Star size={12} weight="fill" />
@@ -336,10 +334,10 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
         <div className="mb-10">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Ticket size={18} weight="duotone" className="text-rose-500" />
-            Voucher ưu đãi
+            {t('landing.branch.vouchers')}
           </h2>
           {vouchers.length === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center bg-slate-50 rounded-2xl">Chưa có voucher nào</p>
+            <p className="text-sm text-slate-400 py-8 text-center bg-slate-50 rounded-2xl">{t('landing.branch.noVouchers')}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {vouchers.map(v => (
@@ -350,20 +348,20 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                       <p className="text-[11px] font-mono text-rose-500 mt-0.5">{v.code}</p>
                     </div>
                     <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-rose-100 text-rose-600 uppercase">
-                      {VOUCHER_TYPE_MAP[v.type] || v.type}
+                      {VOUCHER_TYPE_MAP[v.type] ? t(VOUCHER_TYPE_MAP[v.type]) : v.type}
                     </span>
                   </div>
                   {v.description && <p className="text-xs text-slate-500 mb-3">{v.description}</p>}
                   <div className="flex items-center justify-between text-xs text-slate-500">
                     <span>
-                      Giảm {v.type === 'percentage' ? `${v.value}%` : fmtCurrency(v.value)}
-                      {v.maxDiscount > 0 && v.type === 'percentage' && ` (tối đa ${fmtCurrency(v.maxDiscount)})`}
+                      {t('landing.branch.voucherDiscount', { value: v.type === 'percentage' ? `${v.value}%` : fmtCurrency(v.value) })}
+                      {v.maxDiscount > 0 && v.type === 'percentage' && ` ${t('landing.branch.voucherMax', { value: fmtCurrency(v.maxDiscount) })}`}
                     </span>
-                    {v.minOrder > 0 && <span>Đơn từ {fmtCurrency(v.minOrder)}</span>}
+                    {v.minOrder > 0 && <span>{t('landing.branch.voucherMinOrder', { value: fmtCurrency(v.minOrder) })}</span>}
                   </div>
                   {v.endDate && (
                     <div className="mt-2 text-[10px] text-slate-400">
-                      HS: {new Date(v.endDate).toLocaleDateString('vi-VN')}
+                      {t('landing.branch.voucherHs', { date: new Date(v.endDate).toLocaleDateString('vi-VN') })}
                     </div>
                   )}
                 </div>
@@ -388,7 +386,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
             <button
               onClick={() => setZoomImage(null)}
               className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/90 hover:scale-110 transition-all border border-white/20 shadow-lg"
-              title="Đóng"
+              title={t('landing.branch.close')}
             >
               <X size={20} weight="bold" />
             </button>
@@ -396,7 +394,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
             <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden p-3 bg-black/40">
               <img
                 src={zoomImage}
-                alt={branch?.name || 'Chi nhánh'}
+                alt={branch?.name || t('landing.branch.branch')}
                 className="max-h-[68vh] w-auto max-w-full rounded-xl object-contain shadow-2xl"
               />
             </div>

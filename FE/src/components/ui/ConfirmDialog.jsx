@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 /**
  * Hộp thoại xác nhận dùng chung — thiết kế tối giản, sạch, không màu mè.
  * Nút chính màu trung tính (đen than); chỉ dùng đỏ khi `danger`.
@@ -7,8 +9,8 @@ export default function ConfirmDialog({
   title,
   message,
   content,
-  confirmLabel = 'Xác nhận',
-  cancelLabel = 'Huỷ',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   danger = false,
@@ -16,7 +18,10 @@ export default function ConfirmDialog({
   hideCancel = false,
   maxWidth = null,
 }) {
+  const { t } = useTranslation();
   if (!open) return null;
+  const resolvedConfirmLabel = confirmLabel ?? t('shared.confirm.confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('shared.confirm.cancel');
   const computedMaxWidth = typeof maxWidth === 'number' ? `${maxWidth}px` : (maxWidth || undefined);
 
   return (
@@ -39,7 +44,7 @@ export default function ConfirmDialog({
               disabled={busy}
               className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
             >
-              {cancelLabel}
+              {resolvedCancelLabel}
             </button>
           )}
           <button
@@ -49,7 +54,7 @@ export default function ConfirmDialog({
               danger ? 'bg-red-600 hover:bg-red-500' : 'bg-slate-900 hover:bg-slate-700'
             }`}
           >
-            {busy ? '...' : confirmLabel}
+            {busy ? '...' : resolvedConfirmLabel}
           </button>
         </div>
       </div>

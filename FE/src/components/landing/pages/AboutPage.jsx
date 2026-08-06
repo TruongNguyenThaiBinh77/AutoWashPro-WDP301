@@ -3,13 +3,12 @@ import Footer from '../layout/Footer';
 import PackagesSection from '../sections/PackagesSection';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { translateText } from '@/utils/notifTranslator';
 
 const stats = [
-  { value: '50.000+', label: 'Lượt rửa xe' },
-  { value: '15+', label: 'Chi nhánh' },
-  { value: '4.9', label: 'Đánh giá trung bình' },
-  { value: '5+', label: 'Năm kinh nghiệm' },
+  { value: '50.000+', labelKey: 'landing.about.stats.washes' },
+  { value: '15+', labelKey: 'landing.about.stats.branches' },
+  { value: '4.9', labelKey: 'landing.about.stats.rating' },
+  { value: '5+', labelKey: 'landing.about.stats.experience' },
 ];
 
 const values = [
@@ -19,8 +18,8 @@ const values = [
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
       </svg>
     ),
-    title: 'Chất lượng vượt trội',
-    desc: 'Sử dụng công nghệ và dung dịch chuyên dụng cao cấp, đảm bảo xe của bạn luôn sáng bóng như mới.',
+    titleKey: 'landing.about.values.qualityTitle',
+    descKey: 'landing.about.values.qualityDesc',
   },
   {
     icon: (
@@ -28,8 +27,8 @@ const values = [
         <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
       </svg>
     ),
-    title: 'Tiết kiệm thời gian',
-    desc: 'Đặt lịch trước qua ứng dụng, đến là rửa ngay — không chờ đợi. Quy trình tối ưu chỉ 15-45 phút.',
+    titleKey: 'landing.about.values.timeTitle',
+    descKey: 'landing.about.values.timeDesc',
   },
   {
     icon: (
@@ -37,8 +36,8 @@ const values = [
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
       </svg>
     ),
-    title: 'Đội ngũ chuyên nghiệp',
-    desc: 'Kỹ thuật viên được đào tạo bài bản, tận tâm với từng chi tiết nhỏ nhất trên xe của bạn.',
+    titleKey: 'landing.about.values.teamTitle',
+    descKey: 'landing.about.values.teamDesc',
   },
   {
     icon: (
@@ -46,24 +45,24 @@ const values = [
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       </svg>
     ),
-    title: 'An toàn & bảo vệ',
-    desc: 'Cam kết bồi thường nếu có hư hỏng. Sản phẩm thân thiện môi trường, an toàn cho sức khỏe.',
+    titleKey: 'landing.about.values.safetyTitle',
+    descKey: 'landing.about.values.safetyDesc',
   },
 ];
 
 const timeline = [
-  { year: '2019', title: 'Thành lập', desc: 'AutoWashPro ra đời với 1 chi nhánh đầu tiên tại TP. Hồ Chí Minh, mang đến dịch vụ rửa xe chuyên nghiệp.' },
-  { year: '2020', title: 'Mở rộng', desc: 'Phát triển lên 3 chi nhánh, ra mắt ứng dụng đặt lịch trực tuyến giúp khách hàng chủ động thời gian.' },
-  { year: '2022', title: 'Đổi mới', desc: 'Triển khai hệ thống gói lượt và chương trình khách hàng thân thiết, đạt 10.000 lượt rửa.' },
-  { year: '2024', title: 'Dẫn đầu', desc: '15+ chi nhánh trên toàn quốc, phục vụ hơn 50.000 lượt xe, trở thành thương hiệu rửa xe uy tín hàng đầu.' },
-  { year: '2025', title: 'Tương lai', desc: 'Mở rộng hệ sinh thái dịch vụ xe hơi toàn diện: bảo dưỡng, phụ kiện, và chăm sóc xe tại nhà.' },
+  { year: '2019', titleKey: 'landing.about.timeline.founding.title', descKey: 'landing.about.timeline.founding.desc' },
+  { year: '2020', titleKey: 'landing.about.timeline.expansion.title', descKey: 'landing.about.timeline.expansion.desc' },
+  { year: '2022', titleKey: 'landing.about.timeline.innovation.title', descKey: 'landing.about.timeline.innovation.desc' },
+  { year: '2024', titleKey: 'landing.about.timeline.leadership.title', descKey: 'landing.about.timeline.leadership.desc' },
+  { year: '2025', titleKey: 'landing.about.timeline.future.title', descKey: 'landing.about.timeline.future.desc' },
 ];
 
 const team = [
-  { name: 'Lữ Anh Bảo Khang', role: 'Thành viên', avatar: 'LABK' },
-  { name: 'Trương Nguyễn Thái Bình', role: 'Thành viên', avatar: 'TNTB' },
-  { name: 'Phạm Thị Kim Hương', role: 'Thành viên', avatar: 'PTKH' },
-  { name: 'Hồ Đình Anh', role: 'Thành viên', avatar: 'HDA' },
+  { name: 'Lữ Anh Bảo Khang', roleKey: 'landing.about.teamRole', avatar: 'LABK' },
+  { name: 'Trương Nguyễn Thái Bình', roleKey: 'landing.about.teamRole', avatar: 'TNTB' },
+  { name: 'Phạm Thị Kim Hương', roleKey: 'landing.about.teamRole', avatar: 'PTKH' },
+  { name: 'Hồ Đình Anh', roleKey: 'landing.about.teamRole', avatar: 'HDA' },
 ];
 
 function fadeInUp(i = 0) {
@@ -76,8 +75,7 @@ function fadeInUp(i = 0) {
 }
 
 export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, onGoToHistory, onGoToPayments, onGoToNotifications }) {
-  const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'vi';
+  const { t } = useTranslation();
 
   return (
     <div className="bg-white min-h-screen">
@@ -91,14 +89,14 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
         </div>
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <motion.p {...fadeInUp(0)} className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-200 mb-6 backdrop-blur-sm border border-white/10">
-            {translateText('#1 Dịch vụ rửa xe tại Việt Nam', currentLang)}
+            {t('landing.about.badge')}
           </motion.p>
           <motion.h1 {...fadeInUp(1)} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-            {translateText('Chúng tôi yêu xe của bạn', currentLang)}{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">{translateText('như chính bạn', currentLang)}</span>
+            {t('landing.about.heroTitle1')}{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">{t('landing.about.heroTitle2')}</span>
           </motion.h1>
           <motion.p {...fadeInUp(2)} className="text-emerald-100/80 text-lg max-w-2xl mx-auto leading-relaxed">
-            {translateText('AutoWashPro ra đời với sứ mệnh mang đến trải nghiệm chăm sóc xe chuyên nghiệp, tiện lợi và đáng tin cậy cho mọi chủ xe tại Việt Nam.', currentLang)}
+            {t('landing.about.heroSubtitle')}
           </motion.p>
           <motion.div {...fadeInUp(3)} className="flex items-center justify-center gap-4 mt-10">
             <div className="flex -space-x-2">
@@ -111,7 +109,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
               ))}
             </div>
             <p className="text-sm text-emerald-200/70">
-              {currentLang === 'en' ? 'Trusted by ' : 'Được '}<span className="font-semibold text-emerald-200">50.000+</span> {currentLang === 'en' ? 'customers nationwide' : 'khách hàng tin dùng'}
+              {t('landing.about.trustedPrefix')} <span className="font-semibold text-emerald-200">50.000+</span> {t('landing.about.trustedSuffix')}
             </p>
           </motion.div>
         </div>
@@ -123,10 +121,10 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map((s, i) => (
-              <motion.div key={s.label} {...fadeInUp(i)}
+              <motion.div key={s.labelKey} {...fadeInUp(i)}
                 className="rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-200/50 px-5 py-6 text-center hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
                 <p className="text-2xl md:text-3xl font-extrabold text-emerald-600">{s.value}</p>
-                <p className="text-xs text-slate-500 mt-1 font-medium">{translateText(s.label, currentLang)}</p>
+                <p className="text-xs text-slate-500 mt-1 font-medium">{t(s.labelKey)}</p>
               </motion.div>
             ))}
           </div>
@@ -138,17 +136,17 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div {...fadeInUp(0)}>
-              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{translateText('Câu chuyện', currentLang)}</p>
+              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{t('landing.about.storyLabel')}</p>
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
-                {translateText('Từ một ý tưởng nhỏ', currentLang)}{' '}
-                <span className="text-emerald-600">{translateText('đến chuỗi cửa hàng', currentLang)}</span> {translateText('rửa xe hàng đầu', currentLang)}
+                {t('landing.about.storyTitle1')}{' '}
+                <span className="text-emerald-600">{t('landing.about.storyTitle2')}</span> {t('landing.about.storyTitle3')}
               </h2>
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  {translateText('AutoWashPro được thành lập vào năm 2019 bởi đội ngũ những người đam mê xe hơi và dịch vụ khách hàng. Chúng tôi nhận thấy việc rửa xe tại Việt Nam còn nhiều bất cập: thời gian chờ lâu, chất lượng không đồng nhất, và khó khăn trong việc đặt lịch.', currentLang)}
+                  {t('landing.about.storyPara1')}
                 </p>
                 <p>
-                  {translateText('Từ đó, chúng tôi xây dựng một hệ thống rửa xe chuyên nghiệp với quy trình chuẩn hóa, ứng dụng đặt lịch thông minh, và cam kết chất lượng cho từng chiếc xe. Sau hơn 5 năm, AutoWashPro đã trở thành thương hiệu rửa xe được yêu thích nhất tại TP. Hồ Chí Minh và đang mở rộng ra các tỉnh thành khác.', currentLang)}
+                  {t('landing.about.storyPara2')}
                 </p>
               </div>
             </motion.div>
@@ -161,7 +159,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
                     </svg>
                   </div>
                   <p className="text-lg font-bold text-slate-800">AutoWashPro</p>
-                  <p className="text-sm text-slate-500 mt-1">{translateText('Chăm sóc xe tận tâm', currentLang)}</p>
+                  <p className="text-sm text-slate-500 mt-1">{t('landing.about.cardTagline')}</p>
                   <div className="mt-4 flex items-center justify-center gap-1 text-emerald-600 text-sm font-medium">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     Since 2019
@@ -178,18 +176,18 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
       <section className="py-20 bg-slate-50/60">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeInUp(0)} className="text-center mb-14">
-            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{translateText('Giá trị cốt lõi', currentLang)}</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">{translateText('Tại sao chọn chúng tôi?', currentLang)}</h2>
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{t('landing.about.valuesLabel')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">{t('landing.about.valuesTitle')}</h2>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {values.map((v, i) => (
-              <motion.div key={v.title} {...fadeInUp(i + 1)}
+              <motion.div key={v.titleKey} {...fadeInUp(i + 1)}
                 className="rounded-2xl bg-white border border-slate-200 p-6 hover:shadow-lg hover:border-emerald-200 transition-all duration-300 group">
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
                   {v.icon}
                 </div>
-                <h3 className="font-bold text-slate-800 mb-2">{translateText(v.title, currentLang)}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{translateText(v.desc, currentLang)}</p>
+                <h3 className="font-bold text-slate-800 mb-2">{t(v.titleKey)}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{t(v.descKey)}</p>
               </motion.div>
             ))}
           </div>
@@ -200,13 +198,13 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div {...fadeInUp(0)} className="text-center mb-14">
-            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Lịch sử phát triển</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Hành trình của chúng tôi</h2>
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{t('landing.about.historyLabel')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">{t('landing.about.historyTitle')}</h2>
           </motion.div>
           <div className="relative">
             <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-200 -translate-x-1/2" />
-            {timeline.map((t, i) => (
-              <motion.div key={t.year} {...fadeInUp(i)}
+            {timeline.map((item, i) => (
+              <motion.div key={item.year} {...fadeInUp(i)}
                 className={`relative flex items-start gap-6 md:gap-0 mb-10 last:mb-0 ${
                   i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                 }`}>
@@ -216,9 +214,9 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
                 </div>
                 <div className={`md:w-1/2 ${i % 2 === 0 ? 'md:pr-12 md:text-right' : 'md:pl-12'}`}>
                   <div className="rounded-2xl bg-white border border-slate-200 p-5 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all duration-300">
-                    <span className="inline-block rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 mb-2">{t.year}</span>
-                    <h3 className="font-bold text-slate-800 mb-1">{t.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">{t.desc}</p>
+                    <span className="inline-block rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 mb-2">{item.year}</span>
+                    <h3 className="font-bold text-slate-800 mb-1">{t(item.titleKey)}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{t(item.descKey)}</p>
                   </div>
                 </div>
               </motion.div>
@@ -231,8 +229,8 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
       <section className="py-20 bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeInUp(0)} className="text-center mb-14">
-            <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">Đội ngũ</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white">Những con người tạo nên thương hiệu</h2>
+            <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">{t('landing.about.teamLabel')}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white">{t('landing.about.teamTitle')}</h2>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.map((m, i) => (
@@ -242,7 +240,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
                   {m.avatar}
                 </div>
                 <h3 className="font-bold text-white">{m.name}</h3>
-                <p className="text-sm text-slate-400">{m.role}</p>
+                <p className="text-sm text-slate-400">{t(m.roleKey)}</p>
               </motion.div>
             ))}
           </div>

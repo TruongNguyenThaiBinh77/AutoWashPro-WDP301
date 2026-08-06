@@ -10,15 +10,15 @@ import useSSE from '@/hooks/useSSE';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-function timeAgo(dateStr) {
+function timeAgo(dateStr, i18n) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Vừa xong';
-  if (mins < 60) return `${mins} phút trước`;
+  if (mins < 1) return i18n.t('landing.navbar.timeAgo.justNow');
+  if (mins < 60) return i18n.t('landing.navbar.timeAgo.minutesAgo', { mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 24) return i18n.t('landing.navbar.timeAgo.hoursAgo', { hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} ngày trước`;
+  if (days < 7) return i18n.t('landing.navbar.timeAgo.daysAgo', { days });
   return new Date(dateStr).toLocaleDateString('vi-VN');
 }
 
@@ -329,7 +329,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                           {/* Notification List */}
                           <div className="flex-1 overflow-y-auto divide-y divide-slate-50">
                             {notifLoading ? (
-                              <div className="py-12 text-center text-slate-400 text-sm">Đang tải...</div>
+                              <div className="py-12 text-center text-slate-400 text-sm">{t('loading')}</div>
                             ) : notifications.length === 0 ? (
                               <div className="py-12 text-center">
                                 <div className="text-3xl mb-2">🔔</div>
@@ -364,7 +364,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                                         <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{translated.message}</p>
                                       )}
                                       <p className={`text-[11px] mt-1 font-semibold ${!n.isRead ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                        {timeAgo(n.createdAt)}
+                                        {timeAgo(n.createdAt, i18n)}
                                       </p>
                                     </div>
                                     {!n.isRead && (
@@ -430,7 +430,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <circle cx="12" cy="8" r="4" /><path d="M20 21a8 8 0 10-16 0" />
                             </svg>
-                            Hồ sơ
+                            {t('landing.navbar.profile')}
                           </button>
                           <div className="h-px bg-slate-200" />
                           <button onClick={onLogout}
@@ -439,7 +439,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
                             </svg>
-                            Thoát
+                            {t('landing.navbar.logout')}
                           </button>
                         </motion.div>
                       )}
@@ -455,7 +455,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                       : 'bg-emerald-600 text-white hover:bg-emerald-500'
                   }`}
                 >
-                  Đăng nhập
+                  {t('landing.navbar.login')}
                 </button>
               )}
 
@@ -515,9 +515,9 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                 🎉
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900 leading-snug">Dịch vụ hoàn tất!</h3>
+                <h3 className="text-xl font-bold text-slate-900 leading-snug">{t('landing.navbar.bookingDone')}</h3>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  Đơn đặt lịch của bạn đã hoàn thành. Hệ thống đã tặng bạn <span className="font-bold text-emerald-600">1 lượt quay may mắn</span>. Hãy thử vận may ngay!
+                  {t('landing.navbar.bookingDoneDesc1')}<span className="font-bold text-emerald-600">{t('landing.navbar.spinCount')}</span>{t('landing.navbar.bookingDoneDesc2')}
                 </p>
               </div>
               <div className="pt-2 flex flex-col gap-2">
@@ -528,13 +528,13 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                   }}
                   className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-500/20 hover:scale-[1.02] transition-all"
                 >
-                  🎯 Tới Vòng Quay May Mắn
+                  {t('landing.navbar.goToWheel')}
                 </button>
                 <button
                   onClick={() => setShowSpinModal(false)}
                   className="w-full rounded-xl bg-slate-100 text-slate-600 px-4 py-3 text-sm font-semibold hover:bg-slate-200 transition-colors"
                 >
-                  Đóng lại
+                  {t('landing.navbar.close')}
                 </button>
               </div>
             </div>

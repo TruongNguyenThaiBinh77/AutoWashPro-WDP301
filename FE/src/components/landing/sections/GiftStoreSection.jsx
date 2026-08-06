@@ -4,6 +4,7 @@ import CustomLuckyWheel from '../widgets/CustomLuckyWheel.jsx';
 import { storageKeys } from '../../../lib/authStorage.js';
 import { showToast } from '@/lib/toast';
 import { confirmDialog } from '@/lib/confirm';
+import { useTranslation } from 'react-i18next';
 import TierBadge from '@/components/ui/TierBadge';
 import { Trophy, CheckCircle, Warning, ClockCounterClockwise } from '@phosphor-icons/react';
 
@@ -48,6 +49,7 @@ function buildTierMaps(tiers) {
 }
 
 function VoucherCard({ voucher, index, onRedeem, redeeming }) {
+  const { t } = useTranslation();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   const [copied, setCopied] = useState(false);
@@ -61,7 +63,7 @@ function VoucherCard({ voucher, index, onRedeem, redeeming }) {
   };
 
   const isPercent = voucher.type === 'percentage';
-  const discountText = voucher.type === 'none' ? voucher.name : (isPercent ? `GIẢM ${voucher.value}%` : `GIẢM ${formatPrice(voucher.value)}`);
+  const discountText = voucher.type === 'none' ? voucher.name : (isPercent ? t('landing.gifts.voucher.discountPercent', { value: voucher.value }) : t('landing.gifts.voucher.discountAmount', { value: formatPrice(voucher.value) }));
   const isRedeem = voucher.isTemplate;
   const isPersonal = voucher.assignedTo != null;
 
@@ -81,11 +83,11 @@ function VoucherCard({ voucher, index, onRedeem, redeeming }) {
           <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase ${
             isPersonal ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
           }`}>
-            {isPersonal ? 'Của Riêng Bạn' : (isRedeem ? 'Đổi Điểm' : 'Ưu Đãi')}
+            {isPersonal ? t('landing.gifts.voucher.forYou') : (isRedeem ? t('landing.gifts.voucher.redeemBadge') : t('landing.gifts.voucher.promoBadge'))}
           </div>
           {voucher.remaining > 0 && !isPersonal && (
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">
-              Còn {voucher.remaining} lượt
+              {t('landing.gifts.voucher.remaining', { count: voucher.remaining })}
             </div>
           )}
         </div>
@@ -103,7 +105,7 @@ function VoucherCard({ voucher, index, onRedeem, redeeming }) {
         </p>
         
         <div className="text-xs text-slate-400 font-medium flex items-center gap-2">
-          HSD: {formatDate(voucher.endDate)}
+          {t('landing.gifts.voucher.expiry', { date: formatDate(voucher.endDate) })}
         </div>
       </div>
 
@@ -112,14 +114,14 @@ function VoucherCard({ voucher, index, onRedeem, redeeming }) {
           <div className="w-full flex items-center justify-between">
             <div className="font-bold text-amber-500 flex items-center gap-2">
                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-               {voucher.requiredPoints} Điểm
+               {t('landing.gifts.points', { count: voucher.requiredPoints })}
             </div>
             <button
               onClick={() => onRedeem(voucher)}
               disabled={redeeming}
               className="px-6 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-white hover:bg-slate-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {redeeming ? 'Đang xử lý...' : 'Đổi ngay'}
+              {redeeming ? t('landing.gifts.processing') : t('landing.gifts.redeemNow')}
             </button>
           </div>
         ) : (
@@ -140,7 +142,7 @@ function VoucherCard({ voucher, index, onRedeem, redeeming }) {
                   : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-400 hover:-translate-y-0.5'
               }`}
             >
-              {copied ? 'Đã copy ✔' : 'Copy mã'}
+              {copied ? t('landing.gifts.voucher.copied') : t('landing.gifts.voucher.copyCode')}
             </button>
           </>
         )}
@@ -150,6 +152,7 @@ function VoucherCard({ voucher, index, onRedeem, redeeming }) {
 }
 
 function RewardCard({ reward, index, onRedeem, redeeming, points, userTier, tierMaps }) {
+  const { t } = useTranslation();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   const enough = (points || 0) >= (reward.pointCost || 0);
@@ -158,7 +161,7 @@ function RewardCard({ reward, index, onRedeem, redeeming, points, userTier, tier
   const userRank = tierMaps.rank[(userTier || 'bronze').toLowerCase()] ?? 0;
   const reqRank = tierMaps.rank[reqTier] ?? 0;
   const tierOk = userRank >= reqRank;
-  const reqLabel = tierMaps.label[reqTier] || 'Đồng';
+  const reqLabel = tierMaps.label[reqTier] || t('landing.gifts.tier.bronze');
 
   return (
     <motion.div
@@ -177,20 +180,20 @@ function RewardCard({ reward, index, onRedeem, redeeming, points, userTier, tier
         )}
         {soldOut && (
           <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] flex items-center justify-center">
-            <span className="px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-black uppercase tracking-wider">Hết hàng</span>
+            <span className="px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-black uppercase tracking-wider">{t('landing.gifts.soldOut')}</span>
           </div>
         )}
         <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-black shadow-sm">
-          ⭐ {reward.pointCost} Điểm
+          ⭐ {t('landing.gifts.points', { count: reward.pointCost })}
         </div>
         <div className={`absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black shadow-sm border ${tierMaps.badge[reqTier] || TIER_BADGE_CLS.bronze}`}>
-          {reqTier === 'bronze' ? 'Mọi hạng' : `Hạng ${reqLabel}`}
+          {reqTier === 'bronze' ? t('landing.gifts.reward.allTiers') : t('landing.gifts.reward.tier', { tier: reqLabel })}
         </div>
       </div>
       <div className="p-5">
         <h4 className="text-base font-bold text-slate-800 mb-1 line-clamp-1 group-hover:text-emerald-600 transition-colors">{reward.name}</h4>
         <p className="text-sm text-slate-500 leading-relaxed mb-3 line-clamp-2">{reward.description}</p>
-        <div className="text-xs text-slate-400 font-medium mb-4">Còn {reward.stock} phần quà</div>
+        <div className="text-xs text-slate-400 font-medium mb-4">{t('landing.gifts.reward.stockLeft', { count: reward.stock })}</div>
         <button
           onClick={() => onRedeem(reward)}
           disabled={redeeming || soldOut || !enough || !tierOk}
@@ -200,7 +203,7 @@ function RewardCard({ reward, index, onRedeem, redeeming, points, userTier, tier
               : 'bg-slate-800 text-white hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed'
           }`}
         >
-          {soldOut ? 'Hết hàng' : !tierOk ? `Cần hạng ${reqLabel} trở lên` : !enough ? `Cần thêm ${(reward.pointCost || 0) - (points || 0)} điểm` : redeeming ? 'Đang xử lý...' : 'Đổi ngay'}
+          {soldOut ? t('landing.gifts.soldOut') : !tierOk ? t('landing.gifts.reward.needTier', { tier: reqLabel }) : !enough ? t('landing.gifts.reward.needMore', { points: (reward.pointCost || 0) - (points || 0) }) : redeeming ? t('landing.gifts.processing') : t('landing.gifts.redeemNow')}
         </button>
       </div>
     </motion.div>
@@ -208,6 +211,7 @@ function RewardCard({ reward, index, onRedeem, redeeming, points, userTier, tier
 }
 
 export default function GiftStoreSection({ user, onOpenAuth }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('redeem'); // 'redeem' | 'wheel'
   const [vouchers, setVouchers] = useState([]);
   const [wheelSectors, setWheelSectors] = useState([]);
@@ -249,7 +253,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
         setSpinHistory(Array.isArray(payload?.data) ? payload.data : []);
       }
     } catch (e) {
-      console.error('Lỗi lấy lịch sử quay quà:', e);
+      console.error(t('landing.gifts.error.fetchHistory'), e);
     } finally {
       setHistoryLoading(false);
     }
@@ -271,7 +275,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
               color: it.color || PALETTE[idx % PALETTE.length]
             })));
           } else {
-             setWheelSectors([{ id: '1', label: 'Rỗng', color: '#94a3b8' }]);
+             setWheelSectors([{ id: '1', label: t('landing.gifts.wheel.empty'), color: '#94a3b8' }]);
           }
         }
       } catch(e) {}
@@ -366,13 +370,13 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
     if (!user) return onOpenAuth();
     if (redeemingId) return;
     if ((userPoints || 0) < (voucher.requiredPoints || 0)) {
-      showToast('Bạn không đủ điểm để đổi voucher này.', 'error');
+      showToast(t('landing.gifts.error.insufficientVoucherPoints'), 'error');
       return;
     }
     const ok = await confirmDialog({
-      title: 'Đổi điểm lấy voucher',
-      message: `Bạn có chắc chắn muốn dùng ${voucher.requiredPoints} điểm để đổi lấy "${voucher.name}"?`,
-      confirmLabel: 'Đổi điểm',
+      title: t('landing.gifts.confirm.redeemTitle'),
+      message: t('landing.gifts.confirm.redeemMessage', { points: voucher.requiredPoints, name: voucher.name }),
+      confirmLabel: t('landing.gifts.confirm.redeem'),
     });
     if (!ok) return;
 
@@ -385,11 +389,11 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
         body: JSON.stringify({ templateId: voucher._id }),
       });
       const payload = await res.json();
-      if (!res.ok) throw new Error(payload.message || 'Lỗi đổi điểm');
-      showToast('Đổi voucher thành công!');
+      if (!res.ok) throw new Error(payload.message || t('landing.gifts.error.redeemVoucher'));
+      showToast(t('landing.gifts.success.redeemVoucher'));
       await loadVouchers();
     } catch (err) {
-      showToast(err.message || 'Lỗi đổi điểm', 'error');
+      showToast(err.message || t('landing.gifts.error.redeemVoucher'), 'error');
     } finally {
       setRedeemingId(null);
     }
@@ -400,17 +404,17 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
     if (rewardLoading) return;
     const reqTier = (reward.requiredTier || 'bronze').toLowerCase();
     if ((tierMaps.rank[(user.tier || 'bronze').toLowerCase()] ?? 0) < (tierMaps.rank[reqTier] ?? 0)) {
-      showToast(`Phần thưởng này yêu cầu hạng ${tierMaps.label[reqTier] || reqTier} trở lên.`, 'error');
+      showToast(t('landing.gifts.error.insufficientTier', { tier: tierMaps.label[reqTier] || reqTier }), 'error');
       return;
     }
     if ((userPoints || 0) < (reward.pointCost || 0)) {
-      showToast('Bạn không đủ điểm để đổi phần thưởng này.', 'error');
+      showToast(t('landing.gifts.error.insufficientRewardPoints'), 'error');
       return;
     }
     const ok = await confirmDialog({
-      title: 'Đổi điểm lấy phần thưởng',
-      message: `Bạn có chắc chắn muốn dùng ${reward.pointCost} điểm để đổi lấy "${reward.name}"?`,
-      confirmLabel: 'Đổi điểm',
+      title: t('landing.gifts.confirm.redeemRewardTitle'),
+      message: t('landing.gifts.confirm.redeemRewardMessage', { points: reward.pointCost, name: reward.name }),
+      confirmLabel: t('landing.gifts.confirm.redeem'),
     });
     if (!ok) return;
 
@@ -423,32 +427,32 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
         body: JSON.stringify({ rewardId: reward._id }),
       });
       const payload = await res.json();
-      if (!res.ok) throw new Error(payload.message || 'Lỗi đổi phần thưởng');
+      if (!res.ok) throw new Error(payload.message || t('landing.gifts.error.redeemReward'));
       const code = payload.data?.redemption?.code || '';
       await confirmDialog({
-        title: 'Đổi phần thưởng thành công! 🎉',
+        title: t('landing.gifts.success.redeemRewardTitle'),
         content: (
           <div className="text-center">
-            <p className="text-sm text-slate-500 mb-3">Bạn đã đổi <b className="text-slate-800">{reward.name}</b>. Xuất trình mã sau tại quầy để nhận phần thưởng:</p>
+            <p className="text-sm text-slate-500 mb-3">{t('landing.gifts.success.redeemRewardContent', { name: reward.name })}</p>
             <div className="flex items-center justify-center gap-2">
               <code className="px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono font-black text-lg tracking-widest">{code}</code>
               <button
                 type="button"
-                onClick={() => { navigator.clipboard.writeText(code); showToast('Đã copy mã đổi thưởng!', 'success'); }}
+                onClick={() => { navigator.clipboard.writeText(code); showToast(t('landing.gifts.success.copiedCode'), 'success'); }}
                 className="px-4 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-bold hover:bg-slate-700 transition-colors"
               >
-                Copy
+                {t('landing.gifts.copy')}
               </button>
             </div>
-            <p className="text-xs text-slate-400 mt-3">Mã này cũng được lưu tại mục <b>Quà tặng của tôi</b> trong Kho quà & Tích điểm.</p>
+            <p className="text-xs text-slate-400 mt-3">{t('landing.gifts.success.codeSaved')}</p>
           </div>
         ),
-        confirmLabel: 'Đóng',
+        confirmLabel: t('landing.gifts.close'),
         hideCancel: true,
       });
       await loadVouchers();
     } catch (err) {
-      showToast(err.message || 'Lỗi đổi phần thưởng', 'error');
+      showToast(err.message || t('landing.gifts.error.redeemReward'), 'error');
     } finally {
       setRewardLoading(false);
     }
@@ -458,7 +462,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
     if (!user) return onOpenAuth();
     if (spinning) return;
     if (spinCount <= 0) {
-      showToast('Bạn đã hết lượt quay! Hãy đặt lịch và thanh toán thành công để nhận thêm lượt.', 'error');
+      showToast(t('landing.gifts.error.noSpinLeft'), 'error');
       return;
     }
     
@@ -476,7 +480,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || 'Lỗi khi quay');
+        throw new Error(data.message || t('landing.gifts.error.spin'));
       }
       
       setSpinCount(data.data.spinCount);
@@ -526,13 +530,13 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
           className="text-center mb-12 md:mb-16"
         >
           <span className="text-emerald-600 text-xs md:text-sm font-bold tracking-widest uppercase mb-3 block">
-            Tri ân khách hàng
+            {t('landing.gifts.eyebrow')}
           </span>
           <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 mb-6 max-w-2xl mx-auto leading-tight">
-            Kho Ưu Đãi & Quà Tặng
+            {t('landing.gifts.title')}
           </h2>
           <p className="text-slate-500 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-            Nơi tổng hợp các mã giảm giá dành riêng cho bạn và vòng quay may mắn rinh quà bất ngờ.
+            {t('landing.gifts.subtitle')}
           </p>
         </motion.div>
 
@@ -547,7 +551,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Ưu Đãi
+              {t('landing.gifts.tabs.discount')}
             </button>
             <button
               onClick={() => setActiveTab('wheel')}
@@ -557,7 +561,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Quà Tặng (Vòng Quay)
+              {t('landing.gifts.tabs.wheel')}
             </button>
             <button
               onClick={() => setActiveTab('history')}
@@ -567,7 +571,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Lịch Sử Quay Thưởng
+              {t('landing.gifts.tabs.history')}
             </button>
           </div>
         </div>
@@ -580,10 +584,10 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                 <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Bạn chưa đăng nhập</h3>
-                <p className="text-slate-500 mb-6">Đăng nhập ngay để xem các ưu đãi dành riêng cho hạng thành viên của bạn.</p>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{t('landing.gifts.login.title')}</h3>
+                <p className="text-slate-500 mb-6">{t('landing.gifts.login.message')}</p>
                 <button onClick={onOpenAuth} className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-0.5">
-                  Đăng Nhập
+                  {t('landing.gifts.login.button')}
                 </button>
               </div>
             ) : (
@@ -591,30 +595,30 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                 <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Trophy weight="fill" className="text-amber-500 w-6 h-6" />
-                    <span className="text-sm font-bold text-slate-700">Điểm tích lũy: <span className="text-emerald-600 text-lg">{userPoints}</span></span>
+                    <span className="text-sm font-bold text-slate-700">{t('landing.gifts.pointsLabel')}<span className="text-emerald-600 text-lg">{userPoints}</span></span>
                   </div>
                   <div className="flex bg-slate-100 p-1 rounded-xl">
-                    <button onClick={() => {setFilterType('redeem');}} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filterType === 'redeem' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}>Quà vật lý</button>
-                    <button onClick={() => {setFilterType('redeemable');}} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filterType === 'redeemable' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}>Voucher</button>
-                    <button onClick={() => {setFilterType('mine');}} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filterType === 'mine' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}>Của tôi</button>
+                    <button onClick={() => {setFilterType('redeem');}} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filterType === 'redeem' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}>{t('landing.gifts.filter.physical')}</button>
+                    <button onClick={() => {setFilterType('redeemable');}} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filterType === 'redeemable' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}>{t('landing.gifts.filter.voucher')}</button>
+                    <button onClick={() => {setFilterType('mine');}} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filterType === 'mine' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'}`}>{t('landing.gifts.filter.mine')}</button>
                   </div>
                 </div>
 
                 {filterType === 'redeem' && (
                   <div>
                     {loading ? (
-                      <div className="text-center text-slate-400 py-12 font-medium">Đang tải quà tặng...</div>
+                      <div className="text-center text-slate-400 py-12 font-medium">{t('landing.gifts.loading.gifts')}</div>
                     ) : rewards.length === 0 ? (
                       <div className="text-center py-20">
-                        <p className="text-slate-500 font-medium">Chưa có quà tặng vật lý nào lúc này.</p>
+                        <p className="text-slate-500 font-medium">{t('landing.gifts.empty.physicalGifts')}</p>
                       </div>
                     ) : (
                       <div className="mb-10">
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0 border border-amber-200/70">🎁</div>
                           <div>
-                            <h3 className="text-lg font-black text-slate-900">Đổi Điểm Lấy Quà Vật Lý</h3>
-                            <p className="text-xs text-slate-500 font-medium">Dùng điểm tích lũy đổi các phần quà thực tế như dầu nhớt, nước hoa khử mùi xe,...</p>
+                            <h3 className="text-lg font-black text-slate-900">{t('landing.gifts.redeemPhysical.title')}</h3>
+                            <p className="text-xs text-slate-500 font-medium">{t('landing.gifts.redeemPhysical.description')}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -630,10 +634,10 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                 {filterType === 'redeemable' && (
                   <div>
                     {loading ? (
-                      <div className="text-center text-slate-400 py-12 font-medium">Đang tải ưu đãi...</div>
+                      <div className="text-center text-slate-400 py-12 font-medium">{t('landing.gifts.loading.vouchers')}</div>
                     ) : vouchers.length === 0 ? (
                       <div className="text-center py-20">
-                        <p className="text-slate-500 font-medium">Chưa có voucher nào để đổi điểm lúc này.</p>
+                        <p className="text-slate-500 font-medium">{t('landing.gifts.empty.vouchers')}</p>
                       </div>
                     ) : (
                       <div className="mb-10">
@@ -642,8 +646,8 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                           </div>
                           <div>
-                            <h3 className="text-lg font-black text-slate-900">Đổi Điểm Lấy Voucher</h3>
-                            <p className="text-xs text-slate-500 font-medium">Dùng điểm tích lũy đổi các mã giảm giá dùng cho hóa đơn của bạn.</p>
+                            <h3 className="text-lg font-black text-slate-900">{t('landing.gifts.redeemVoucher.title')}</h3>
+                            <p className="text-xs text-slate-500 font-medium">{t('landing.gifts.redeemVoucher.description')}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -661,8 +665,8 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0 border border-amber-200/70">🎁</div>
                   <div>
-                    <h3 className="text-lg font-black text-slate-900">Phần Thưởng Đã Đổi</h3>
-                    <p className="text-xs text-slate-500 font-medium">Các phần quà vật lý bạn đã dùng điểm để đổi. Xuất trình mã tại quầy để nhận quà.</p>
+                    <h3 className="text-lg font-black text-slate-900">{t('landing.gifts.redeemed.title')}</h3>
+                    <p className="text-xs text-slate-500 font-medium">{t('landing.gifts.redeemed.description')}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -675,20 +679,20 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                       <div key={rd._id} className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex flex-col">
                         <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                           {snap.imageUrl ? (
-                            <img src={snap.imageUrl} alt={snap.name || 'Phần thưởng'} loading="lazy"
+                            <img src={snap.imageUrl} alt={snap.name || t('landing.gifts.redeemed.fallbackName')} loading="lazy"
                               className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-4xl">🎁</div>
                           )}
                           <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-black shadow-sm">
-                            ⭐ {rd.pointsSpent} Điểm
+                            ⭐ {t('landing.gifts.points', { count: rd.pointsSpent })}
                           </div>
                         </div>
                         <div className="p-5 flex-1 flex flex-col">
                           <h4 className="text-base font-bold text-slate-800 mb-1 line-clamp-1">{snap.name}</h4>
-                          <p className="text-[11px] text-slate-400 mb-3">Đổi ngày {formatDate(rd.createdAt)}</p>
+                          <p className="text-[11px] text-slate-400 mb-3">{t('landing.gifts.redeemed.redeemedOn', { date: formatDate(rd.createdAt) })}</p>
                           <div className={`rounded-lg px-3 py-2 border flex items-center justify-between mb-3 ${cancelled ? 'bg-slate-50 border-slate-200' : 'bg-emerald-50 border-emerald-100'}`}>
-                            <span className="text-xs font-semibold text-slate-500">Mã đổi thưởng</span>
+                            <span className="text-xs font-semibold text-slate-500">{t('landing.gifts.redeemed.codeLabel')}</span>
                             <span className={`font-mono font-extrabold tracking-wider ${cancelled ? 'text-slate-400 line-through' : 'text-emerald-700'}`}>{rd.code}</span>
                           </div>
                           <div className="mt-auto flex items-center justify-between text-[11px] text-slate-400 mb-3">

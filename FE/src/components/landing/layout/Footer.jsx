@@ -6,23 +6,23 @@ import { getApiBaseUrl } from '../../../lib/authStorage.js';
 import { translateText } from '@/utils/notifTranslator';
 
 const DEFAULT_SERVICES = [
-  { title: 'Rửa xe bọt tuyết cao cấp', linkUrl: '/#services' },
-  { title: 'Rửa khoang máy chi tiết', linkUrl: '/#services' },
-  { title: 'Phủ bóng Ceramic Nano', linkUrl: '/#services' },
-  { title: 'Vệ sinh nội thất khử khuẩn', linkUrl: '/#services' },
-  { title: 'Đánh bóng & Khôi phục sơn', linkUrl: '/#services' },
+  { titleKey: 'landing.footer.serviceSnowFoam', linkUrl: '/#services' },
+  { titleKey: 'landing.footer.serviceEngine', linkUrl: '/#services' },
+  { titleKey: 'landing.footer.serviceCeramic', linkUrl: '/#services' },
+  { titleKey: 'landing.footer.serviceInterior', linkUrl: '/#services' },
+  { titleKey: 'landing.footer.servicePolish', linkUrl: '/#services' },
 ];
 
 const DEFAULT_POLICIES = [
-  { slug: 'privacy', title: 'Chính sách bảo mật', icon: '🔒' },
-  { slug: 'terms', title: 'Điều khoản sử dụng', icon: '📋' },
-  { slug: 'payment', title: 'Thanh toán linh hoạt', icon: '💳' },
-  { slug: 'cancellation', title: 'Chính sách hủy lịch', icon: '❌' },
-  { slug: 'refund', title: 'Hoàn tiền 100%', icon: '🔙' },
+  { slug: 'privacy', titleKey: 'landing.footer.policyPrivacy', icon: '🔒' },
+  { slug: 'terms', titleKey: 'landing.footer.policyTerms', icon: '📋' },
+  { slug: 'payment', titleKey: 'landing.footer.policyPayment', icon: '💳' },
+  { slug: 'cancellation', titleKey: 'landing.footer.policyCancellation', icon: '❌' },
+  { slug: 'refund', titleKey: 'landing.footer.policyRefund', icon: '🔙' },
 ];
 
 export default function Footer() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'vi';
   const [featuredServices, setFeaturedServices] = useState(DEFAULT_SERVICES);
   const [policyList, setPolicyList] = useState(DEFAULT_POLICIES);
@@ -58,6 +58,8 @@ export default function Footer() {
     return () => { cancelled = true; };
   }, []);
 
+  const resolveTitle = (item) => (item.titleKey ? t(item.titleKey) : translateText(item.title, currentLang));
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -74,17 +76,17 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-6 text-slate-600">
             <span className="flex items-center gap-2 font-medium">
               <Clock size={15} className="text-emerald-600 shrink-0" />
-              Giờ mở cửa: <strong className="text-slate-900 font-bold">07:00 - 20:00</strong> (Tất cả các ngày)
+              {t('landing.footer.openHoursLabel')} <strong className="text-slate-900 font-bold">07:00 - 20:00</strong> {t('landing.footer.allDays')}
             </span>
             <span className="hidden sm:flex items-center gap-2 font-medium">
               <MapPin size={15} className="text-emerald-600 shrink-0" />
-              Mạng lưới: <strong className="text-slate-900 font-bold">15+ Chi nhánh toàn quốc</strong>
+              {t('landing.footer.networkLabel')} <strong className="text-slate-900 font-bold">{t('landing.footer.networkValue')}</strong>
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-emerald-700 font-bold ml-auto bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
             <Phone size={14} className="animate-pulse text-emerald-600" />
-            <span>Hotline khẩn cấp:</span>
+            <span>{t('landing.footer.hotline')}</span>
             <a href="tel:19008888" className="text-emerald-800 hover:text-emerald-600 font-extrabold underline transition-colors">
               1900 8888
             </a>
@@ -103,17 +105,17 @@ export default function Footer() {
                 Auto<span className="text-emerald-600">Wash</span>Pro
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-100/80 border border-emerald-300/60 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider shadow-2xs">
-                Hệ thống 5.0 ✨
+                {t('landing.footer.badgeVersion')}
               </span>
             </div>
             
             <p className="text-slate-600 text-sm leading-relaxed max-w-md">
-              Hệ thống đặt lịch rửa xe & chăm sóc xe hơi thông minh hàng đầu. Công nghệ hiện đại, minh bạch giá thành và tối ưu thời gian cho chủ xe.
+              {t('landing.footer.tagline')}
             </p>
 
             {/* Social Media Icons */}
             <div className="pt-2">
-              <p className="text-xs font-bold text-slate-800 mb-2.5 uppercase tracking-wider">Kết nối với chúng tôi</p>
+              <p className="text-xs font-bold text-slate-800 mb-2.5 uppercase tracking-wider">{t('landing.footer.connectTitle')}</p>
               <div className="flex items-center gap-3">
                 {[
                   {
@@ -158,14 +160,14 @@ export default function Footer() {
           <div>
             <h4 className="text-emerald-700 text-xs font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              {translateText('Dịch vụ nổi bật', currentLang)}
+              {t('landing.footer.servicesTitle')}
             </h4>
             <ul className="space-y-2.5 text-sm font-medium">
               {featuredServices.map((item, idx) => (
                 <li key={item._id || item.slug || idx}>
                   <a href={item.linkUrl || '/#services'} className="text-slate-600 hover:text-emerald-600 hover:translate-x-1 transition-all duration-200 inline-block">
                     {item.icon && <span className="mr-1.5">{item.icon}</span>}
-                    {translateText(item.title, currentLang)}
+                    {resolveTitle(item)}
                   </a>
                 </li>
               ))}
@@ -176,13 +178,13 @@ export default function Footer() {
           <div>
             <h4 className="text-emerald-700 text-xs font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              {translateText('Chính sách & Hỗ trợ', currentLang)}
+              {t('landing.footer.policiesTitle')}
             </h4>
             <ul className="space-y-2.5 text-sm font-medium">
               {policyList.map((item, idx) => (
                 <li key={item._id || item.slug || idx}>
                   <a href={`/policies#${item.slug}`} className="text-slate-600 hover:text-emerald-600 transition-colors flex items-center gap-2">
-                    <span>{item.icon || '📜'}</span> {translateText(item.title, currentLang)}
+                    <span>{item.icon || '📜'}</span> {resolveTitle(item)}
                   </a>
                 </li>
               ))}
@@ -193,13 +195,13 @@ export default function Footer() {
           <div>
             <h4 className="text-emerald-700 text-xs font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              Liên hệ trực tiếp
+              {t('landing.footer.contactTitle')}
             </h4>
             <div className="space-y-3 text-xs text-slate-600">
               <div className="flex items-start gap-3 bg-white/90 border border-emerald-100 p-3 rounded-2xl shadow-2xs">
                 <Mail size={16} className="text-emerald-600 mt-0.5 shrink-0" />
                 <div>
-                  <span className="block text-[11px] text-slate-400 font-medium">Email CSKH</span>
+                  <span className="block text-[11px] text-slate-400 font-medium">{t('landing.footer.emailCsLabel')}</span>
                   <span className="font-bold text-slate-800">support@autowashpro.vn</span>
                 </div>
               </div>
@@ -207,8 +209,8 @@ export default function Footer() {
               <div className="flex items-start gap-3 bg-white/90 border border-emerald-100 p-3 rounded-2xl shadow-2xs">
                 <ShieldCheck size={16} className="text-emerald-600 mt-0.5 shrink-0" />
                 <div>
-                  <span className="block text-[11px] text-slate-400 font-medium">Bảo hành dịch vụ</span>
-                  <span className="font-bold text-emerald-700">Cam kết hài lòng 100%</span>
+                  <span className="block text-[11px] text-slate-400 font-medium">{t('landing.footer.warrantyLabel')}</span>
+                  <span className="font-bold text-emerald-700">{t('landing.footer.warrantyValue')}</span>
                 </div>
               </div>
             </div>
@@ -219,18 +221,18 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
           <div className="flex items-center gap-1.5">
-            <span>&copy; {new Date().getFullYear()} AutoWashPro. Mọi quyền được bảo lưu. Thiết kế với</span>
+            <span>&copy; {new Date().getFullYear()} AutoWashPro. {t('landing.footer.copyrightText')}</span>
             <Heart size={13} className="text-red-500 fill-red-500 animate-pulse" />
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="/policies#privacy" className="hover:text-emerald-600 transition-colors">Bảo mật</a>
-            <a href="/policies#terms" className="hover:text-emerald-600 transition-colors">Điều khoản</a>
+            <a href="/policies#privacy" className="hover:text-emerald-600 transition-colors">{t('landing.footer.privacyLink')}</a>
+            <a href="/policies#terms" className="hover:text-emerald-600 transition-colors">{t('landing.footer.termsLink')}</a>
             <button
               onClick={scrollToTop}
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-600 text-white font-bold hover:bg-emerald-500 shadow-md shadow-emerald-500/20 transition-all duration-300 cursor-pointer"
             >
-              <span>Về đầu trang</span>
+              <span>{t('landing.footer.backToTop')}</span>
               <ArrowUp size={13} />
             </button>
           </div>

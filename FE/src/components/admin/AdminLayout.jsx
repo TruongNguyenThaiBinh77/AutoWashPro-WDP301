@@ -65,7 +65,7 @@ export default function AdminLayout({ user, onLogout }) {
   const navigate = useNavigate();
   const meta = resolvePageMeta(location.pathname, location.search);
   const [badges, setBadges] = useState({});
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'vi';
 
   // Đếm số mục "mới / cần xử lý" toàn hệ thống: đơn chờ xác nhận + đánh giá chưa phản hồi + thanh toán chưa xem
@@ -150,14 +150,14 @@ export default function AdminLayout({ user, onLogout }) {
     <DashboardShell
       brand={{
         ...ADMIN_BRAND,
-        tagline: translateText(ADMIN_BRAND.tagline, currentLang),
+        tagline: t('admin.layout.brandTagline'),
         logo: <Drop size={24} weight="fill" className="text-primary" aria-hidden />,
       }}
       menuItems={ADMIN_MENU_ITEMS}
       badges={badges}
       user={{
-        name: user?.name || translateText('Quản trị viên', currentLang),
-        roleLabel: user?.role ? `${translateText('Vai trò', currentLang)}: ${user.role}` : 'Admin',
+        name: user?.name || t('admin.layout.adminRole'),
+        roleLabel: user?.role ? `${t('admin.layout.roleLabel')}: ${user.role}` : 'Admin',
       }}
       onLogout={handleLogout}
       header={

@@ -1,8 +1,10 @@
 import { Wrench } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function FeaturePlaceholder({ title, description }) {
+  const { t } = useTranslation();
   return (
     <Card className="max-w-2xl border-dashed">
       <CardHeader>
@@ -17,9 +19,9 @@ export default function FeaturePlaceholder({ title, description }) {
         </div>
       </CardHeader>
       <CardContent>
-        <Badge variant="muted">Tính năng đang phát triển</Badge>
+        <Badge variant="muted">{t('admin.placeholder.featureInDevelopment')}</Badge>
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-          Màn hình này sẽ được bổ sung chi tiết sau. Bạn có thể tiếp tục điều hướng qua menu bên trái.
+          {t('admin.placeholder.description')}
         </p>
       </CardContent>
     </Card>

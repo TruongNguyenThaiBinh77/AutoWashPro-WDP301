@@ -49,7 +49,7 @@ export default function ManagerLayout({ user, onLogout }) {
   const [badges, setBadges] = useState({});
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [pendingCheckinBooking, setPendingCheckinBooking] = useState(null);
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'vi';
   const token = getStoredToken();
 
@@ -127,8 +127,8 @@ export default function ManagerLayout({ user, onLogout }) {
       menuItems={MANAGER_MENU_ITEMS}
       badges={badges}
       user={{
-        name: user?.name || translateText('Quản lý', currentLang),
-        roleLabel: translateText('Quản lý chi nhánh', currentLang),
+        name: user?.name || t('manager.layout.manager'),
+        roleLabel: t('manager.layout.branchManager'),
       }}
       onLogout={handleLogout}
       header={
@@ -141,7 +141,7 @@ export default function ManagerLayout({ user, onLogout }) {
             <button
               onClick={() => setShowQRScanner(true)}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-              title="Quét mã QR"
+              title={t('manager.layout.scanQr')}
             >
               <QrCode size={20} weight="bold" />
             </button>

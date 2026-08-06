@@ -26,5 +26,596 @@
   "yes": "Có",
   "no": "Không",
   "retry": "Thử lại",
-  "system": "Hệ thống"
+  "system": "Hệ thống",
+  "menu": {
+    "overview": "Giám sát tổng quan",
+    "bookings": "Quản lý đặt lịch",
+    "payments": "Quản lý thanh toán",
+    "reviews": "Đánh giá",
+    "branches": "Quản lý chi nhánh",
+    "users": "Quản lý người dùng",
+    "slot-packs": "Gói lượt",
+    "rewards": "Khuyến mãi & Quà tặng",
+    "policies": "Quản lý Chính sách & Dịch vụ",
+    "activity": "Hoạt động gần đây",
+    "system-config": "Cấu hình Quy tắc Nghiệp vụ",
+    "profile": "Hồ sơ",
+    "schedule": "Lịch theo ngày",
+    "customers": "Khách hàng",
+    "feedbacks": "Đánh giá",
+    "packages": "Gói dịch vụ",
+    "vouchers": "Khuyến mãi & Quà tặng",
+    "revenue": "Báo cáo doanh thu",
+    "branch": "Chi nhánh của tôi"
+  },
+  "landing": {
+    "footer": {
+      "serviceSnowFoam": "Rửa xe bọt tuyết cao cấp",
+      "serviceEngine": "Rửa khoang máy chi tiết",
+      "serviceCeramic": "Phủ bóng Ceramic Nano",
+      "serviceInterior": "Vệ sinh nội thất khử khuẩn",
+      "servicePolish": "Đánh bóng & Khôi phục sơn",
+      "policyPrivacy": "Chính sách bảo mật",
+      "policyTerms": "Điều khoản sử dụng",
+      "policyPayment": "Thanh toán linh hoạt",
+      "policyCancellation": "Chính sách hủy lịch",
+      "policyRefund": "Hoàn tiền 100%",
+      "openHoursLabel": "Giờ mở cửa:",
+      "allDays": "(Tất cả các ngày)",
+      "networkLabel": "Mạng lưới:",
+      "networkValue": "15+ Chi nhánh toàn quốc",
+      "hotline": "Hotline khẩn cấp:",
+      "badgeVersion": "Hệ thống 5.0 ✨",
+      "tagline": "Hệ thống đặt lịch rửa xe & chăm sóc xe hơi thông minh hàng đầu. Công nghệ hiện đại, minh bạch giá thành và tối ưu thời gian cho chủ xe.",
+      "connectTitle": "Kết nối với chúng tôi",
+      "servicesTitle": "Dịch vụ nổi bật",
+      "policiesTitle": "Chính sách & Hỗ trợ",
+      "contactTitle": "Liên hệ trực tiếp",
+      "emailCsLabel": "Email CSKH",
+      "warrantyLabel": "Bảo hành dịch vụ",
+      "warrantyValue": "Cam kết hài lòng 100%",
+      "copyrightText": "Mọi quyền được bảo lưu. Thiết kế với",
+      "privacyLink": "Bảo mật",
+      "termsLink": "Điều khoản",
+      "backToTop": "Về đầu trang"
+    },
+    "hero": {
+      "badge": "Hệ thống đặt lịch thông minh",
+      "titleCare": "Chăm sóc xế yêu",
+      "titleWay": "một cách",
+      "titleProfessional": "chuyên nghiệp",
+      "subtitle": "Hệ thống đặt lịch rửa xe trực tuyến nhanh chóng. Trải nghiệm dịch vụ vệ sinh và chăm sóc xe hơi đẳng cấp nhất tại AutoWash Pro.",
+      "bookNow": "Bắt đầu đặt lịch ngay",
+      "scrollExplore": "Cuộn để khám phá",
+      "stats": {
+        "washes": "LƯỢT RỬA",
+        "satisfaction": "HÀI LÒNG",
+        "branches": "CHI NHÁNH"
+      }
+    },
+    "cta": {
+      "badge": "BẮT ĐẦU NGAY — ƯU ĐÃI 20% LẦN ĐẦU",
+      "titlePart1": "Sẵn sàng để xe bạn",
+      "titlePart2": "luôn sạch bóng như mới?",
+      "subtitle": "Đăng ký ngay để nhận ưu đãi lần đầu và trải nghiệm hệ thống đặt lịch thông minh 30s của AutoWashPro.",
+      "register": "Đăng ký miễn phí",
+      "trustFreeSignup": "Miễn phí đăng ký",
+      "trustNoCard": "Không cần thẻ tín dụng",
+      "trust30s": "Đặt lịch trong 30 giây",
+      "imageAlt": "AutoWashPro Showroom chăm sóc xe chi tiết",
+      "rating": "4.9 / 5.0 ⭐",
+      "ratingLabel": "2,500+ Đánh giá hài lòng",
+      "carsWashed": "10,000+ Xe đã rửa",
+      "qualityLabel": "Cam kết chất lượng 100%"
+    },
+    "how": {
+      "stepLabel": "BƯỚC",
+      "step1Title": "Chọn chi nhánh",
+      "step1Desc": "Chọn chi nhánh gần nhất phù hợp với vị trí của bạn trên hệ thống AutoWash Pro toàn quốc.",
+      "step1Tag": "📍 Mạng lưới toàn quốc",
+      "step2Title": "Chọn gói dịch vụ",
+      "step2Desc": "Lựa chọn gói rửa từ cơ bản đến cao cấp, kèm các phụ kiện bổ sung theo nhu cầu.",
+      "step2Tag": "✨ Đa dạng gói rửa xe",
+      "step3Title": "Chọn xe & thời gian",
+      "step3Desc": "Chọn xe đã lưu hoặc nhập thông tin xe mới, rồi chọn ngày và khung giờ phù hợp.",
+      "step3Tag": "⏰ Giờ hẹn chuẩn 30s",
+      "step4Title": "Xác nhận & nhận xe",
+      "step4Desc": "Xác nhận đặt chỗ, áp dụng mã giảm giá nếu có. Mang xe đến và nhận xe sạch như mới.",
+      "step4Tag": "🛡 Xe sạch hoàn hảo 100%",
+      "label": "CÁCH HOẠT ĐỘNG",
+      "titlePart1": "Đặt lịch trong",
+      "titlePart2": "4 bước",
+      "subtitle": "Quy trình đơn giản, nhanh chóng. Bạn chỉ cần chọn chi nhánh, chọn dịch vụ, chọn thời gian và xác nhận đặt chỗ.",
+      "cta": "Đặt lịch ngay ✨"
+    },
+    "about": {
+      "badge": "#1 Dịch vụ rửa xe tại Việt Nam",
+      "heroTitle1": "Chúng tôi yêu xe của bạn",
+      "heroTitle2": "như chính bạn",
+      "heroSubtitle": "AutoWashPro ra đời với sứ mệnh mang đến trải nghiệm chăm sóc xe chuyên nghiệp, tiện lợi và đáng tin cậy cho mọi chủ xe tại Việt Nam.",
+      "trustedPrefix": "Được",
+      "trustedSuffix": "khách hàng tin dùng",
+      "stats": {
+        "washes": "Lượt rửa xe",
+        "branches": "Chi nhánh",
+        "rating": "Đánh giá trung bình",
+        "experience": "Năm kinh nghiệm"
+      },
+      "storyLabel": "Câu chuyện",
+      "storyTitle1": "Từ một ý tưởng nhỏ",
+      "storyTitle2": "đến chuỗi cửa hàng",
+      "storyTitle3": "rửa xe hàng đầu",
+      "storyPara1": "AutoWashPro được thành lập vào năm 2019 bởi đội ngũ những người đam mê xe hơi và dịch vụ khách hàng. Chúng tôi nhận thấy việc rửa xe tại Việt Nam còn nhiều bất cập: thời gian chờ lâu, chất lượng không đồng nhất, và khó khăn trong việc đặt lịch.",
+      "storyPara2": "Từ đó, chúng tôi xây dựng một hệ thống rửa xe chuyên nghiệp với quy trình chuẩn hóa, ứng dụng đặt lịch thông minh, và cam kết chất lượng cho từng chiếc xe. Sau hơn 5 năm, AutoWashPro đã trở thành thương hiệu rửa xe được yêu thích nhất tại TP. Hồ Chí Minh và đang mở rộng ra các tỉnh thành khác.",
+      "cardTagline": "Chăm sóc xe tận tâm",
+      "valuesLabel": "Giá trị cốt lõi",
+      "valuesTitle": "Tại sao chọn chúng tôi?",
+      "values": {
+        "qualityTitle": "Chất lượng vượt trội",
+        "qualityDesc": "Sử dụng công nghệ và dung dịch chuyên dụng cao cấp, đảm bảo xe của bạn luôn sáng bóng như mới.",
+        "timeTitle": "Tiết kiệm thời gian",
+        "timeDesc": "Đặt lịch trước qua ứng dụng, đến là rửa ngay — không chờ đợi. Quy trình tối ưu chỉ 15-45 phút.",
+        "teamTitle": "Đội ngũ chuyên nghiệp",
+        "teamDesc": "Kỹ thuật viên được đào tạo bài bản, tận tâm với từng chi tiết nhỏ nhất trên xe của bạn.",
+        "safetyTitle": "An toàn & bảo vệ",
+        "safetyDesc": "Cam kết bồi thường nếu có hư hỏng. Sản phẩm thân thiện môi trường, an toàn cho sức khỏe."
+      },
+      "historyLabel": "Lịch sử phát triển",
+      "historyTitle": "Hành trình của chúng tôi",
+      "timeline": {
+        "founding": {
+          "title": "Thành lập",
+          "desc": "AutoWashPro ra đời với 1 chi nhánh đầu tiên tại TP. Hồ Chí Minh, mang đến dịch vụ rửa xe chuyên nghiệp."
+        },
+        "expansion": {
+          "title": "Mở rộng",
+          "desc": "Phát triển lên 3 chi nhánh, ra mắt ứng dụng đặt lịch trực tuyến giúp khách hàng chủ động thời gian."
+        },
+        "innovation": {
+          "title": "Đổi mới",
+          "desc": "Triển khai hệ thống gói lượt và chương trình khách hàng thân thiết, đạt 10.000 lượt rửa."
+        },
+        "leadership": {
+          "title": "Dẫn đầu",
+          "desc": "15+ chi nhánh trên toàn quốc, phục vụ hơn 50.000 lượt xe, trở thành thương hiệu rửa xe uy tín hàng đầu."
+        },
+        "future": {
+          "title": "Tương lai",
+          "desc": "Mở rộng hệ sinh thái dịch vụ xe hơi toàn diện: bảo dưỡng, phụ kiện, và chăm sóc xe tại nhà."
+        }
+      },
+      "teamLabel": "Đội ngũ",
+      "teamTitle": "Những con người tạo nên thương hiệu",
+      "teamRole": "Thành viên"
+    },
+    "branch": {
+      "voucherPercentage": "Giảm %",
+      "voucherFixed": "Giảm tiền",
+      "notFound": "Không tìm thấy chi nhánh",
+      "backToMap": "Quay lại bản đồ",
+      "store": "Cửa hàng",
+      "clickToZoom": "🔍 Click để phóng to",
+      "mapTitle": "Bản đồ",
+      "getDirections": "Chỉ đường",
+      "directionsInline": "Chỉ đường trong trang",
+      "directionsInlineDesc": "Xem bản đồ ngay tại đây",
+      "openGoogleMaps": "Mở Google Maps",
+      "openGoogleMapsDesc": "Chỉ đường bằng ứng dụng",
+      "address": "Địa chỉ",
+      "openHours": "Giờ mở cửa",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "bookHere": "Đặt lịch tại đây",
+      "packages": "Gói dịch vụ",
+      "noPackages": "Chưa có gói dịch vụ nào",
+      "minutes": "{{minutes}} phút",
+      "vatNote": "* Giá đã bao gồm VAT 10%",
+      "vouchers": "Voucher ưu đãi",
+      "noVouchers": "Chưa có voucher nào",
+      "voucherDiscount": "Giảm {{value}}",
+      "voucherMax": "(tối đa {{value}})",
+      "voucherMinOrder": "Đơn từ {{value}}",
+      "voucherHs": "HS: {{date}}",
+      "close": "Đóng",
+      "branch": "Chi nhánh"
+    },
+    "policy": {
+      "listTitle": "Danh sách chính sách",
+      "heroBadge": "📜 Chính sách & Điều khoản",
+      "heroTitle": "Chính sách dịch vụ",
+      "heroSubtitle": "AutoWashPro cam kết minh bạch trong cung cấp dịch vụ và bảo vệ quyền lợi khách hàng với chính sách bảo hiểm bồi thường thiệt hại phát sinh trong quá trình rửa xe, bao gồm cả dòng xe sang và siêu sang.",
+      "updatedAt": "Cập nhật lần cuối: {{date}}",
+      "backToTop": "Quay lại đầu trang",
+      "privacy": {
+        "0": {
+          "subtitle": "1. Mục đích và phạm vi thu thập thông tin",
+          "body": "AutoWashPro thu thập thông tin cá nhân của khách hàng bao gồm: họ tên, email, số điện thoại, biển số xe, địa chỉ và thông tin thanh toán. Các thông tin này chỉ được thu thập khi khách hàng tự nguyện đăng ký tài khoản, đặt lịch rửa xe hoặc sử dụng các dịch vụ trên hệ thống."
+        },
+        "1": {
+          "subtitle": "2. Phạm vi sử dụng thông tin",
+          "body": "Thông tin cá nhân thu thập được chỉ sử dụng trong nội bộ AutoWashPro với các mục đích: xác nhận và quản lý lịch hẹn, hỗ trợ khách hàng, gửi thông báo về lịch hẹn và khuyến mãi, nâng cao chất lượng dịch vụ."
+        },
+        "2": {
+          "subtitle": "3. Thời gian lưu trữ thông tin",
+          "body": "AutoWashPro lưu trữ thông tin cá nhân của khách hàng trong suốt thời gian tài khoản còn hoạt động. Khách hàng có quyền yêu cầu xóa tài khoản và thông tin cá nhân bất cứ lúc nào bằng cách liên hệ bộ phận hỗ trợ."
+        },
+        "3": {
+          "subtitle": "4. Cam kết bảo mật",
+          "body": "AutoWashPro cam kết bảo vệ thông tin cá nhân của khách hàng bằng các biện pháp kỹ thuật và quản lý. Hệ thống sử dụng mã hóa SSL/TLS cho toàn bộ dữ liệu truyền tải và mã hóa mật khẩu bằng công nghệ bcrypt."
+        },
+        "4": {
+          "subtitle": "5. Chia sẻ thông tin với bên thứ ba",
+          "body": "AutoWashPro không bán, chia sẻ hoặc tiết lộ thông tin cá nhân của khách hàng cho bên thứ ba ngoại trừ các trường hợp: có sự đồng ý của khách hàng, theo yêu cầu của cơ quan pháp luật, hoặc đối tác thanh toán (VNPay, MoMo) phục vụ xử lý giao dịch."
+        },
+        "title": "Chính sách bảo mật"
+      },
+      "terms": {
+        "0": {
+          "subtitle": "1. Chấp nhận điều khoản",
+          "body": "Bằng việc truy cập và sử dụng hệ thống AutoWashPro, khách hàng xác nhận đã đọc, hiểu và đồng ý với tất cả các điều khoản được quy định trong tài liệu này."
+        },
+        "1": {
+          "subtitle": "2. Tài khoản người dùng",
+          "body": "Khách hàng có trách nhiệm bảo mật thông tin tài khoản và mật khẩu. Mọi hoạt động diễn ra trên tài khoản đều được xem là do khách hàng thực hiện. AutoWashPro không chịu trách nhiệm cho các tổn thất phát sinh từ việc truy cập trái phép."
+        },
+        "2": {
+          "subtitle": "3. Quyền và nghĩa vụ của khách hàng",
+          "body": "Khách hàng có quyền đặt lịch, hủy lịch, đánh giá dịch vụ và tham gia chương trình khách hàng thân thiết. Khách hàng có nghĩa vụ cung cấp thông tin chính xác, đến đúng giờ hẹn và tuân thủ nội quy của chi nhánh."
+        },
+        "3": {
+          "subtitle": "4. Quyền và nghĩa vụ của AutoWashPro",
+          "body": "AutoWashPro có quyền từ chối phục vụ nếu khách hàng vi phạm điều khoản. Chúng tôi cam kết cung cấp dịch vụ đúng với mô tả và chịu trách nhiệm nếu dịch vụ không đạt chất lượng."
+        },
+        "4": {
+          "subtitle": "5. Sửa đổi điều khoản",
+          "body": "AutoWashPro có quyền sửa đổi các điều khoản sử dụng bất cứ lúc nào. Các thay đổi sẽ được thông báo trên hệ thống. Việc tiếp tục sử dụng dịch vụ sau khi thay đổi được xem là chấp nhận điều khoản mới."
+        },
+        "title": "Điều khoản sử dụng"
+      },
+      "payment": {
+        "0": {
+          "subtitle": "1. Hình thức thanh toán",
+          "body": "AutoWashPro chấp nhận các hình thức thanh toán sau: tiền mặt tại chi nhánh, chuyển khoản ngân hàng, thanh toán trực tuyến qua VNPay và MoMo."
+        },
+        "1": {
+          "subtitle": "2. Thanh toán đặt cọc",
+          "body": "Một số gói dịch vụ yêu cầu đặt cọc tối thiểu {{depositPercent}}% giá trị đơn hàng khi đặt lịch. Khoản cọc sẽ được khấu trừ vào tổng số tiền khi khách hàng hoàn tất dịch vụ."
+        },
+        "2": {
+          "subtitle": "3. Thanh toán trực tuyến",
+          "body": "Thanh toán trực tuyến qua VNPay/MoMo được xử lý ngay lập tức. Giao dịch thành công sẽ được xác nhận và cập nhật trạng thái thanh toán trong vòng 24h."
+        },
+        "3": {
+          "subtitle": "4. Hóa đơn và chứng từ",
+          "body": "Hóa đơn điện tử được gửi qua email sau khi giao dịch hoàn tất. Khách hàng có nhu cầu lấy hóa đơn VAT vui lòng liên hệ bộ phận hỗ trợ và cung cấp mã số thuế trước khi thanh toán."
+        },
+        "4": {
+          "subtitle": "5. Bảo mật thông tin thanh toán",
+          "body": "Mọi giao dịch thanh toán được bảo mật qua cổng thanh toán chuẩn PCI DSS. AutoWashPro không lưu trữ thông tin thẻ tín dụng hoặc mật khẩu tài khoản ngân hàng của khách hàng."
+        },
+        "title": "Chính sách thanh toán"
+      },
+      "cancellation": {
+        "0": {
+          "subtitle": "1. Hủy lịch trước giờ hẹn",
+          "body": "Khách hàng có thể hủy lịch hẹn trước tối thiểu 2 giờ so với giờ bắt đầu. Việc hủy lịch được thực hiện trực tiếp trên hệ thống qua mục \"Lịch sử đặt xe\"."
+        },
+        "1": {
+          "subtitle": "2. Hủy lịch muộn (dưới 2 giờ)",
+          "body": "Trong trường hợp hủy lịch dưới 2 giờ trước giờ hẹn, khoản tiền cọc (nếu có) sẽ không được hoàn lại. Khách hàng vui lòng liên hệ chi nhánh qua số điện thoại để được hỗ trợ."
+        },
+        "2": {
+          "subtitle": "3. Không đến (No-show)",
+          "body": "Nếu khách hàng không đến sau {{noShowGraceMinutes}} phút kể từ giờ hẹn, lịch hẹn sẽ tự động bị hủy bởi hệ thống. Tiền cọc sẽ không được hoàn lại và khách hàng sẽ bị ghi nhận một lượt \"vắng mặt\" (no-show)."
+        },
+        "3": {
+          "subtitle": "4. Hủy lịch do chi nhánh",
+          "body": "Trong trường hợp chi nhánh phải hủy lịch hẹn vì lý do bất khả kháng (mất điện, hỏng thiết bị, thiên tai), AutoWashPro sẽ thông báo sớm nhất có thể và hỗ trợ khách hàng đặt lại lịch miễn phí."
+        },
+        "4": {
+          "subtitle": "5. Giới hạn số lần hủy",
+          "body": "Khách hàng hủy lịch nhiều lần (từ 5 lần trở lên trong một tháng) có thể bị giới hạn quyền đặt lịch hoặc yêu cầu đặt cọc 100% cho các lần đặt sau."
+        },
+        "title": "Chính sách hủy lịch"
+      },
+      "refund": {
+        "0": {
+          "subtitle": "1. Điều kiện hoàn tiền",
+          "body": "Khách hàng được hoàn tiền tự động vào Ví AutoWash khi hủy đơn đã thanh toán/cọc. Đối với đơn đã hoàn thành, khách hàng có thể gửi yêu cầu hoàn tiền trong vòng 24h kể từ khi hoàn thành. Ngoài ra, khách hàng được hoàn tiền khi chi nhánh hủy lịch do lỗi từ phía hệ thống."
+        },
+        "1": {
+          "subtitle": "2. Quy trình hoàn tiền",
+          "body": "Hủy đơn: tiền được hoàn tự động vào Ví AutoWash ngay sau khi hủy, không cần yêu cầu. Hoàn tiền sau hoàn thành: khách hàng gửi yêu cầu qua hệ thống (trong vòng 24h), admin xem xét và phê duyệt, tiền sẽ được chuyển vào Ví AutoWash."
+        },
+        "2": {
+          "subtitle": "3. Phương thức hoàn tiền",
+          "body": "Toàn bộ tiền hoàn được chuyển trực tiếp vào Ví AutoWash của khách hàng, có thể sử dụng ngay cho lần đặt lịch tiếp theo."
+        },
+        "3": {
+          "subtitle": "4. Hoàn tiền cho gói lượt (Slot Pack)",
+          "body": "Gói lượt chưa sử dụng hết có thể được yêu cầu hoàn tiền với giá trị tương ứng số lượt còn lại, sau khi trừ phí quản lý 10%. Yêu cầu hoàn tiền gói lượt chỉ được chấp nhận trong vòng 30 ngày kể từ ngày mua."
+        },
+        "title": "Chính sách hoàn tiền"
+      },
+      "insurance": {
+        "0": {
+          "subtitle": "1. Phạm vi bảo hiểm",
+          "body": "AutoWashPro áp dụng bảo hiểm trách nhiệm dịch vụ cho toàn bộ quy trình rửa xe tại tất cả chi nhánh. Bảo hiểm này chi trả trong trường hợp xe của khách hàng bị trầy xước, móp méo, vỡ kính hoặc hư hỏng ngoại thất phát sinh trực tiếp từ quy trình rửa và chăm sóc xe của nhân viên AutoWashPro. Bảo hiểm không áp dụng cho các hư hỏng có sẵn trước khi nhận xe hoặc hư hỏng do nguyên nhân khách quan (thiên tai, trộm cắp)."
+        },
+        "1": {
+          "subtitle": "2. Quy trình kiểm tra xe trước khi rửa",
+          "body": "Trước khi tiến hành rửa, nhân viên AutoWashPro và khách hàng sẽ cùng kiểm tra tình trạng xe hiện tại. Mọi vết trầy xước, vết lõm, hoặc hư hỏng có sẵn sẽ được ghi nhận bằng hình ảnh và biên bản bàn giao. Quy trình này nhằm bảo vệ quyền lợi cả hai bên và là căn cứ xác định trách nhiệm khi có sự cố phát sinh. Khách hàng vui lòng dành 3-5 phút để cùng kiểm tra và ký xác nhận."
+        },
+        "2": {
+          "subtitle": "3. Quy trình xử lý khi có sự cố",
+          "body": "Ngay khi phát hiện hư hỏng, khách hàng thông báo cho nhân viên hoặc quản lý chi nhánh trong vòng 24 giờ kể từ khi rời khỏi chi nhánh. AutoWashPro sẽ tiến hành: (1) lập biên bản ghi nhận sự cố có chữ ký hai bên, (2) chụp ảnh hiện trường, (3) định giá thiệt hại tại garage hoặc trung tâm sửa chữa uy tín do hai bên thỏa thuận. Thời gian xử lý yêu cầu tối đa 48 giờ làm việc."
+        },
+        "3": {
+          "subtitle": "4. Mức bồi thường",
+          "body": "AutoWashPro cam kết bồi thường 100% chi phí sửa chữa, khắc phục hư hỏng tại garage được hai bên thống nhất. Trường hợp hư hỏng không thể khắc phục, mức bồi thường tối đa dựa trên giá trị thị trường của bộ phận bị hư hỏng tại thời điểm xảy ra sự cố. Mức bồi thường tối đa cho mỗi sự cố là 50.000.000đ. Bồi thường được thực hiện trong vòng 7 ngày làm việc sau khi hai bên thống nhất mức bồi thường."
+        },
+        "4": {
+          "subtitle": "5. Xử lý xe sang, xe đắt tiền",
+          "body": "Đối với các dòng xe sang, siêu sang (Mercedes-Benz, BMW, Audi, Lexus, Porsche, Rolls-Royce, Bentley, Ferrari, Lamborghini, McLaren và các thương hiệu tương đương), AutoWashPro áp dụng quy trình rửa tay chuyên biệt bởi đội ngũ kỹ thuật viên có chứng chỉ chăm sóc xe hạng sang. Khách hàng sở hữu xe sang nên đặt lịch tại các chi nhánh có trang bị khu vực rửa xe riêng biệt (VIP Zone). Nếu có thiệt hại phát sinh, hạn mức bồi thường tối đa cho xe sang có thể lên đến 200.000.000đ mỗi sự cố, tùy theo đánh giá của bên giám định độc lập."
+        },
+        "5": {
+          "subtitle": "6. Trường hợp từ chối bồi thường",
+          "body": "AutoWashPro có quyền từ chối bồi thường trong các trường hợp: (1) hư hỏng có sẵn trước khi rửa nhưng không được ghi nhận trong biên bản bàn giao, (2) hư hỏng do lỗi kỹ thuật của xe hoặc do xe đã có sẵn tình trạng xuống cấp, (3) khách hàng không thông báo trong vòng 24 giờ, (4) hư hỏng phát sinh sau khi xe đã rời khỏi chi nhánh và không thể xác định nguyên nhân, (5) khách hàng yêu cầu dịch vụ trái với quy trình hoặc từ chối kiểm tra xe trước khi rửa."
+        },
+        "title": "Chính sách bảo hiểm & bồi thường"
+      },
+      "booking": {
+        "0": {
+          "subtitle": "1. Quy trình đặt lịch",
+          "body": "Khách hàng chọn chi nhánh, gói dịch vụ, thời gian và phương tiện. Hệ thống sẽ kiểm tra slot trống và xác nhận lịch hẹn. Mỗi lịch hẹn được cấp một mã duy nhất dùng để check-in tại chi nhánh."
+        },
+        "1": {
+          "subtitle": "2. Thời gian đặt lịch",
+          "body": "Khách hàng có thể đặt lịch trước tối thiểu {{minAdvanceMinutes}} phút và tối đa 30 ngày so với thời điểm hiện tại. Mỗi khung giờ cách nhau 30 phút để đảm bảo đủ thời gian phục vụ."
+        },
+        "2": {
+          "subtitle": "3. Check-in và Check-out",
+          "body": "Khách hàng đến chi nhánh đúng giờ hẹn, xuất trình mã lịch hẹn (QR code) để check-in. Sau khi hoàn tất dịch vụ, nhân viên thực hiện check-out và xác nhận hoàn thành."
+        },
+        "3": {
+          "subtitle": "4. Lịch hẹn định kỳ",
+          "body": "Khách hàng có thể đặt lịch định kỳ theo tuần. Hệ thống tự động tạo lịch hẹn mới dựa trên lịch định kỳ đã đăng ký. Khách hàng có thể hủy hoặc điều chỉnh lịch định kỳ bất cứ lúc nào."
+        },
+        "4": {
+          "subtitle": "5. Ưu tiên xếp lịch",
+          "body": "Khách hàng thân thiết ở hạng Bạc, Vàng, Kim cương được ưu tiên xếp lịch trước. Thứ tự ưu tiên dựa trên hạng thành viên và điểm tích lũy."
+        },
+        "title": "Chính sách đặt lịch"
+      },
+      "loyalty": {
+        "0": {
+          "subtitle": "1. Hạng thành viên",
+          "body": "AutoWashPro có 4 hạng thành viên: Đồng (0-99 điểm), Bạc (100-499 điểm), Vàng (500-999 điểm), Kim cương (1.000+ điểm). Điểm tích lũy dựa trên giá trị đơn hàng đã hoàn thành."
+        },
+        "1": {
+          "subtitle": "2. Tích điểm",
+          "body": "Mỗi 10.000đ chi tiêu tương ứng 1 điểm. Điểm được tự động cộng vào tài khoản sau khi lịch hẹn hoàn tất và thanh toán thành công. Điểm có hạn sử dụng 12 tháng kể từ ngày tích lũy."
+        },
+        "2": {
+          "subtitle": "3. Quyền lợi theo hạng",
+          "body": "Khách hàng hạng Bạc được giảm 5% khi mua gói lượt, hạng Vàng giảm 10%, hạng Kim cương giảm 15%. Khách hàng hạng Vàng và Kim cương được ưu tiên xếp lịch và hỗ trợ ưu tiên."
+        },
+        "3": {
+          "subtitle": "4. Đổi quà từ điểm thưởng",
+          "body": "Điểm tích lũy có thể được đổi lấy quà tặng và voucher giảm giá tại mục \"Kho quà & Tích điểm\". Điểm đã đổi không thể hoàn lại hoặc chuyển đổi thành tiền mặt."
+        },
+        "title": "Chính sách khách hàng thân thiết"
+      },
+      "data-protection": {
+        "0": {
+          "subtitle": "1. Nguyên tắc xử lý dữ liệu",
+          "body": "AutoWashPro tuân thủ các nguyên tắc: thu thập dữ liệu tối thiểu (chỉ thu thập dữ liệu cần thiết), minh bạch về mục đích sử dụng, có sự đồng ý rõ ràng từ khách hàng, và đảm bảo tính chính xác của dữ liệu."
+        },
+        "1": {
+          "subtitle": "2. Quyền của khách hàng đối với dữ liệu",
+          "body": "Khách hàng có quyền: truy cập dữ liệu cá nhân, yêu cầu chỉnh sửa dữ liệu không chính xác, yêu cầu xóa dữ liệu (quyền được lãng quên), phản đối xử lý dữ liệu, và yêu cầu xuất dữ liệu."
+        },
+        "2": {
+          "subtitle": "3. Cookie và công nghệ theo dõi",
+          "body": "Hệ thống sử dụng cookie để cải thiện trải nghiệm người dùng và phân tích hành vi. Khách hàng có thể tùy chọn tắt cookie trong cài đặt trình duyệt."
+        },
+        "3": {
+          "subtitle": "4. Biện pháp bảo vệ kỹ thuật",
+          "body": "Dữ liệu được bảo vệ bằng tường lửa, mã hóa SSL/TLS, xác thực đa lớp và kiểm soát truy cập chặt chẽ. Hệ thống được kiểm tra bảo mật định kỳ để phát hiện và khắc phục lỗ hổng."
+        },
+        "title": "Chính sách bảo vệ dữ liệu cá nhân"
+      }
+    },
+    "navbar": {
+      "profile": "Hồ sơ",
+      "logout": "Thoát",
+      "login": "Đăng nhập",
+      "bookingDone": "Dịch vụ hoàn tất!",
+      "bookingDoneDesc": "Đơn đặt lịch của bạn đã hoàn thành. Hệ thống đã tặng bạn {{count}} lượt quay may mắn. Hãy thử vận may ngay!",
+      "bookingDoneDesc1": "Đơn đặt lịch của bạn đã hoàn thành. Hệ thống đã tặng bạn ",
+      "bookingDoneDesc2": ". Hãy thử vận may ngay!",
+      "spinCount": "1 lượt quay may mắn",
+      "goToWheel": "🎯 Tới Vòng Quay May Mắn",
+      "close": "Đóng lại",
+      "timeAgo": {
+        "justNow": "Vừa xong",
+        "minutesAgo": "{{mins}} phút trước",
+        "hoursAgo": "{{hours}} giờ trước",
+        "daysAgo": "{{days}} ngày trước"
+      }
+    }
+  },
+  "admin": {
+    "layout": {
+      "brandTagline": "Bảng điều khiển quản trị",
+      "adminRole": "Quản trị viên",
+      "roleLabel": "Vai trò"
+    },
+    "placeholder": {
+      "featureInDevelopment": "Tính năng đang phát triển",
+      "description": "Màn hình này sẽ được bổ sung chi tiết sau. Bạn có thể tiếp tục điều hướng qua menu bên trái."
+    },
+    "rewardsManagement": {
+      "addButton": "Thêm phần quà",
+      "addFirstButton": "Thêm phần quà đầu tiên",
+      "addSuccess": "Thêm phần quà thành công!",
+      "allStatuses": "Tất cả trạng thái",
+      "branchSender": "Chi nhánh / Người gửi",
+      "confirmReceived": "Xác nhận đã nhận",
+      "confirmSentLabel": "Đã gửi quà",
+      "confirmSentMessage": "Xác nhận bạn đã giao \"{{gift}}\" cho khách hàng? Khách sẽ dùng mã đổi thưởng để nhận quà.",
+      "confirmSentTitle": "Xác nhận đã gửi quà",
+      "customer": "Khách hàng",
+      "deleteConfirmLabel": "Xóa",
+      "deleteFailed": "Xóa thất bại",
+      "deleteMessage": "Bạn có chắc chắn muốn xóa phần quà này?",
+      "deleteSuccess": "Xóa phần quà thành công!",
+      "deleteTitle": "Xóa phần quà",
+      "deleteTooltip": "Xóa",
+      "editTooltip": "Chỉnh sửa",
+      "emptyRedemptions": "Chưa có lượt đổi thưởng nào",
+      "emptyState": "Chưa có phần quà vật lý nào",
+      "enterCodePlaceholder": "Nhập mã của khách",
+      "enterCodeRequired": "Vui lòng nhập mã đổi thưởng của khách",
+      "errorLoadRedemptions": "Không thể tải danh sách đổi thưởng",
+      "errorLoadRewards": "Không thể tải phần quà",
+      "gift": "Quà tặng",
+      "giftNameFallback": "phần quà",
+      "markSentButton": "Đã gửi quà cho khách",
+      "minTier": "Hạng tối thiểu",
+      "nextPage": "Sau",
+      "pageInfo": "Trang {{page}} / {{total}}",
+      "points": "Điểm đổi",
+      "pointsUnit": "điểm",
+      "prevPage": "Trước",
+      "receivedSuccess": "Đã xác nhận khách nhận quà!",
+      "redeemedDate": "Ngày đổi",
+      "saveFailed": "Lưu thất bại",
+      "searchRedemptionsPlaceholder": "Tìm theo mã đổi thưởng hoặc tên quà...",
+      "searchRewardsPlaceholder": "Tìm theo tên phần quà...",
+      "sending": "Đang gửi...",
+      "sentBy": "bởi {{name}}",
+      "sentSuccess": "Đã gửi quà cho khách hàng!",
+      "status": "Trạng thái",
+      "statusActive": "Kích hoạt",
+      "statusCancelled": "Đã hủy",
+      "statusClaimed": "Chờ gửi quà",
+      "statusInactive": "Tắt",
+      "statusReceived": "Khách đã nhận",
+      "statusSent": "Đã gửi cho khách",
+      "stock": "Tồn kho",
+      "updateFailed": "Cập nhật thất bại",
+      "updateSuccess": "Cập nhật phần quà thành công!",
+      "verifyFailed": "Xác nhận thất bại",
+      "verifying": "Đang xác nhận...",
+      "modal": {
+        "addTitle": "Thêm phần quà vật lý mới",
+        "cancel": "Hủy",
+        "descriptionLabel": "Mô tả",
+        "descriptionPlaceholder": "Mô tả ngắn về phần quà...",
+        "editTitle": "Chỉnh sửa phần quà",
+        "errorNameRequired": "Nhập tên phần quà",
+        "errorPointsRequired": "Nhập số điểm (> 0)",
+        "errorStockRequired": "Nhập số lượng tồn kho",
+        "imageUrlLabel": "Ảnh (URL)",
+        "nameLabel": "Tên phần quà",
+        "namePlaceholder": "Nước hoa khử mùi xe",
+        "pointsCostLabel": "Số điểm đổi",
+        "save": "Lưu",
+        "saving": "Đang lưu…",
+        "stockLabel": "Số lượng tồn kho"
+      }
+    }
+  },
+  "manager": {
+    "layout": {
+      "manager": "Quản lý",
+      "branchManager": "Quản lý chi nhánh",
+      "scanQr": "Quét mã QR"
+    },
+    "systemConfig": {
+      "viewModeLabel": "Chế độ xem:",
+      "readOnlyNotice": "Bạn đang xem cấu hình hệ thống (Business Rules). Chỉ Admin mới có quyền thay đổi các thông số này."
+    }
+  },
+  "shared": {
+    "confirm": {
+      "confirm": "Xác nhận",
+      "cancel": "Hủy"
+    },
+    "tierBadge": {
+      "icon": {
+        "circle": "Hình tròn",
+        "medal": "Huy chương",
+        "crown": "Vương miện",
+        "diamond": "Kim cương",
+        "trophy": "Cúp",
+        "star": "Ngôi sao",
+        "sparkle": "Lấp lánh",
+        "shield": "Khiên",
+        "shieldStar": "Khiên sao",
+        "medalMilitary": "Huân chương",
+        "flame": "Ngọn lửa",
+        "lightning": "Tia chớp",
+        "gift": "Quà tặng",
+        "coin": "Đồng xu",
+        "heart": "Trái tim",
+        "rocket": "Tên lửa",
+        "sun": "Mặt trời",
+        "sealCheck": "Tem xác nhận",
+        "magicWand": "Đũa thần",
+        "fire": "Lửa",
+        "checkCircle": "Đúng (khoanh tròn)"
+      },
+      "color": {
+        "bronze": "Đồng",
+        "silver": "Bạc",
+        "gold": "Vàng",
+        "diamond": "Kim cương",
+        "purple": "Tím",
+        "rose": "Hồng",
+        "emerald": "Ngọc lục bảo",
+        "indigo": "Chàm"
+      },
+      "tier": {
+        "bronze": "Hạng Đồng",
+        "silver": "Hạng Bạc",
+        "gold": "Hạng Vàng",
+        "diamond": "Hạng Kim cương",
+        "member": "Thành viên"
+      }
+    },
+    "chatbot": {
+      "error": "Không thể kết nối chatbot. Vui lòng thử lại sau.",
+      "fallback": "Xin lỗi, tôi chưa hiểu câu hỏi của bạn. Bạn có thể hỏi lại theo cách khác được không?"
+    },
+    "languageSwitcher": {
+      "switchToEn": "Chuyển sang Tiếng Anh (English)",
+      "switchToVi": "Switch to Vietnamese (Tiếng Việt)",
+      "switchToEnShort": "Chuyển sang Tiếng Anh",
+      "switchToViShort": "Switch to Vietnamese"
+    }
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "booking": "Đặt lịch",
+    "gifts": "Quà tặng",
+    "stores": "Cửa hàng"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "mark_all_read": "Đánh dấu đã đọc tất cả",
+    "all": "Tất cả",
+    "unread": "Chưa đọc",
+    "empty": "Không có thông báo nào",
+    "view_all": "Xem tất cả thông báo"
+  },
+  "sidebar": {
+    "expand": "Mở rộng sidebar",
+    "collapse": "Thu gọn sidebar",
+    "logout": "Đăng xuất",
+    "new_items": "mục mới",
+    "mainMenu": "Menu chính"
+  }
 }

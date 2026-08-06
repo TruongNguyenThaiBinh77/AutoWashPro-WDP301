@@ -16,7 +16,7 @@ import { getApiBaseUrl } from '@/lib/authStorage';
 import { useTranslation } from 'react-i18next';
 
 export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, onGoogleLoginSuccess }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'common']);
   const location = useLocation();
   const [authMode, setAuthMode] = useState('login');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -40,8 +40,8 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
   async function handleLogin(event) {
     if (event) event.preventDefault();
     setLoginLoading(true); setAuthError(''); setStatusMessage('');
-    try { await onLogin(loginPhone, loginPass); setStatusMessage('Đăng nhập thành công.'); }
-    catch (error) { setAuthError(error.message || 'Đăng nhập thất bại'); }
+    try { await onLogin(loginPhone, loginPass); setStatusMessage(t('messages.login_success')); }
+    catch (error) { setAuthError(error.message || t('messages.login_failed')); }
     finally { setLoginLoading(false); }
   }
 
@@ -50,8 +50,8 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
     setRegisterLoading(true); setAuthError(''); setStatusMessage('');
     try {
       await onRegister({ name: regName.trim(), email: regEmail, password: regPass });
-      setStatusMessage('Đăng ký thành công, đang mở luồng đặt lịch.');
-    } catch (error) { setAuthError(error.message || 'Đăng ký thất bại'); }
+      setStatusMessage(t('messages.register_success'));
+    } catch (error) { setAuthError(error.message || t('messages.register_failed')); }
     finally { setRegisterLoading(false); }
   }
 
@@ -65,14 +65,14 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
         body: JSON.stringify({ idToken: credentialResponse.credential })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Đăng nhập Google thất bại');
+      if (!res.ok) throw new Error(data.message || t('messages.google_login_failed'));
       
-      setStatusMessage('Đăng nhập bằng Google thành công.');
+      setStatusMessage(t('messages.google_login_success'));
       if (onGoogleLoginSuccess) {
         onGoogleLoginSuccess(data.data.accessToken, data.data.refreshToken);
       }
     } catch (error) {
-      setAuthError(error.message || 'Đăng nhập Google thất bại');
+      setAuthError(error.message || t('messages.google_login_failed'));
     } finally {
       setLoginLoading(false);
     }
@@ -88,8 +88,8 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
         body: JSON.stringify({ email: forgotEmail })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Lỗi gửi yêu cầu');
-      setStatusMessage('Mã OTP đã được gửi đến email của bạn.');
+      if (!res.ok) throw new Error(data.message || t('messages.forgot_failed'));
+      setStatusMessage(t('messages.send_otp_success'));
       setForgotStep(2);
     } catch (error) { setAuthError(error.message); }
     finally { setForgotLoading(false); }
@@ -105,8 +105,8 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
         body: JSON.stringify({ email: forgotEmail, otp: forgotOtp })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'OTP không hợp lệ');
-      setStatusMessage('Mã OTP hợp lệ. Vui lòng nhập mật khẩu mới.');
+      if (!res.ok) throw new Error(data.message || t('messages.otp_invalid'));
+      setStatusMessage(t('messages.otp_valid'));
       setForgotStep(3);
     } catch (error) { setAuthError(error.message); }
     finally { setForgotLoading(false); }
@@ -122,8 +122,8 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
         body: JSON.stringify({ email: forgotEmail, otp: forgotOtp, newPassword })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Lỗi đổi mật khẩu');
-      setStatusMessage('Đổi mật khẩu thành công. Vui lòng đăng nhập.');
+      if (!res.ok) throw new Error(data.message || t('messages.reset_password_failed'));
+      setStatusMessage(t('messages.reset_password_success'));
       setAuthMode('login');
       setForgotStep(1);
       setForgotEmail('');
@@ -138,7 +138,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
       <div className="flex min-h-screen items-center justify-center bg-slate-100">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-500" />
-          <p className="text-sm font-semibold text-slate-500">Đang kiểm tra phiên đăng nhập...</p>
+          <p className="text-sm font-semibold text-slate-500">{t('messages.checking_session')}</p>
         </div>
       </div>
     );
@@ -180,24 +180,24 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
           {/* Hero text */}
           <div className="my-auto">
             <h2 className="text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-slate-800">
-              Dịch vụ chăm sóc <br />
-              xe <br />
-              <span className="text-emerald-600">đẳng cấp mới.</span>
+              {t('hero.tagline1')} <br />
+              {t('hero.car')} <br />
+              <span className="text-emerald-600">{t('hero.tagline2')}</span>
             </h2>
             <p className="mt-4 text-sm text-slate-600 leading-relaxed max-w-md">
-              Hệ thống quản lý thông minh giúp bạn đặt lịch và theo dõi quá trình chăm sóc xế yêu dễ dàng hơn bao giờ hết.
+              {t('hero.description')}
             </p>
 
             {/* Stats */}
             <div className="flex items-center gap-8 mt-6">
               <div>
                 <div className="text-2xl font-black text-emerald-600">5,000+</div>
-                <div className="text-xs text-slate-500 font-semibold mt-1">Khách hàng tin tưởng</div>
+                <div className="text-xs text-slate-500 font-semibold mt-1">{t('hero.trusted')}</div>
               </div>
               <div className="h-10 w-px bg-slate-300" />
               <div>
                 <div className="text-2xl font-black text-emerald-600">15+</div>
-                <div className="text-xs text-slate-500 font-semibold mt-1">Trung tâm toàn quốc</div>
+                <div className="text-xs text-slate-500 font-semibold mt-1">{t('hero.branches')}</div>
               </div>
             </div>
           </div>
@@ -233,15 +233,15 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                {t('common.back')}
+                {t('back')}
               </button>
             )}
 
             <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-              {authMode === 'forgot' ? t('auth.forgot_title') : authMode === 'login' ? t('auth.login_title') : t('auth.register_title')}
+              {authMode === 'forgot' ? t('forgot.title') : authMode === 'login' ? t('login.title') : t('register.title')}
             </h2>
             <p className="mt-2 text-sm text-slate-400">
-              {authMode === 'login' ? t('auth.login_now') : authMode === 'register' ? t('auth.register_now') : t('auth.forgot_title')}
+              {authMode === 'login' ? t('register.login_now') : authMode === 'register' ? t('login.register_now') : t('forgot.title')}
             </p>
 
             {/* Toggle Tabs */}
@@ -257,7 +257,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   )}
                   onClick={() => { setAuthMode('login'); setAuthError(''); setStatusMessage(''); }}
                 >
-                  {t('auth.login_btn')}
+                  {t('login.button')}
                 </button>
                 <button
                   type="button"
@@ -269,7 +269,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   )}
                   onClick={() => { setAuthMode('register'); setAuthError(''); setStatusMessage(''); }}
                 >
-                  {t('auth.register_btn')}
+                  {t('register.button')}
                 </button>
               </div>
             )}
@@ -288,7 +288,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="login-phone" className="text-xs font-bold text-slate-600">
-                    Email hoặc Số điện thoại
+                    {t('fields.identifier')}
                   </Label>
                   <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                     <div className="w-6 h-6 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500 text-xs font-bold mr-3 select-none">
@@ -308,7 +308,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
 
                 <div className="space-y-1.5">
                   <Label htmlFor="login-pass" className="text-xs font-bold text-slate-600">
-                    Mật khẩu
+                    {t('fields.password')}
                   </Label>
                   <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                     <LockKey size={18} className="text-slate-400 mr-3" />
@@ -337,14 +337,14 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                       type="checkbox"
                       className="rounded-md border-slate-200 text-emerald-600 focus:ring-emerald-500/30 w-4 h-4 bg-slate-50"
                     />
-                    <span className="font-semibold text-slate-500">Ghi nhớ tôi</span>
+                    <span className="font-semibold text-slate-500">{t('remember_me')}</span>
                   </label>
                   <a
                     href="#"
                     onClick={(e) => { e.preventDefault(); setAuthMode('forgot'); setAuthError(''); setStatusMessage(''); setForgotStep(1); }}
                     className="text-xs md:text-sm font-bold text-emerald-600 hover:text-emerald-500 transition-colors"
                   >
-                    Quên mật khẩu?
+                    {t('forgot_password_btn')}
                   </a>
                 </div>
 
@@ -353,7 +353,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   disabled={loginLoading}
                   className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl py-3 px-6 shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
                 >
-                  {loginLoading ? 'ĐANG ĐĂNG NHẬP...' : 'TIẾP TỤC'}
+                  {loginLoading ? t('login_loading') : t('login_continue')}
                   {!loginLoading && <ArrowRight size={18} weight="bold" />}
                 </button>
               </form>
@@ -361,7 +361,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-name" className="text-xs font-bold text-slate-600">
-                    Họ và tên
+                    {t('fields.name')}
                   </Label>
                   <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                     <div className="w-6 h-6 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500 text-xs font-bold mr-3 select-none">
@@ -370,7 +370,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                     <input
                       id="reg-name"
                       type="text"
-                      placeholder="Nguyễn Văn A"
+                      placeholder={t('fields.name_placeholder')}
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
                       className="bg-transparent border-none outline-none w-full text-slate-800 text-sm placeholder:text-slate-400 focus:ring-0 focus:outline-none"
@@ -380,7 +380,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
 
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-email" className="text-xs font-bold text-slate-600">
-                    Email
+                    {t('fields.email')}
                   </Label>
                   <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                     <div className="w-6 h-6 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500 text-xs font-bold mr-3 select-none">
@@ -399,7 +399,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
 
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-pass" className="text-xs font-bold text-slate-600">
-                    Mật khẩu
+                    {t('fields.password')}
                   </Label>
                   <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                     <LockKey size={18} className="text-slate-400 mr-3" />
@@ -426,7 +426,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   disabled={registerLoading}
                   className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl py-3 px-6 shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
                 >
-                  {registerLoading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG KÝ'}
+                  {registerLoading ? t('register_loading') : t('register_btn2')}
                   {!registerLoading && <ArrowRight size={18} weight="bold" />}
                 </button>
               </form>
@@ -436,7 +436,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   <form onSubmit={handleForgotPassword} className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="forgot-email" className="text-xs font-bold text-slate-600">
-                        Email đã đăng ký
+                        {t('email_registered')}
                       </Label>
                       <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                         <div className="w-6 h-6 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500 text-xs font-bold mr-3 select-none">
@@ -458,7 +458,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                       disabled={forgotLoading}
                       className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl py-3 px-6 shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
                     >
-                      {forgotLoading ? 'ĐANG GỬI...' : 'GỬI MÃ OTP'}
+                      {forgotLoading ? t('forgot_sending') : t('forgot_send_btn')}
                       {!forgotLoading && <ArrowRight size={18} weight="bold" />}
                     </button>
                   </form>
@@ -468,14 +468,14 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   <form onSubmit={handleVerifyOtp} className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="forgot-otp" className="text-xs font-bold text-slate-600">
-                        Mã xác nhận (OTP)
+                        {t('otp_label')}
                       </Label>
                       <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                         <LockKey size={18} className="text-slate-400 mr-3" />
                         <input
                           id="forgot-otp"
                           type="text"
-                          placeholder="Nhập 6 số OTP"
+                          placeholder={t('otp_placeholder')}
                           value={forgotOtp}
                           onChange={(e) => setForgotOtp(e.target.value)}
                           className="bg-transparent border-none outline-none w-full text-slate-800 text-sm placeholder:text-slate-400 focus:ring-0 focus:outline-none"
@@ -488,7 +488,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                       disabled={forgotLoading}
                       className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl py-3 px-6 shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
                     >
-                      {forgotLoading ? 'ĐANG XÁC NHẬN...' : 'XÁC NHẬN OTP'}
+                      {forgotLoading ? t('forgot_verifying') : t('verify_otp_btn')}
                       {!forgotLoading && <ArrowRight size={18} weight="bold" />}
                     </button>
                   </form>
@@ -498,14 +498,14 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   <form onSubmit={handleResetPassword} className="space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="new-password" className="text-xs font-bold text-slate-600">
-                        Mật khẩu mới
+                        {t('new_password')}
                       </Label>
                       <div className="relative flex items-center bg-slate-100/70 border border-transparent rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:bg-white focus-within:border-emerald-500/20 transition-all duration-300">
                         <LockKey size={18} className="text-slate-400 mr-3" />
                         <input
                           id="new-password"
                           type={showNewPassword ? 'text' : 'password'}
-                          placeholder="Tạo mật khẩu mới"
+                          placeholder={t('new_password_placeholder')}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           className="bg-transparent border-none outline-none w-full text-slate-800 text-sm placeholder:text-slate-400 focus:ring-0 focus:outline-none"
@@ -525,7 +525,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                       disabled={forgotLoading}
                       className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl py-3 px-6 shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-60"
                     >
-                      {forgotLoading ? 'ĐANG LƯU...' : 'ĐỔI MẬT KHẨU'}
+                      {forgotLoading ? t('forgot_saving') : t('change_password_btn')}
                       {!forgotLoading && <ArrowRight size={18} weight="bold" />}
                     </button>
                   </form>
@@ -537,7 +537,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                     onClick={(e) => { e.preventDefault(); setAuthMode('login'); setAuthError(''); setStatusMessage(''); }}
                     className="text-xs md:text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
                   >
-                    Quay lại đăng nhập
+                    {t('back_to_login')}
                   </a>
                 </div>
               </div>
@@ -547,7 +547,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
               <>
                 <div className="mt-5 flex items-center justify-center">
                   <div className="h-px bg-slate-200 flex-1"></div>
-                  <span className="px-4 text-xs font-semibold text-slate-400">HOẶC</span>
+                  <span className="px-4 text-xs font-semibold text-slate-400">{t('or_divider')}</span>
                   <div className="h-px bg-slate-200 flex-1"></div>
                 </div>
 
@@ -556,7 +556,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={() => {
-                        setAuthError('Đăng nhập Google không thành công');
+                        setAuthError(t('messages.google_login_failed'));
                       }}
                       theme="outline"
                       size="large"
@@ -570,13 +570,13 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
             {/* Footer links */}
             <div className="flex items-center justify-center gap-8 mt-5 text-xs font-bold text-slate-400">
               <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-slate-600 transition-colors">
-                Trợ giúp
+                {t('help')}
               </a>
               <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-slate-600 transition-colors">
-                Điều khoản
+                {t('terms')}
               </a>
               <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-slate-600 transition-colors">
-                Bảo mật
+                {t('privacy')}
               </a>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import {
   ArrowClockwise,
@@ -41,12 +42,12 @@ async function apiFetch(path, options = {}) {
   });
 }
 
-async function readError(res) {
+async function readError(res, t) {
   try {
     const j = await res.json();
-    return j?.message || j?.error || `Lỗi ${res.status}`;
+    return j?.message || j?.error || t('admin.branches.error.http', { status: res.status });
   } catch {
-    return `Lỗi ${res.status}`;
+    return t('admin.branches.error.http', { status: res.status });
   }
 }
 
@@ -71,6 +72,7 @@ function Spinner({ size = 18, className = '' }) {
 
 /* ─────────────────────────── Status badge ────────────────────────── */
 function StatusBadge({ status }) {
+  const { t } = useTranslation();
   const active = status === 'active';
   return (
     <span
@@ -83,7 +85,7 @@ function StatusBadge({ status }) {
       {active
         ? <CheckCircle size={11} weight="fill" />
         : <XCircle size={11} weight="fill" />}
-      {active ? 'Hoạt động' : 'Ngừng'}
+      {active ? t('admin.branches.status.active') : t('admin.branches.status.inactive')}
     </span>
   );
 }
@@ -184,6 +186,7 @@ const inp =
   'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors';
 
 function BranchForm({ initial, onSave, onCancel, saving }) {
+  const { t } = useTranslation();
   const initialManagerId =
     typeof initial?.managerId === 'object' && initial?.managerId !== null
       ? initial.managerId._id || initial.managerId.id || ''
@@ -225,9 +228,9 @@ function BranchForm({ initial, onSave, onCancel, saving }) {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = 'Vui lòng nhập tên chi nhánh';
-    if (!form.address.trim()) e.address = 'Vui lòng nhập địa chỉ';
-    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email không hợp lệ';
+    if (!form.name.trim()) e.name = t('admin.branches.form.errors.name');
+    if (!form.address.trim()) e.address = t('admin.branches.form.errors.address');
+    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) e.email = t('admin.branches.form.errors.email');
     return e;
   };
 
@@ -245,70 +248,70 @@ function BranchForm({ initial, onSave, onCancel, saving }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Tên chi nhánh" required error={errors.name}>
+        <Field label={t('admin.branches.form.name')} required error={errors.name}>
           <input id="f-name" className={inp} value={form.name}
-            onChange={(e) => set('name', e.target.value)} placeholder="Chi nhánh Quận 1" />
+            onChange={(e) => set('name', e.target.value)} placeholder={t('admin.branches.form.placeholders.name')} />
         </Field>
-        <Field label="Số điện thoại" error={errors.phone}>
+        <Field label={t('admin.branches.form.phone')} error={errors.phone}>
           <input id="f-phone" className={inp} value={form.phone}
             onChange={(e) => set('phone', e.target.value)} placeholder="028 1234 5678" />
         </Field>
       </div>
 
-      <Field label="Địa chỉ" required error={errors.address}>
+      <Field label={t('admin.branches.form.address')} required error={errors.address}>
         <input id="f-addr" className={inp} value={form.address}
-          onChange={(e) => set('address', e.target.value)} placeholder="123 Nguyễn Huệ, Quận 1, TP.HCM" />
+          onChange={(e) => set('address', e.target.value)} placeholder={t('admin.branches.form.placeholders.address')} />
       </Field>
 
-      <Field label="Email" error={errors.email}>
+      <Field label={t('admin.branches.form.email')} error={errors.email}>
         <input id="f-email" type="email" className={inp} value={form.email}
           onChange={(e) => set('email', e.target.value)} placeholder="chinhanh@autowashpro.com" />
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Giờ mở cửa" error={errors.openingTime}>
+        <Field label={t('admin.branches.form.openingTime')} error={errors.openingTime}>
           <input id="f-open" type="time" className={inp} value={form.openingTime}
             onChange={(e) => set('openingTime', e.target.value)} />
         </Field>
-        <Field label="Giờ đóng cửa" error={errors.closingTime}>
+        <Field label={t('admin.branches.form.closingTime')} error={errors.closingTime}>
           <input id="f-close" type="time" className={inp} value={form.closingTime}
             onChange={(e) => set('closingTime', e.target.value)} />
         </Field>
       </div>
 
-      <Field label="URL ảnh đại diện" error={errors.image}>
+      <Field label={t('admin.branches.form.imageUrl')} error={errors.image}>
         <input id="f-img" className={inp} value={form.image}
           onChange={(e) => set('image', e.target.value)} placeholder="https://..." />
       </Field>
 
-      <Field label="Trạng thái" error={errors.status}>
+      <Field label={t('admin.branches.form.status')} error={errors.status}>
         <select id="f-status" className={inp} value={form.status}
           onChange={(e) => set('status', e.target.value)}>
-          <option value="active">Hoạt động</option>
-          <option value="inactive">Ngừng hoạt động</option>
+          <option value="active">{t('admin.branches.status.active')}</option>
+          <option value="inactive">{t('admin.branches.status.inactiveFull')}</option>
         </select>
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Tọa độ X (svgCx)" error={errors.svgCx}>
+        <Field label={t('admin.branches.form.svgX')} error={errors.svgCx}>
           <input id="f-svgCx" type="number" className={inp} value={form.svgCx}
-            onChange={(e) => set('svgCx', e.target.value)} placeholder="VD: 236" />
+            onChange={(e) => set('svgCx', e.target.value)} placeholder={t('admin.branches.form.placeholders.svgX')} />
         </Field>
-        <Field label="Tọa độ Y (svgCy)" error={errors.svgCy}>
+        <Field label={t('admin.branches.form.svgY')} error={errors.svgCy}>
           <input id="f-svgCy" type="number" className={inp} value={form.svgCy}
-            onChange={(e) => set('svgCy', e.target.value)} placeholder="VD: 684" />
+            onChange={(e) => set('svgCy', e.target.value)} placeholder={t('admin.branches.form.placeholders.svgY')} />
         </Field>
       </div>
 
       <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
         <button type="button" onClick={onCancel} disabled={saving}
           className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-          Hủy
+          {t('admin.branches.common.cancel')}
         </button>
         <button type="submit" id="branch-submit" disabled={saving}
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors">
           {saving && <Spinner size={14} className="text-white" />}
-          {saving ? 'Đang lưu…' : 'Lưu'}
+          {saving ? t('admin.branches.common.saving') : t('admin.branches.common.save')}
         </button>
       </div>
     </form>
@@ -339,10 +342,11 @@ function parseBlockedMessage(msg = '') {
 }
 
 function BlockDeleteModal({ title, message, onClose, onDeactivate, deactivating }) {
+  const { t } = useTranslation();
   const { header, items, footer } = useMemo(() => parseBlockedMessage(message), [message]);
 
   return (
-    <Modal title={title || "Không thể xóa"} onClose={onClose}>
+    <Modal title={title || t('admin.branches.modal.cannotDelete')} onClose={onClose}>
       <div className="space-y-4 py-1">
         {/* Header Warning Banner */}
         <div className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200/70">
@@ -350,7 +354,7 @@ function BlockDeleteModal({ title, message, onClose, onDeactivate, deactivating 
             <Warning size={20} weight="fill" />
           </div>
           <div className="space-y-1 min-w-0 flex-1">
-            <h4 className="text-sm font-bold text-amber-900">Bảo vệ liên kết dữ liệu hệ thống</h4>
+            <h4 className="text-sm font-bold text-amber-900">{t('admin.branches.modal.blockedBanner')}</h4>
             <p className="text-xs text-amber-800 leading-relaxed font-medium">{header}</p>
           </div>
         </div>
@@ -359,7 +363,7 @@ function BlockDeleteModal({ title, message, onClose, onDeactivate, deactivating 
         {items.length > 0 && (
           <div className="space-y-2">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-              Các dữ liệu đang liên kết hoạt động:
+              {t('admin.branches.modal.blockedListTitle')}
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {items.map((it, idx) => (
@@ -390,7 +394,7 @@ function BlockDeleteModal({ title, message, onClose, onDeactivate, deactivating 
             onClick={onClose}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
           >
-            Đóng
+            {t('admin.branches.common.close')}
           </button>
           {onDeactivate && (
             <button
@@ -399,7 +403,7 @@ function BlockDeleteModal({ title, message, onClose, onDeactivate, deactivating 
               disabled={deactivating}
               className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4.5 py-2 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-60 transition-colors shadow-xs"
             >
-              {deactivating ? 'Đang xử lý…' : 'Chuyển sang "Ngừng hoạt động"'}
+              {deactivating ? t('admin.branches.common.processing') : t('admin.branches.modal.deactivate')}
             </button>
           )}
         </div>
@@ -410,27 +414,28 @@ function BlockDeleteModal({ title, message, onClose, onDeactivate, deactivating 
 
 /* ─────────────────────────── Confirm delete ─────────────────────── */
 function ConfirmDelete({ branch, onConfirm, onCancel, deleting }) {
+  const { t } = useTranslation();
   return (
-    <Modal title="Xác nhận xóa chi nhánh" onClose={onCancel}>
+    <Modal title={t('admin.branches.confirm.deleteTitle')} onClose={onCancel}>
       <div className="space-y-4">
         <div className="flex gap-3 rounded-xl bg-red-50 p-4 ring-1 ring-red-100">
           <Warning size={18} weight="fill" className="mt-0.5 shrink-0 text-red-500" />
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-red-700">Bạn chắc chắn muốn xóa chi nhánh "{branch.name}"?</p>
+            <p className="text-sm font-semibold text-red-700">{t('admin.branches.confirm.deleteQuestion', { name: branch.name })}</p>
             <p className="text-xs text-red-600 leading-relaxed">
-              Lưu ý: Nếu chi nhánh đang có lịch đặt chưa hoàn thành hoặc gói lượt còn hiệu lực của khách hàng, hệ thống sẽ bảo vệ dữ liệu và không cho phép xóa. Tất cả các gói dịch vụ và voucher riêng của chi nhánh này cũng sẽ tự động được dọn dẹp khi xóa.
+              {t('admin.branches.confirm.deleteWarning')}
             </p>
           </div>
         </div>
         <div className="flex justify-end gap-2">
           <button onClick={onCancel} disabled={deleting}
             className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-            Hủy
+            {t('admin.branches.common.cancel')}
           </button>
           <button id="confirm-delete-btn" onClick={onConfirm} disabled={deleting}
             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60 transition-colors">
             {deleting && <Spinner size={14} className="text-white" />}
-            {deleting ? 'Đang xóa…' : 'Xóa chi nhánh'}
+            {deleting ? t('admin.branches.confirm.deleting') : t('admin.branches.confirm.delete')}
           </button>
         </div>
       </div>
@@ -440,6 +445,7 @@ function ConfirmDelete({ branch, onConfirm, onCancel, deleting }) {
 
 /* ─────────────────────────── Assign Manager Modal ─────────────────────────── */
 function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving }) {
+  const { t } = useTranslation();
   const [managers, setManagers] = useState([]);
   const [branchesList, setBranchesList] = useState(allBranches);
   const [loading, setLoading] = useState(true);
@@ -522,7 +528,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
 
     // Strict validation 1: Search typed but no results matched
     if (isSearchEmptyResult) {
-      setFormError(`Không tìm thấy quản lý nào khớp với từ khóa "${search}". Vui lòng xóa từ khóa tìm kiếm hoặc chọn quản lý khả dụng.`);
+      setFormError(t('admin.branches.assign.errors.noResult', { keyword: search }));
       return;
     }
 
@@ -530,18 +536,18 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
     if (selectedMgrId !== '') {
       const isVisible = filteredManagers.some((m) => String(m._id) === String(selectedMgrId));
       if (search.trim() !== '' && !isVisible) {
-        setFormError(`Quản lý đã chọn trước đó không khớp với từ khóa tìm kiếm "${search}". Vui lòng chọn một quản lý từ kết quả hiển thị bên dưới.`);
+        setFormError(t('admin.branches.assign.errors.selectedNotMatch', { keyword: search }));
         return;
       }
 
       const targetMgr = managers.find((m) => String(m._id) === String(selectedMgrId));
       if (!targetMgr) {
-        setFormError('Vui lòng chọn một quản lý hợp lệ từ danh sách hiển thị bên dưới.');
+        setFormError(t('admin.branches.assign.errors.invalid'));
         return;
       }
       const assignedBranch = managerAssignmentMap[selectedMgrId];
       if (assignedBranch && String(assignedBranch._id) !== String(branch._id)) {
-        setFormError(`Quản lý "${targetMgr.name}" đã được phân công cho chi nhánh "${assignedBranch.name}". Vui lòng chọn quản lý chưa có chi nhánh.`);
+        setFormError(t('admin.branches.assign.errors.alreadyAssigned', { manager: targetMgr.name, branch: assignedBranch.name }));
         return;
       }
     }
@@ -550,7 +556,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
   };
 
   return (
-    <Modal title={`Phân công quản lý: ${branch.name}`} onClose={onClose}>
+    <Modal title={t('admin.branches.assign.title', { name: branch.name })} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Error notification */}
         {formError && (
@@ -566,7 +572,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
           <input
             type="text"
             className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
-            placeholder="Tìm theo tên hoặc email quản lý..."
+            placeholder={t('admin.branches.assign.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -577,8 +583,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
 
         {/* Manager Options List */}
         <div className="max-h-72 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
-          {/* Option: Unassign / Bỏ phân công */}
-          <div
+          {/* Option: Unassign */}          <div
             onClick={() => handleSelect('', false)}
             className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
               selectedMgrId === ''
@@ -591,8 +596,8 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
                 🚫
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-700">Chưa phân công quản lý</p>
-                <p className="text-[11px] text-slate-400">Để trống người quản lý chi nhánh này</p>
+                <p className="text-xs font-bold text-slate-700">{t('admin.branches.assign.unassigned')}</p>
+                <p className="text-[11px] text-slate-400">{t('admin.branches.assign.unassignedHint')}</p>
               </div>
             </div>
             <input
@@ -607,11 +612,11 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
           {loading ? (
             <div className="flex items-center justify-center py-8 text-slate-400 gap-2">
               <Spinner size={18} />
-              <span className="text-xs">Đang tải danh sách quản lý...</span>
+              <span className="text-xs">{t('admin.branches.assign.loading')}</span>
             </div>
           ) : filteredManagers.length === 0 ? (
             <div className="py-8 text-center text-xs text-slate-400">
-              Không tìm thấy quản lý nào khớp với "{search}"
+              {t('admin.branches.assign.noManagers', { keyword: search })}
             </div>
           ) : (
             filteredManagers.map((m) => {
@@ -647,15 +652,15 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
                         <p className="text-xs font-bold text-slate-800 truncate">{m.name}</p>
                         {isOtherBranch ? (
                           <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                            📍 Đã quản lý: {assignedBranch.name}
+                            📍 {t('admin.branches.assign.managingOther', { branch: assignedBranch.name })}
                           </span>
                         ) : isCurrentBranch ? (
                           <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                            ✓ Đang quản lý chi nhánh này
+                            ✓ {t('admin.branches.assign.managingCurrent')}
                           </span>
                         ) : (
                           <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            ✨ Khả dụng (Chưa có chi nhánh)
+                            ✨ {t('admin.branches.assign.available')}
                           </span>
                         )}
                       </div>
@@ -687,7 +692,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
             disabled={saving}
             className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
           >
-            Hủy
+            {t('admin.branches.common.cancel')}
           </button>
           <button
             type="submit"
@@ -695,7 +700,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-xs"
           >
             {saving && <Spinner size={14} className="text-white" />}
-            {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
+            {saving ? t('admin.branches.common.saving') : t('admin.branches.assign.saveChanges')}
           </button>
         </div>
       </form>
@@ -705,6 +710,7 @@ function AssignManagerModal({ branch, allBranches = [], onClose, onSave, saving 
 
 /* ─────────────────────────── Detail View ─────────────────────────── */
 function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
+  const { t } = useTranslation();
   const [packages, setPackages] = useState([]);
   const [pkgLoading, setPkgLoading] = useState(true);
   const [pkgSearch, setPkgSearch] = useState('');
@@ -732,7 +738,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
         method: 'PUT',
         body: JSON.stringify({ packageSortOrder: newSortOrder }),
       });
-      if (!res.ok) throw new Error(await readError(res));
+      if (!res.ok) throw new Error(await readError(res, t));
 
       setPackages((prev) => {
         const list = [...prev];
@@ -746,10 +752,10 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
         return list;
       });
 
-      const label = newSortOrder === 'price_asc' ? 'Giá thấp → cao' : newSortOrder === 'price_desc' ? 'Giá cao → thấp' : 'Lượt đặt nhiều nhất';
-      notify(`Đã đổi kiểu sắp xếp gói: ${label}`);
+      const label = newSortOrder === 'price_asc' ? t('admin.branches.detail.sort.labelPriceAsc') : newSortOrder === 'price_desc' ? t('admin.branches.detail.sort.labelPriceDesc') : t('admin.branches.detail.sort.labelMostBooked');
+      notify(t('admin.branches.detail.notify.sortChanged', { label }));
     } catch (err) {
-      notify(err.message || 'Lỗi cập nhật kiểu sắp xếp', 'error');
+      notify(err.message || t('admin.branches.detail.notify.sortError'), 'error');
     }
   };
 
@@ -790,15 +796,15 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
     setPkgSaving(true);
     try {
       const res = await apiFetch(`/packages/${pkgSelected._id}`, { method: 'PUT', body: JSON.stringify(data) });
-      if (!res.ok) throw new Error(await readError(res));
+      if (!res.ok) throw new Error(await readError(res, t));
       const payload = await res.json();
       const updated = payload?.data ?? payload;
       setPackages((p) => p.map((b) => (b._id === updated._id ? updated : b)));
       setPkgModal(null);
       setPkgSelected(null);
-      notify('Cập nhật gói thành công!');
+      notify(t('admin.branches.detail.notify.pkgUpdated'));
     } catch (err) {
-      notify(err.message || 'Cập nhật thất bại', 'error');
+      notify(err.message || t('admin.branches.detail.notify.updateFailed'), 'error');
     } finally { setPkgSaving(false); }
   };
 
@@ -812,22 +818,22 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
       const res = await apiFetch(url, { method: 'DELETE' });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        const errMsg = payload.message || payload.error || 'Xóa gói thất bại';
+        const errMsg = payload.message || payload.error || t('admin.branches.detail.notify.deleteFailed');
         setPkgDeleteError(errMsg);
         return;
       }
       if (isHard) {
         setPackages((p) => p.filter((b) => b._id !== pkgSelected._id));
-        notify('Đã xóa cứng gói dịch vụ khỏi hệ thống!');
+        notify(t('admin.branches.detail.notify.hardDeleted'));
       } else {
         setPackages((p) => p.map((b) => (b._id === pkgSelected._id ? { ...b, status: 'inactive', isDeleted: true } : b)));
-        notify('Đã xóa mềm gói dịch vụ (chuyển sang Ngừng hoạt động).');
+        notify(t('admin.branches.detail.notify.softDeleted'));
       }
       setPkgModal(null);
       setPkgSelected(null);
       setPkgDeleteError('');
     } catch (err) {
-      setPkgDeleteError(err.message || 'Xóa gói thất bại');
+      setPkgDeleteError(err.message || t('admin.branches.detail.notify.deleteFailed'));
     } finally { setPkgDeleting(false); }
   };
 
@@ -852,7 +858,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
           className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold !text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm transition-colors"
         >
           <CaretLeft size={16} weight="bold" />
-          Quay lại danh sách
+          {t('admin.branches.detail.backToList')}
         </button>
 
         <div className="flex gap-2">
@@ -860,11 +866,11 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
             onClick={() => onEdit(branch)}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold !text-blue-700 hover:bg-blue-100 transition-colors"
           >
-            <PencilSimple size={16} /> Sửa
+            <PencilSimple size={16} /> {t('admin.branches.detail.edit')}
           </button>
           <button onClick={() => setPkgModal('create')}
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold !text-emerald-700 hover:bg-emerald-100 transition-colors">
-            <Plus size={16} weight="bold" /> Thêm gói
+            <Plus size={16} weight="bold" /> {t('admin.branches.detail.addPackage')}
           </button>
         </div>
       </div>
@@ -877,7 +883,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
             className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-50 text-blue-500 overflow-hidden shadow-xs shrink-0 transition-all ${
               branch.image ? 'cursor-pointer group ring-2 ring-blue-100 hover:ring-blue-500 hover:shadow-md' : ''
             }`}
-            title={branch.image ? 'Click để xem ảnh lớn' : undefined}
+            title={branch.image ? t('admin.branches.detail.viewLargeImage') : undefined}
           >
             {branch.image ? (
               <>
@@ -900,7 +906,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                 onClick={() => setZoomImage(branch.image)}
                 className="mt-1 text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                <MagnifyingGlassPlus size={13} weight="bold" /> Xem ảnh phóng to
+                <MagnifyingGlassPlus size={13} weight="bold" /> {t('admin.branches.detail.zoomImage')}
               </button>
             )}
           </div>
@@ -916,16 +922,16 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100/90 px-2.5 py-0.5 rounded-md">
-                    Quản lý chi nhánh
+                    {t('admin.branches.detail.managerBadge')}
                   </span>
                   {mgr && (
                     <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-md">
-                      ✓ Hoạt động
+                      ✓ {t('admin.branches.detail.managerActive')}
                     </span>
                   )}
                 </div>
                 <h4 className="text-lg font-bold text-slate-800">
-                  {mgr ? mgr.name : <span className="text-slate-400 italic">Chưa phân công quản lý</span>}
+                  {mgr ? mgr.name : <span className="text-slate-400 italic">{t('admin.branches.detail.managerUnassigned')}</span>}
                 </h4>
                 {mgr && (
                   <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 font-medium pt-0.5">
@@ -951,7 +957,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               className="inline-flex items-center gap-1.5 rounded-xl bg-white border border-blue-200 px-3.5 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 transition-colors shadow-2xs"
             >
               <PencilSimple size={14} />
-              {mgr ? 'Thay đổi Quản Lý' : 'Phân Công Quản Lý'}
+              {mgr ? t('admin.branches.detail.changeManager') : t('admin.branches.detail.assignManager')}
             </button>
           </div>
         </div>
@@ -963,8 +969,8 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               <MapPin size={20} weight="fill" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Địa chỉ</p>
-              <p className="text-sm font-medium text-slate-700 leading-snug">{branch.address || 'Chưa cập nhật'}</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('admin.branches.detail.address')}</p>
+              <p className="text-sm font-medium text-slate-700 leading-snug">{branch.address || t('admin.branches.common.notUpdated')}</p>
             </div>
           </div>
 
@@ -973,8 +979,8 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               <Phone size={20} weight="fill" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Điện thoại</p>
-              <p className="text-sm font-medium text-slate-700">{branch.phone || 'Chưa cập nhật'}</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('admin.branches.detail.phone')}</p>
+              <p className="text-sm font-medium text-slate-700">{branch.phone || t('admin.branches.common.notUpdated')}</p>
             </div>
           </div>
 
@@ -983,8 +989,8 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               <Envelope size={20} weight="fill" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Email liên hệ</p>
-              <p className="text-sm font-medium text-slate-700 break-all">{branch.email || 'Chưa cập nhật'}</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('admin.branches.detail.email')}</p>
+              <p className="text-sm font-medium text-slate-700 break-all">{branch.email || t('admin.branches.common.notUpdated')}</p>
             </div>
           </div>
 
@@ -993,9 +999,9 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               <Clock size={20} weight="fill" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Giờ mở cửa</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('admin.branches.detail.hours')}</p>
               <p className="text-sm font-medium text-slate-700">
-                {branch.openingTime && branch.closingTime ? `${branch.openingTime} – ${branch.closingTime}` : 'Chưa cập nhật'}
+                {branch.openingTime && branch.closingTime ? `${branch.openingTime} – ${branch.closingTime}` : t('admin.branches.common.notUpdated')}
               </p>
             </div>
           </div>
@@ -1008,20 +1014,20 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                 <Package size={16} weight="duotone" />
               </div>
-              <h3 className="text-sm font-bold text-slate-800">Gói dịch vụ</h3>
+              <h3 className="text-sm font-bold text-slate-800">{t('admin.branches.detail.packagesTitle')}</h3>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs shadow-2xs">
-                <span className="text-slate-500 font-medium">Sắp xếp:</span>
+                <span className="text-slate-500 font-medium">{t('admin.branches.detail.sort')}:</span>
                 <select
                   value={currentSortOrder}
                   onChange={(e) => handleSortOrderChange(e.target.value)}
                   className="bg-transparent font-bold text-slate-800 focus:outline-none cursor-pointer"
                 >
-                  <option value="price_asc">Giá từ thấp → cao</option>
-                  <option value="price_desc">Giá từ cao → thấp</option>
-                  <option value="booking_count">Theo lượt đặt (Nhiều nhất)</option>
+                  <option value="price_asc">{t('admin.branches.detail.sort.optionPriceAsc')}</option>
+                  <option value="price_desc">{t('admin.branches.detail.sort.optionPriceDesc')}</option>
+                  <option value="booking_count">{t('admin.branches.detail.sort.optionMostBooked')}</option>
                 </select>
               </div>
 
@@ -1029,7 +1035,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                 <MagnifyingGlass size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   value={pkgSearch} onChange={(e) => setPkgSearch(e.target.value)}
-                  placeholder="Tìm gói dịch vụ…"
+                  placeholder={t('admin.branches.detail.pkgSearchPlaceholder')}
                   className="w-48 rounded-lg border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors"
                 />
               </div>
@@ -1043,7 +1049,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
           ) : packages.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-12 text-slate-400">
               <Package size={32} weight="thin" />
-              <p className="text-sm">Không có gói dịch vụ nào</p>
+              <p className="text-sm">{t('admin.branches.detail.noPackages')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 bg-slate-50/60">
@@ -1057,31 +1063,31 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                     <div className="flex items-start justify-between gap-3 mb-2.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-lg bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700 uppercase tracking-wide border border-blue-100">
-                          {pkg.category === 'external' ? 'Ngoại thất' : pkg.category === 'internal' ? 'Nội thất' : 'Tổng thể'}
+                          {pkg.category === 'external' ? t('admin.branches.package.category.external') : pkg.category === 'internal' ? t('admin.branches.package.category.internal') : t('admin.branches.package.category.full')}
                         </span>
                         <span className={`rounded-lg px-2 py-0.5 text-[11px] font-semibold border ${
                           pkg.status === 'active'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                             : 'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
-                          {pkg.status === 'active' ? '● Hoạt động' : '○ Ngừng'}
+                          {pkg.status === 'active' ? t('admin.branches.package.status.active') : t('admin.branches.package.status.inactive')}
                         </span>
                         <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700 border border-amber-200/80 flex items-center gap-1">
-                          {pkg.bookingCount || 0} lượt đặt
+                          {t('admin.branches.package.bookings', { count: pkg.bookingCount || 0 })}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => { setPkgSelected(pkg); setPkgModal('edit'); }}
-                          title="Chỉnh sửa"
+                          title={t('admin.branches.common.edit')}
                           className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                         >
                           <PencilSimple size={15} />
                         </button>
                         <button
                           onClick={() => { setPkgSelected(pkg); setPkgModal('delete'); }}
-                          title="Xóa gói"
+                          title={t('admin.branches.package.delete')}
                           className="flex h-7.5 w-7.5 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                         >
                           <Trash size={15} />
@@ -1112,7 +1118,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                     <div className="flex flex-wrap items-center gap-2 py-1.5 px-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-600 mb-3">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-slate-700">
                         <ClockCountdown size={14} className="text-amber-500" />
-                        {pkg.duration} phút
+                        {t('admin.branches.package.duration', { minutes: pkg.duration })}
                       </span>
                       {pkg.vehicleTypes?.length > 0 && (
                         <>
@@ -1132,7 +1138,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                         {pkg.subServices.filter((s) => !s.isOptional).length > 0 && (
                           <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                              <span className="text-emerald-500 font-bold">✓</span> Quy trình ({pkg.subServices.filter((s) => !s.isOptional).length} công đoạn)
+                              <span className="text-emerald-500 font-bold">✓</span> {t('admin.branches.package.process', { count: pkg.subServices.filter((s) => !s.isOptional).length })}
                             </p>
                             <div className="grid grid-cols-1 gap-1">
                               {pkg.subServices.filter((s) => !s.isOptional).map((sub, idx) => (
@@ -1153,7 +1159,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                         {pkg.subServices.filter((s) => s.isOptional).length > 0 && (
                           <div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                              <span className="text-indigo-500 font-bold">✨</span> Nâng cấp tùy chọn ({pkg.subServices.filter((s) => s.isOptional).length})
+                              <span className="text-indigo-500 font-bold">✨</span> {t('admin.branches.package.optionalAddons', { count: pkg.subServices.filter((s) => s.isOptional).length })}
                             </p>
                             <div className="grid grid-cols-1 gap-1">
                               {pkg.subServices.filter((s) => s.isOptional).map((sub, idx) => (
@@ -1183,7 +1189,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
 
       {/* ── Package Create Modal ── */}
       {pkgModal === 'create' && (
-        <Modal title="Thêm gói dịch vụ mới" onClose={() => setPkgModal(null)} wide>
+        <Modal title={t('admin.branches.package.modal.createTitle')} onClose={() => setPkgModal(null)} wide>
           <CreatePackageForm onSave={async (data) => {
             setPkgSaving(true);
             try {
@@ -1193,9 +1199,9 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
               const created = payload?.data ?? payload;
               setPackages((p) => [created, ...p]);
               setPkgModal(null);
-              notify('Tạo gói dịch vụ thành công!');
+              notify(t('admin.branches.detail.notify.pkgCreated'));
             } catch (err) {
-              notify(err.message || 'Tạo thất bại', 'error');
+              notify(err.message || t('admin.branches.detail.notify.createFailed'), 'error');
             } finally { setPkgSaving(false); }
           }} onCancel={() => setPkgModal(null)} saving={pkgSaving} />
         </Modal>
@@ -1203,20 +1209,20 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
 
       {/* ── Package Edit Modal ── */}
       {pkgModal === 'edit' && pkgSelected && (
-        <Modal title={`Chỉnh sửa: ${pkgSelected.name}`} onClose={() => { setPkgModal(null); setPkgSelected(null); }} wide>
+        <Modal title={t('admin.branches.package.modal.editTitle', { name: pkgSelected.name })} onClose={() => { setPkgModal(null); setPkgSelected(null); }} wide>
           <CreatePackageForm initial={pkgSelected} onSave={handlePkgUpdate} onCancel={() => { setPkgModal(null); setPkgSelected(null); }} saving={pkgSaving} />
         </Modal>
       )}
 
       {/* ── Package Delete Modal ── */}
       {pkgModal === 'delete' && pkgSelected && (
-        <Modal title="Xóa gói dịch vụ" onClose={() => { setPkgModal(null); setPkgSelected(null); setPkgDeleteError(''); }}>
+        <Modal title={t('admin.branches.package.modal.deleteTitle')} onClose={() => { setPkgModal(null); setPkgSelected(null); setPkgDeleteError(''); }}>
           <div className="space-y-4">
             <div className="rounded-xl bg-slate-50 p-4 border border-slate-200 space-y-2">
-              <p className="text-sm font-bold text-slate-800">Chọn tùy chọn xóa cho gói "{pkgSelected.name}"</p>
+              <p className="text-sm font-bold text-slate-800">{t('admin.branches.package.modal.deleteQuestion', { name: pkgSelected.name })}</p>
               <p className="text-xs text-slate-500 leading-relaxed">
-                • <b>Xóa mềm:</b> Chuyển gói sang trạng thái <i>Ngừng hoạt động</i> và bảo lưu toàn bộ dữ liệu lịch sử đặt xe.<br />
-                • <b>Xóa cứng:</b> Xóa vĩnh viễn khỏi hệ thống (chỉ áp dụng nếu chưa có khách hàng nào đặt lịch hoặc mua gói lượt).
+                • <b>{t('admin.branches.package.modal.softDelete')}:</b> {t('admin.branches.package.modal.softDeleteDesc')} <i>{t('admin.branches.status.inactiveFull')}</i>{t('admin.branches.package.modal.softDeleteDesc2')}<br />
+                • <b>{t('admin.branches.package.modal.hardDelete')}:</b> {t('admin.branches.package.modal.hardDeleteDesc')}
               </p>
             </div>
 
@@ -1234,7 +1240,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                 disabled={pkgDeleting}
                 className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
               >
-                Hủy
+                {t('admin.branches.common.cancel')}
               </button>
               <button
                 type="button"
@@ -1243,7 +1249,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-60 transition-colors"
               >
                 {pkgDeleting && <Spinner size={14} className="text-white" />}
-                Xóa mềm (Ngừng)
+                {t('admin.branches.package.modal.softDeleteBtn')}
               </button>
               <button
                 type="button"
@@ -1252,7 +1258,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
               >
                 {pkgDeleting && <Spinner size={14} className="text-white" />}
-                Xóa cứng (Vĩnh viễn)
+                {t('admin.branches.package.modal.hardDeleteBtn')}
               </button>
             </div>
           </div>
@@ -1272,7 +1278,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
             <button
               onClick={() => setZoomImage(null)}
               className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/90 hover:scale-110 transition-all border border-white/20 shadow-lg"
-              title="Đóng"
+              title={t('admin.branches.common.close')}
             >
               <X size={20} weight="bold" />
             </button>
@@ -1299,6 +1305,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
 }
 
 function CreatePackageForm({ initial, onSave, onCancel, saving }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: initial?.name ?? '',
     description: initial?.description ?? '',
@@ -1356,15 +1363,15 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
   const submit = (e) => {
     e.preventDefault();
     const errs = {};
-    if (!form.name.trim()) errs.name = 'Vui lòng nhập tên gói';
+    if (!form.name.trim()) errs.name = t('admin.branches.pkgForm.errors.name');
 
     const numericPrice = parseVnd(form.price);
     if (!form.price || isNaN(numericPrice) || numericPrice <= 1000) {
-      errs.price = 'Giá gói phải lớn hơn 1.000 VNĐ';
+      errs.price = t('admin.branches.pkgForm.errors.price');
     }
 
     if (!form.duration || Number(form.duration) <= 0) {
-      errs.duration = 'Thời lượng phải lớn hơn 0 phút';
+      errs.duration = t('admin.branches.pkgForm.errors.duration');
     }
 
     const subErrors = [];
@@ -1373,17 +1380,17 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
     (form.subServices || []).forEach((sub, idx) => {
       const sErr = {};
       if (!sub.name || !sub.name.trim()) {
-        sErr.name = 'Vui lòng nhập tên dịch vụ nhỏ';
+        sErr.name = t('admin.branches.pkgForm.errors.subName');
         hasSubError = true;
       }
       if (!sub.duration || Number(sub.duration) <= 0) {
-        sErr.duration = 'Vui lòng nhập thời gian';
+        sErr.duration = t('admin.branches.pkgForm.errors.subDuration');
         hasSubError = true;
       }
       if (sub.isOptional) {
         const subPriceNum = parseVnd(sub.price);
         if (!sub.price || isNaN(subPriceNum) || subPriceNum <= 1000) {
-          sErr.price = 'Giá phụ thu phải > 1.000 VNĐ';
+          sErr.price = t('admin.branches.pkgForm.errors.subPrice');
           hasSubError = true;
         }
       }
@@ -1409,41 +1416,41 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
     <form onSubmit={submit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Tên gói <span className="text-red-500">*</span></label>
-          <input className={inp} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Rửa xe cao cấp" />
+          <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.pkgForm.name')} <span className="text-red-500">*</span></label>
+          <input className={inp} value={form.name} onChange={(e) => set('name', e.target.value)} placeholder={t('admin.branches.pkgForm.placeholders.name')} />
           {errors.name && <p className="mt-1 text-[11px] text-red-500">{errors.name}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Danh mục</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.pkgForm.category')}</label>
           <select className={inp} value={form.category} onChange={(e) => set('category', e.target.value)}>
-            <option value="full">Tổng thể</option><option value="external">Ngoại thất</option><option value="internal">Nội thất</option>
+            <option value="full">{t('admin.branches.package.category.full')}</option><option value="external">{t('admin.branches.package.category.external')}</option><option value="internal">{t('admin.branches.package.category.internal')}</option>
           </select>
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">Mô tả</label>
-        <textarea rows={2} className={inp + ' resize-none'} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Mô tả gói dịch vụ..." />
+        <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.pkgForm.description')}</label>
+        <textarea rows={2} className={inp + ' resize-none'} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder={t('admin.branches.pkgForm.placeholders.description')} />
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Giá gói (VNĐ) <span className="text-red-500">*</span></label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.pkgForm.price')} <span className="text-red-500">*</span></label>
           <input type="text" inputMode="numeric" className={inp} value={form.price} onChange={(e) => onPriceChange(e.target.value)} placeholder="80000" />
           {errors.price && <p className="mt-1 text-[11px] text-red-500">{errors.price}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Thời lượng (phút) <span className="text-red-500">*</span></label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.pkgForm.duration')} <span className="text-red-500">*</span></label>
           <input type="number" min="1" className={inp} value={form.duration} onChange={(e) => set('duration', e.target.value)} placeholder="60" />
           {errors.duration && <p className="mt-1 text-[11px] text-red-500">{errors.duration}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Trạng thái</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.form.status')}</label>
           <select className={inp} value={form.status} onChange={(e) => set('status', e.target.value)}>
-            <option value="active">Hoạt động</option><option value="inactive">Ngừng</option>
+            <option value="active">{t('admin.branches.status.active')}</option><option value="inactive">{t('admin.branches.status.inactive')}</option>
           </select>
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">Loại xe áp dụng</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600">{t('admin.branches.pkgForm.vehicleTypes')}</label>
         <div className="flex flex-wrap gap-2">
           {[{ v: 'sedan', l: 'Sedan' }, { v: 'suv', l: 'SUV' }, { v: 'pickup', l: 'Pickup' }, { v: 'van', l: 'Van' }].map((o) => (
             <button key={o.v} type="button" onClick={() => toggleVehicle(o.v)}
@@ -1454,12 +1461,12 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
       <div className="pt-2 border-t border-slate-100">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <label className="text-xs font-bold text-slate-700 block">Các dịch vụ nhỏ trong gói (Sub-services)</label>
-            <span className="text-[11px] text-slate-400">Các công đoạn chi tiết được thực hiện trong gói</span>
+            <label className="text-xs font-bold text-slate-700 block">{t('admin.branches.pkgForm.subServices')}</label>
+            <span className="text-[11px] text-slate-400">{t('admin.branches.pkgForm.subServicesHint')}</span>
           </div>
           <button type="button" onClick={addSub}
             className="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors">
-            <Plus size={13} weight="bold" /> Thêm dịch vụ nhỏ
+            <Plus size={13} weight="bold" /> {t('admin.branches.pkgForm.addSubService')}
           </button>
         </div>
 
@@ -1477,7 +1484,7 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
                         : 'text-slate-500 hover:bg-slate-100'
                     }`}
                   >
-                    Đã bao gồm
+                    {t('admin.branches.pkgForm.included')}
                   </button>
                   <button
                     type="button"
@@ -1488,11 +1495,11 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
                         : 'text-slate-500 hover:bg-slate-100'
                     }`}
                   >
-                    Tùy chọn
+                    {t('admin.branches.pkgForm.optional')}
                   </button>
                 </div>
                 <button type="button" onClick={() => delSub(idx)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors" title="Xóa">
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors" title={t('admin.branches.common.delete')}>
                   <Trash size={15} />
                 </button>
               </div>
@@ -1500,9 +1507,9 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div className="sm:col-span-1">
                   <label className="text-[10px] font-medium text-slate-500 block mb-1">
-                    Tên dịch vụ nhỏ <span className="text-red-500">*</span>
+                    {t('admin.branches.pkgForm.subName')} <span className="text-red-500">*</span>
                   </label>
-                  <input placeholder="VD: Phun bọt tuyết, Lau khô..." className={inp + ' text-xs'} value={sub.name}
+                  <input placeholder={t('admin.branches.pkgForm.placeholders.subName')} className={inp + ' text-xs'} value={sub.name}
                     onChange={(e) => updSub(idx, 'name', e.target.value)} />
                   {errors.subServices?.[idx]?.name && (
                     <p className="mt-1 text-[11px] text-red-500">{errors.subServices[idx].name}</p>
@@ -1510,12 +1517,12 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
                 </div>
                 <div>
                   <label className="text-[10px] font-medium text-slate-500 block mb-1">
-                    Giá phụ thu (VNĐ) {sub.isOptional ? <span className="text-red-500">*</span> : <span className="text-slate-400">(Miễn phí)</span>}
+                    {t('admin.branches.pkgForm.subPrice')} {sub.isOptional ? <span className="text-red-500">*</span> : <span className="text-slate-400">({t('admin.branches.pkgForm.free')})</span>}
                   </label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    placeholder={!sub.isOptional ? "0đ (Đã bao gồm)" : "VD: 20000"}
+                    placeholder={!sub.isOptional ? t('admin.branches.pkgForm.placeholders.subPriceIncluded') : t('admin.branches.pkgForm.placeholders.subPriceExample')}
                     disabled={!sub.isOptional}
                     className={`${inp} text-xs ${!sub.isOptional ? 'bg-slate-100/90 text-slate-400 cursor-not-allowed border-slate-200' : ''}`}
                     value={!sub.isOptional ? '0' : sub.price}
@@ -1527,7 +1534,7 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
                 </div>
                 <div>
                   <label className="text-[10px] font-medium text-slate-500 block mb-1">
-                    Thời gian (phút) <span className="text-red-500">*</span>
+                    {t('admin.branches.pkgForm.subDuration')} <span className="text-red-500">*</span>
                   </label>
                   <input type="number" min="1" placeholder="5" className={inp + ' text-xs'} value={sub.duration}
                     onChange={(e) => updSub(idx, 'duration', e.target.value)} />
@@ -1541,18 +1548,18 @@ function CreatePackageForm({ initial, onSave, onCancel, saving }) {
 
           {form.subServices.length === 0 && (
             <div className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-center">
-              <p className="text-xs text-slate-400">Chưa có dịch vụ nhỏ nào trong gói này.</p>
+              <p className="text-xs text-slate-400">{t('admin.branches.pkgForm.noSubServices')}</p>
               <button type="button" onClick={addSub} className="mt-1 text-xs font-semibold text-blue-600 hover:underline">
-                + Thêm dịch vụ nhỏ ngay
+                {t('admin.branches.pkgForm.addSubServiceNow')}
               </button>
             </div>
           )}
         </div>
       </div>
       <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-        <button type="button" onClick={onCancel} disabled={saving} className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Hủy</button>
+        <button type="button" onClick={onCancel} disabled={saving} className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">{t('admin.branches.common.cancel')}</button>
         <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
-          {saving && <Spinner size={14} className="text-white" />}{saving ? 'Đang lưu…' : 'Lưu'}
+          {saving && <Spinner size={14} className="text-white" />}{saving ? t('admin.branches.common.saving') : t('admin.branches.common.save')}
         </button>
       </div>
     </form>

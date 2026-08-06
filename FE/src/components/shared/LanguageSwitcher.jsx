@@ -3,7 +3,7 @@ import { Globe } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 export default function LanguageSwitcher({ className, isCompact = false, isLightBg = false }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'vi';
 
   const toggleLanguage = () => {
@@ -23,7 +23,7 @@ export default function LanguageSwitcher({ className, isCompact = false, isLight
             : 'bg-sidebar-accent border-sidebar-border text-sidebar-foreground hover:bg-accent',
           className
         )}
-        title={currentLang === 'vi' ? 'Chuyển sang Tiếng Anh (English)' : 'Switch to Vietnamese (Tiếng Việt)'}
+        title={currentLang === 'vi' ? t('shared.languageSwitcher.switchToEn') : t('shared.languageSwitcher.switchToVi')}
         aria-label="Toggle language"
       >
         {currentLang === 'vi' ? 'EN' : 'VI'}
@@ -41,7 +41,7 @@ export default function LanguageSwitcher({ className, isCompact = false, isLight
           : 'bg-white/10 backdrop-blur-md border-white/20 text-slate-800 dark:text-white',
         className
       )}
-      title={currentLang === 'vi' ? 'Chuyển sang Tiếng Anh' : 'Switch to Vietnamese'}
+      title={currentLang === 'vi' ? t('shared.languageSwitcher.switchToEnShort') : t('shared.languageSwitcher.switchToViShort')}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && toggleLanguage()}

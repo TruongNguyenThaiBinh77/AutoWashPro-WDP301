@@ -56,7 +56,7 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
 
       <Separator />
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4" aria-label="Menu chính">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4" aria-label={t('sidebar.mainMenu')}>
         {menuItems.map((item) => {
           const Icon = item.icon;
           const count = badges[item.id] || 0;
