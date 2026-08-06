@@ -40,7 +40,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
   async function handleLogin(event) {
     if (event) event.preventDefault();
     setLoginLoading(true); setAuthError(''); setStatusMessage('');
-    try { await onLogin(loginPhone, loginPass); setStatusMessage(t('messages.login_success')); }
+    try { await onLogin(loginPhone, loginPass, null, t); setStatusMessage(t('messages.login_success')); }
     catch (error) { setAuthError(error.message || t('messages.login_failed')); }
     finally { setLoginLoading(false); }
   }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, MessageSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -63,6 +64,7 @@ function TestimonialCard({ item }) {
 }
 
 export default function TestimonialsSection() {
+  const { t } = useTranslation();
   const [testimonials, setTestimonials] = useState([]);
 
   useEffect(() => {
@@ -97,10 +99,10 @@ export default function TestimonialsSection() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-100/60 text-emerald-600 mb-4 shadow-xs">
             <MessageSquare className="w-5 h-5" />
           </div>
-          <p className="text-emerald-600 text-xs font-bold tracking-widest uppercase">Khách hàng nói gì</p>
-          <h2 className="mt-3 text-3xl md:text-5xl font-black tracking-tight text-slate-900">Hàng ngàn khách hàng hài lòng</h2>
+          <p className="text-emerald-600 text-xs font-bold tracking-widest uppercase">{t('landing.testimonials.heading')}</p>
+          <h2 className="mt-3 text-3xl md:text-5xl font-black tracking-tight text-slate-900">{t('landing.testimonials.subheading')}</h2>
           <p className="mt-4 text-sm md:text-base text-slate-500 leading-relaxed">
-            Xem những đánh giá khách quan nhất từ những người sở hữu xế hộp đã lựa chọn và trải nghiệm dịch vụ tại AutoWashPro.
+            {t('landing.testimonials.description')}
           </p>
         </div>
       </div>

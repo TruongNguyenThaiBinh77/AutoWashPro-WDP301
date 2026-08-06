@@ -617,5 +617,7 @@
     "logout": "Sign out",
     "new_items": "new items",
     "mainMenu": "Main menu"
-  }
+  },
+  "error_no_admin_permission": "You do not have administrator privileges.",
+  "error_no_manager_permission": "You do not have branch manager privileges."
 }

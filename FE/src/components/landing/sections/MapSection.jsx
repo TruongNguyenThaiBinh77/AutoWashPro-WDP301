@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Clock, Phone, Envelope, ArrowRight, CaretLeft, Buildings, Tag, MagnifyingGlass } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl } from '@/lib/authStorage';
 
 const API_BASE = getApiBaseUrl() || 'http://localhost:5000/api';
 
 function getCities(branches) {
   const set = new Set(branches.map(b => b.city).filter(Boolean));
-  return ['Tất cả', ...Array.from(set)];
+  return ['all', ...Array.from(set)];
 }
 
 function parseSvgPaths(svgText) {
@@ -27,13 +28,14 @@ function fmtCurrency(n) {
 }
 
 export default function MapSection({ onSelectBranch }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [activeCity, setActiveCity] = useState('Tất cả');
+  const [activeCity, setActiveCity] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
   const [provincePaths, setProvincePaths] = useState([]);
   const [hoveredProvince, setHoveredProvince] = useState(null);
   const [branches, setBranches] = useState([]);
-  const [cities, setCities] = useState(['Tất cả']);
+  const [cities, setCities] = useState(['all']);
 
   // Detail view state
   const [detailBranch, setDetailBranch] = useState(null);
@@ -92,7 +94,7 @@ export default function MapSection({ onSelectBranch }) {
       .finally(() => setLoadingPkgs(false));
   }, [detailBranch]);
 
-  const filtered = activeCity === 'Tất cả' ? branches : branches.filter((b) => b.city === activeCity);
+  const filtered = activeCity === 'all' ? branches : branches.filter((b) => b.city === activeCity);
   const selected = branches.find((b) => b.id === selectedId);
 
   const openDetail = (branch) => {
@@ -115,13 +117,13 @@ export default function MapSection({ onSelectBranch }) {
           <div className="lg:col-span-2">
             <div className="max-w-xl mb-8">
               <span className="text-emerald-400 text-sm font-medium tracking-widest uppercase mb-4 block">
-                Hệ thống chi nhánh
+                {t('landing.map.branch_system')}
               </span>
               <h2 className="text-3xl md:text-5xl tracking-tighter leading-none text-white">
-                Tìm chi nhánh gần bạn
+                {t('landing.map.find_nearby')}
               </h2>
               <p className="text-neutral-400 mt-4 leading-relaxed">
-                {branches.length} chi nhánh trên toàn quốc. Chọn chi nhánh và đặt lịch ngay.
+                {t('landing.map.description', { count: branches.length })}
               </p>
             </div>
 
@@ -180,7 +182,7 @@ export default function MapSection({ onSelectBranch }) {
                         {b.phone && <span className="flex items-center gap-1"><Phone size={11} /> {b.phone}</span>}
                       </div>
                       <div className="mt-2 text-[11px] font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
-                        Xem chi tiết →
+                        {t('landing.map.view_details')}
                       </div>
                     </div>
                   </div>
@@ -210,7 +212,7 @@ export default function MapSection({ onSelectBranch }) {
                         className="flex items-center gap-2 text-sm text-neutral-400 hover:text-emerald-400 transition-colors font-medium"
                       >
                         <CaretLeft size={16} weight="bold" />
-                        Quay lại bản đồ
+                        {t('landing.map.back_to_map')}
                       </button>
                     </div>
 
@@ -228,7 +230,7 @@ export default function MapSection({ onSelectBranch }) {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm text-neutral-800 text-xs font-semibold px-4 py-2 rounded-full shadow-lg">
-                            🔍 Click để phóng to
+                            {t('landing.map.click_zoom')}
                           </span>
                         </div>
                       </div>
@@ -251,7 +253,7 @@ export default function MapSection({ onSelectBranch }) {
                           <MapPin size={16} weight="fill" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">Địa chỉ</p>
+                          <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">{t('landing.map.address')}</p>
                           <p className="text-xs text-neutral-300 mt-0.5 leading-relaxed">{detailBranch.address}</p>
                         </div>
                       </div>
@@ -261,7 +263,7 @@ export default function MapSection({ onSelectBranch }) {
                           <Clock size={16} weight="fill" />
                         </div>
                         <div>
-                          <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">Giờ mở cửa</p>
+                          <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">{t('landing.map.hours')}</p>
                           <p className="text-xs text-neutral-300 mt-0.5">{detailBranch.hours}</p>
                         </div>
                       </div>
@@ -272,7 +274,7 @@ export default function MapSection({ onSelectBranch }) {
                             <Phone size={16} weight="fill" />
                           </div>
                           <div>
-                            <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">Điện thoại</p>
+                            <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">{t('landing.map.phone')}</p>
                             <p className="text-xs text-neutral-300 mt-0.5">{detailBranch.phone}</p>
                           </div>
                         </div>
@@ -284,7 +286,7 @@ export default function MapSection({ onSelectBranch }) {
                             <Envelope size={16} weight="fill" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">Email</p>
+                            <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">{t('landing.map.email')}</p>
                             <p className="text-xs text-neutral-300 mt-0.5 truncate">{detailBranch.email}</p>
                           </div>
                         </div>
@@ -295,14 +297,14 @@ export default function MapSection({ onSelectBranch }) {
                     <div className="px-5 pb-4">
                       <h4 className="text-sm font-bold text-neutral-200 mb-3 flex items-center gap-2">
                         <Tag size={14} weight="duotone" className="text-emerald-400" />
-                        Gói dịch vụ
+                        {t('landing.map.services')}
                       </h4>
                       {loadingPkgs ? (
                         <div className="flex items-center justify-center py-6">
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-500 border-t-transparent" />
                         </div>
                       ) : packages.length === 0 ? (
-                        <p className="text-xs text-neutral-500 py-4 text-center bg-neutral-800/30 rounded-xl border border-neutral-800/50">Chưa có gói dịch vụ</p>
+                        <p className="text-xs text-neutral-500 py-4 text-center bg-neutral-800/30 rounded-xl border border-neutral-800/50">{t('landing.map.no_packages')}</p>
                       ) : (
                         <div className="grid grid-cols-2 gap-2.5">
                           {packages.slice(0, 6).map(pkg => (
@@ -311,7 +313,7 @@ export default function MapSection({ onSelectBranch }) {
                               {pkg.description && <p className="text-[10px] text-neutral-500 line-clamp-1 mb-2">{pkg.description}</p>}
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold text-emerald-400">{fmtCurrency(pkg.price)}</span>
-                                {pkg.duration && <span className="text-[10px] text-neutral-500">{pkg.duration} phút</span>}
+                                {pkg.duration && <span className="text-[10px] text-neutral-500">{t('landing.map.duration_min', { count: pkg.duration })}</span>}
                               </div>
                             </div>
                           ))}
@@ -319,7 +321,7 @@ export default function MapSection({ onSelectBranch }) {
                       )}
                       {packages.length > 6 && (
                         <p className="text-[11px] text-emerald-400 mt-2 text-center">
-                          +{packages.length - 6} gói khác
+                          {t('landing.map.more_packages', { count: packages.length - 6 })}
                         </p>
                       )}
                     </div>
@@ -330,14 +332,14 @@ export default function MapSection({ onSelectBranch }) {
                         onClick={() => navigate(`/booking?branchId=${detailBranch.id}`)}
                         className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition-colors shadow-sm shadow-emerald-600/20"
                       >
-                        Đặt lịch tại đây
+                        {t('landing.map.book_here')}
                         <ArrowRight size={16} weight="bold" />
                       </button>
                       <button
                         onClick={() => navigate(`/branch/${detailBranch.id}`)}
                         className="py-3 px-5 rounded-xl border border-neutral-700 text-neutral-300 text-sm font-medium hover:bg-neutral-800 transition-colors"
                       >
-                        Trang chi tiết
+                        {t('landing.map.detail_page')}
                       </button>
                     </div>
                   </div>
@@ -496,13 +498,13 @@ export default function MapSection({ onSelectBranch }) {
                           onClick={() => openDetail(selected)}
                           className="flex-1 py-2.5 rounded-xl border border-neutral-700 text-neutral-300 text-sm font-medium hover:bg-neutral-800 transition-colors"
                         >
-                          Chi tiết
+                          {t('landing.map.details')}
                         </button>
                         <button
                           onClick={() => navigate(`/booking?branchId=${selected.id}`)}
                           className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 transition-colors"
                         >
-                          Đặt lịch tại đây
+                          {t('landing.map.book_here')}
                         </button>
                       </div>
                     </motion.div>
@@ -535,7 +537,7 @@ export default function MapSection({ onSelectBranch }) {
               <button
                 onClick={() => setZoomImage(null)}
                 className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/90 hover:scale-110 transition-all border border-white/20 shadow-lg"
-                title="Đóng"
+                title={t('landing.map.close')}
               >
                 <X size={20} weight="bold" />
               </button>
@@ -543,7 +545,7 @@ export default function MapSection({ onSelectBranch }) {
               <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden p-3 bg-black/40">
                 <img
                   src={zoomImage}
-                  alt={detailBranch?.fullName || 'Chi nhánh'}
+                  alt={detailBranch?.fullName || t('landing.map.branch_fallback')}
                   className="max-h-[68vh] w-auto max-w-full rounded-xl object-contain shadow-2xl"
                 />
               </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PALETTE = [
   { bg1: '#10b981', bg2: '#059669', text: '#ffffff', icon: '🎁' },
@@ -30,6 +31,7 @@ function describeArc(x, y, radius, startAngle, endAngle) {
 }
 
 const CustomLuckyWheel = forwardRef(({ sectors = [], onSpinEnd, onSpinStart, onCenterClick, isSpinning: isSpinningProp }, ref) => {
+  const { t } = useTranslation();
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [ledOffset, setLedOffset] = useState(0);
@@ -156,7 +158,7 @@ const CustomLuckyWheel = forwardRef(({ sectors = [], onSpinEnd, onSpinStart, onC
               const palette = PALETTE[idx % PALETTE.length];
 
               // Clean text label for display
-              const rawText = sector.label || sector.name || 'Quà tặng';
+              const rawText = sector.label || sector.name || t('landing.booking.wheel_fallback');
               const cleanText = rawText.toUpperCase();
 
               return (

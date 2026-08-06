@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { confirmDialog } from '@/lib/confirm';
 import useSSE from '@/hooks/useSSE';
 import { showToast } from '@/lib/toast';
@@ -7,7 +8,7 @@ function formatCurrency(v) {
   return `${new Intl.NumberFormat('vi-VN').format(v || 0)}đ`;
 }
 
-function DiscountBadge({ voucher, orderAmount }) {
+function DiscountBadge({ voucher, orderAmount, t }) {
   const savingsAmount = (() => {
     if (!orderAmount || !voucher) return 0;
     if (voucher.type === 'percentage') {
@@ -25,7 +26,7 @@ function DiscountBadge({ voucher, orderAmount }) {
         </span>
         {voucher.maxDiscount > 0 && (
           <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 600 }}>
-            tối đa {formatCurrency(voucher.maxDiscount)}
+            {t('maxDiscount', { amount: formatCurrency(voucher.maxDiscount) })}
           </span>
         )}
         {savingsAmount > 0 && orderAmount > 0 && (
@@ -45,7 +46,7 @@ function DiscountBadge({ voucher, orderAmount }) {
   );
 }
 
-function VoucherCard({ voucher, onSelect, selected, userPoints, orderAmount }) {
+function VoucherCard({ voucher, onSelect, selected, userPoints, orderAmount, t }) {
   const needsPoints   = voucher.requiredPoints > 0;
   const canAfford     = !needsPoints || (userPoints || 0) >= voucher.requiredPoints;
   const meetsMinOrder = !orderAmount || !voucher.minOrder || orderAmount >= voucher.minOrder;
@@ -100,12 +101,12 @@ function VoucherCard({ voucher, onSelect, selected, userPoints, orderAmount }) {
               </span>
               {needsPoints && (
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#d97706', padding: '1px 5px', borderRadius: 4, background: 'rgba(217,119,6,0.08)' }}>
-                  ⭐ {voucher.requiredPoints.toLocaleString('vi-VN')} điểm
+                  ⭐ {voucher.requiredPoints.toLocaleString('vi-VN')} {t('points')}
                 </span>
               )}
               {isSelected && (
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', padding: '1px 6px', borderRadius: 4, background: '#10b981' }}>
-                  ✓ Đang dùng
+                  {t('inUse')}
                 </span>
               )}
             </div>
@@ -125,27 +126,27 @@ function VoucherCard({ voucher, onSelect, selected, userPoints, orderAmount }) {
                   background: meetsMinOrder ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
                   color: meetsMinOrder ? '#059669' : '#dc2626',
                 }}>
-                  {meetsMinOrder ? '✓' : '✗'} Đơn tối thiểu {formatCurrency(voucher.minOrder)}
+                  {meetsMinOrder ? '✓' : '✗'} {t('minOrder', { amount: formatCurrency(voucher.minOrder) })}
                 </span>
               )}
               {needsPoints && !canAfford && (
                 <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(239,68,68,0.08)', color: '#dc2626' }}>
-                  ✗ Thiếu {(voucher.requiredPoints - userPoints).toLocaleString('vi-VN')} điểm
+                  ✗ {t('notEnoughPoints', { points: (voucher.requiredPoints - userPoints).toLocaleString('vi-VN') })}
                 </span>
               )}
               {needsPoints && canAfford && (
                 <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: 'rgba(16,185,129,0.08)', color: '#059669' }}>
-                  ✓ Đủ điểm đổi
+                  ✓ {t('enoughPoints')}
                 </span>
               )}
               {(voucher.remaining || 0) > 0 && (
                 <span style={{ fontSize: '0.65rem', fontWeight: 600, padding: '2px 6px', borderRadius: 4, background: '#f8fafc', color: '#64748b' }}>
-                  Còn {voucher.remaining} lượt
+                  {t('remaining', { count: voucher.remaining })}
                 </span>
               )}
             </div>
           </div>
-          <DiscountBadge voucher={voucher} orderAmount={orderAmount} />
+          <DiscountBadge voucher={voucher} orderAmount={orderAmount} t={t} />
         </div>
       </div>
     </button>
@@ -153,6 +154,7 @@ function VoucherCard({ voucher, onSelect, selected, userPoints, orderAmount }) {
 }
 
 export default function VoucherPicker({ apiBase, token, selected, onSelect, orderAmount = 0, compact = false, branchId }) {
+  const { t } = useTranslation('promotion');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -179,11 +181,11 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
       const params = branchId ? `?branchId=${branchId}` : '';
       const res = await fetch(`${apiBase}/vouchers/available${params}`, { headers: { Authorization: `Bearer ${token}` } });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Không tải được voucher');
+      if (!res.ok) throw new Error(json.message || t('loadError'));
       setData(json.data);
     } catch (e) { setError(e.message); }
     finally { setLoading(false); }
-  }, [apiBase, token, branchId]);
+  }, [apiBase, token, branchId, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -192,14 +194,14 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
 
   async function applyManual() {
     const code = manualCode.trim().toUpperCase();
-    if (!code) { setManualMsg('Nhập mã coupon để áp dụng.'); return; }
+    if (!code) { setManualMsg(t('enterCode')); return; }
     try {
       const params = branchId ? `?branchId=${branchId}` : '';
       const res = await fetch(`${apiBase}/vouchers/code/${code}${params}`, { headers: { Authorization: `Bearer ${token}` } });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Mã không hợp lệ');
+      if (!res.ok) throw new Error(json.message || t('invalidCode'));
       onSelect(json.data);
-      setManualMsg('✓ Đã áp dụng mã coupon!');
+      setManualMsg(`✓ ${t('codeApplied')}`);
       setManualCode('');
     } catch (e) { onSelect(null); setManualMsg(e.message); }
   }
@@ -208,7 +210,7 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
     if (!voucher) { onSelect(null); return; }
     const needsPoints = voucher.requiredPoints > 0;
     if (needsPoints && voucher.isTemplate) {
-      if (!(await confirmDialog({ title: 'Đổi điểm lấy voucher', message: `Dùng ${voucher.requiredPoints} điểm để đổi lấy mã "${voucher.name}"?`, confirmLabel: 'Đổi điểm' }))) return;
+      if (!(await confirmDialog({ title: t('redeemTitle'), message: t('redeemConfirm', { points: voucher.requiredPoints, name: voucher.name }), confirmLabel: t('redeemButton') }))) return;
       try {
         setLoading(true);
         const res = await fetch(`${apiBase}/vouchers/redeem-points`, {
@@ -217,10 +219,10 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
           body: JSON.stringify({ templateId: voucher._id })
         });
         const json = await res.json();
-        if (!res.ok) throw new Error(json.message || 'Lỗi đổi điểm');
+        if (!res.ok) throw new Error(json.message || t('redeemError'));
         const realVoucher = json.data;
         onSelect(realVoucher);
-        showToast(`Đổi điểm thành công! Mã của bạn là: ${realVoucher.code}`);
+        showToast(t('redeemSuccess', { code: realVoucher.code }));
         load();
       } catch (e) { showToast(e.message); }
       finally { setLoading(false); }
@@ -238,7 +240,7 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
 
   const userPoints = data?.user?.loyaltyPoints || 0;
   const userTier   = data?.user?.tier || 'bronze';
-  const tierObj    = tierList.find(t => (t.id || '').toLowerCase() === String(userTier).toLowerCase());
+  const tierObj    = tierList.find(t2 => (t2.id || '').toLowerCase() === String(userTier).toLowerCase());
   const tierMeta   = {
     label: tierObj?.name || userTier || 'Thành viên',
     icon: tierObj?.icon === 'Circle' ? '●' : (tierObj?.icon ? '◆' : '★'),
@@ -252,9 +254,9 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
 
   // Tab definitions
   const tabs = [
-    { id: 'public', icon: '🏷️', label: 'Công khai', count: pubCount },
-    ...(tierCount > 0 ? [{ id: 'tier', icon: tierMeta.icon, label: `Hạng ${tierMeta.label}`, count: tierCount }] : []),
-    { id: 'points', icon: '⭐', label: 'Đổi điểm', count: ptsCount },
+    { id: 'public', icon: '🏷️', label: t('tabPublic'), count: pubCount },
+    ...(tierCount > 0 ? [{ id: 'tier', icon: tierMeta.icon, label: t('tabTier', { tier: tierMeta.label }), count: tierCount }] : []),
+    { id: 'points', icon: '⭐', label: t('tabPoints'), count: ptsCount },
   ];
 
   return (
@@ -282,15 +284,15 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
           }}>🏷️</div>
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#10b981', letterSpacing: '0.03em' }}>
-              VOUCHER & ƯU ĐÃI
+              {t('headerTitle')}
             </div>
             {selected ? (
               <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: 1, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{ fontWeight: 700, color: '#10b981', fontFamily: 'monospace' }}>{selected.code}</span>
-                {savings > 0 && <span style={{ color: '#10b981', fontWeight: 600 }}>— tiết kiệm {formatCurrency(savings)}</span>}
+                {savings > 0 && <span style={{ color: '#10b981', fontWeight: 600 }}>— {t('saving')} {formatCurrency(savings)}</span>}
               </div>
             ) : (
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 1 }}>Chọn voucher để tiết kiệm thêm</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 1 }}>{t('selectPrompt')}</div>
             )}
           </div>
         </div>
@@ -330,7 +332,7 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
               value={manualCode}
               onChange={e => { setManualCode(e.target.value.toUpperCase()); setManualMsg(''); }}
               onKeyDown={e => e.key === 'Enter' && applyManual()}
-              placeholder="NHẬP MÃ COUPON..."
+              placeholder={t('codePlaceholder')}
               style={{
                 flex: 1, padding: '9px 13px', borderRadius: 10,
                 border: '1.5px solid #e2e8f0', fontSize: '0.8rem', fontWeight: 600,
@@ -349,7 +351,7 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
               onMouseOver={e => e.target.style.background = '#059669'}
               onMouseOut={e => e.target.style.background = '#10b981'}
             >
-              Áp dụng
+              {t('applyButton')}
             </button>
             {selected && (
               <button type="button" onClick={() => { onSelect(null); setManualMsg(''); setManualCode(''); }} style={{
@@ -403,14 +405,14 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
                 <path d="M21 12a9 9 0 11-6.219-8.56" />
               </svg>
               <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-              Đang tải voucher...
+              {t('loading')}
             </div>
           )}
           {error && (
             <div style={{ padding: '10px 12px', borderRadius: 10, fontSize: '0.78rem', background: 'rgba(239,68,68,0.07)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: '1rem' }}>⚠️</span>
               <span style={{ flex: 1 }}>{error}</span>
-              <button type="button" onClick={load} style={{ fontSize: '0.72rem', fontWeight: 700, color: '#dc2626', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>Thử lại</button>
+              <button type="button" onClick={load} style={{ fontSize: '0.72rem', fontWeight: 700, color: '#dc2626', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>{t('retry')}</button>
             </div>
           )}
 
@@ -423,10 +425,10 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
                 pubCount === 0 ? (
                   <div style={{ textAlign: 'center', padding: '20px 0', color: '#94a3b8', fontSize: '0.82rem' }}>
                     <div style={{ fontSize: '2rem', marginBottom: 6 }}>🎫</div>
-                    Không có voucher công khai nào hiện tại
+                    {t('noPublicVouchers')}
                   </div>
                 ) : data.public.map(v => (
-                  <VoucherCard key={v._id} voucher={v} onSelect={handleSelectVoucher} selected={selected} userPoints={userPoints} orderAmount={orderAmount} />
+                  <VoucherCard key={v._id} voucher={v} onSelect={handleSelectVoucher} selected={selected} userPoints={userPoints} orderAmount={orderAmount} t={t} />
                 ))
               )}
 
@@ -434,7 +436,7 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
               {activeTab === 'tier' && (
                 tierCount === 0 ? (
                   <div style={{ textAlign: 'center', padding: '20px 0', color: '#94a3b8', fontSize: '0.82rem' }}>
-                    Không có voucher đặc quyền cho hạng <strong>{tierMeta.label}</strong>
+                    {t('noTierVouchers', { tier: tierMeta.label })}
                   </div>
                 ) : (
                   <>
@@ -442,10 +444,10 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
                       display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
                       background: tierMeta.bg, border: `1px solid ${tierMeta.ring}`, fontSize: '0.78rem', fontWeight: 600, color: tierMeta.color,
                     }}>
-                      {tierMeta.icon} Ưu đãi đặc quyền dành riêng cho thành viên hạng <strong>{tierMeta.label}</strong>
+                      {tierMeta.icon} {t('tierExclusive', { tier: tierMeta.label })}
                     </div>
                     {data.tier_exclusive.map(v => (
-                      <VoucherCard key={v._id} voucher={v} onSelect={handleSelectVoucher} selected={selected} userPoints={userPoints} orderAmount={orderAmount} />
+                      <VoucherCard key={v._id} voucher={v} onSelect={handleSelectVoucher} selected={selected} userPoints={userPoints} orderAmount={orderAmount} t={t} />
                     ))}
                   </>
                 )
@@ -460,8 +462,8 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
                     border: '1px solid rgba(16,185,129,0.15)',
                   }}>
                     <div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>Số điểm của bạn</div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: 2 }}>Chọn mẫu để đổi điểm lấy mã giảm</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>{t('yourPoints')}</div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: 2 }}>{t('redeemHint')}</div>
                     </div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#10b981' }}>
                       ⭐ {userPoints.toLocaleString('vi-VN')}
@@ -470,10 +472,10 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
                   {ptsCount === 0 ? (
                     <div style={{ textAlign: 'center', padding: '20px 0', color: '#94a3b8', fontSize: '0.82rem' }}>
                       <div style={{ fontSize: '2rem', marginBottom: 6 }}>⭐</div>
-                      Không có mẫu đổi điểm nào
+                      {t('noRedeemable')}
                     </div>
                   ) : data.redeemable.map(v => (
-                    <VoucherCard key={v._id} voucher={v} onSelect={handleSelectVoucher} selected={selected} userPoints={userPoints} orderAmount={orderAmount} />
+                    <VoucherCard key={v._id} voucher={v} onSelect={handleSelectVoucher} selected={selected} userPoints={userPoints} orderAmount={orderAmount} t={t} />
                   ))}
                 </>
               )}
@@ -491,7 +493,7 @@ export default function VoucherPicker({ apiBase, token, selected, onSelect, orde
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: '1.1rem' }}>🎉</span>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>Đang tiết kiệm</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>{t('saving')}</div>
                   {orderAmount > 0 && (
                     <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: 1 }}>
                       {formatCurrency(orderAmount)} → <strong style={{ color: '#10b981' }}>{formatCurrency(Math.max(0, orderAmount - savings))}</strong>

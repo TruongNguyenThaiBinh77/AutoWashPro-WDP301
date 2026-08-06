@@ -4,5 +4,9 @@
   "all": "Tất cả",
   "unread": "Chưa đọc",
   "empty": "Chưa có thông báo nào",
-  "view_all": "Xem tất cả thông báo"
+  "view_all": "Xem tất cả thông báo",
+  "just_now": "Vừa xong",
+  "minutes_ago": "phút trước",
+  "hours_ago": "giờ trước",
+  "days_ago": "ngày trước"
 }

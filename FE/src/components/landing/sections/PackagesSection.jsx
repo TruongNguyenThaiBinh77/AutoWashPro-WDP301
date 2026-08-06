@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSystemConfig } from '@/hooks/useSystemConfig';
+import { useTranslation } from 'react-i18next';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -10,6 +11,7 @@ function formatPrice(v) {
 }
 
 export default function PackagesSection() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('single');
   const [packages, setPackages] = useState([]);
@@ -36,8 +38,8 @@ export default function PackagesSection() {
   const tabs = [
     {
       id: 'single',
-      label: 'Đặt lịch thường',
-      sublabel: 'Linh hoạt & Nhanh chóng',
+      labelKey: 'landing.packages.quick_booking',
+      sublabelKey: 'landing.packages.quick_booking_sub',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -49,8 +51,8 @@ export default function PackagesSection() {
     },
     {
       id: 'recurring',
-      label: 'Đặt lịch định kỳ',
-      sublabel: 'Tự động & Tiện lợi',
+      labelKey: 'landing.packages.recurring_booking',
+      sublabelKey: 'landing.packages.recurring_booking_sub',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
@@ -59,8 +61,8 @@ export default function PackagesSection() {
     },
     {
       id: 'slot_pack',
-      label: 'Gói slot prepaid',
-      sublabel: 'Tiết kiệm đến 15%',
+      labelKey: 'landing.packages.slot_pack',
+      sublabelKey: 'landing.packages.slot_pack_sub',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z" />
@@ -81,13 +83,13 @@ export default function PackagesSection() {
         {/* Header Section */}
         <div className="text-center mb-16">
           <span className="text-emerald-600 text-xs font-semibold tracking-widest uppercase mb-4 block">
-            GIẢI PHÁP ĐẶT LỊCH
+            {t('landing.packages.solutions')}
           </span>
           <h2 className="text-4xl md:text-5xl font-extrabold tracking-tighter leading-none text-slate-900 mb-6">
-            Chọn cách đặt lịch phù hợp với bạn
+            {t('landing.packages.choose_style')}
           </h2>
           <p className="text-slate-500 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
-            Chúng tôi cung cấp nhiều hình thức đặt lịch rửa xe linh hoạt, giúp bạn tiết kiệm tối đa thời gian, chi phí và giữ cho phương tiện luôn sạch bóng.
+            {t('landing.packages.choose_style_desc')}
           </p>
         </div>
 
@@ -111,8 +113,8 @@ export default function PackagesSection() {
                   {tab.icon}
                 </div>
                 <div>
-                  <div className="font-bold text-sm sm:text-base leading-tight">{tab.label}</div>
-                  <div className="text-xs text-slate-400 font-medium mt-0.5">{tab.sublabel}</div>
+                  <div className="font-bold text-sm sm:text-base leading-tight">{t(tab.labelKey)}</div>
+                  <div className="text-xs text-slate-400 font-medium mt-0.5">{t(tab.sublabelKey)}</div>
                 </div>
                 {isActive && (
                   <motion.div
@@ -139,13 +141,13 @@ export default function PackagesSection() {
               >
                 <div className="lg:col-span-7 space-y-6">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700">
-                    ✨ DỊCH VỤ NHANH CHÓNG
+                    {t('landing.packages.quick_service_title')}
                   </div>
                   <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                    Đặt lịch đơn lẻ 24/7
+                    {t('landing.packages.quick_service_heading')}
                   </h3>
                   <p className="text-slate-500 text-sm md:text-base leading-relaxed">
-                    Giải pháp hoàn hảo khi bạn cần rửa xe gấp hoặc không có lịch trình rửa xe định kỳ cố định. Đặt chỗ linh hoạt bất cứ lúc nào trong ngày chỉ với vài thao tác chạm.
+                    {t('landing.packages.quick_service_desc')}
                   </p>
 
                   <div className="space-y-4 pt-2">
@@ -154,8 +156,8 @@ export default function PackagesSection() {
                         1
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm md:text-base">Hẹn lịch chính xác</h4>
-                        <p className="text-xs md:text-sm text-slate-400">Chọn chi nhánh gần nhất và chọn đúng khung giờ rửa xe còn trống.</p>
+                        <h4 className="font-bold text-slate-800 text-sm md:text-base">{t('landing.packages.feature_exact_booking')}</h4>
+                        <p className="text-xs md:text-sm text-slate-400">{t('landing.packages.feature_exact_booking_desc')}</p>
                       </div>
                     </div>
                     <div className="flex gap-4">
@@ -163,8 +165,8 @@ export default function PackagesSection() {
                         2
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm md:text-base">Cá nhân hóa dịch vụ</h4>
-                        <p className="text-xs md:text-sm text-slate-400">Chọn gói rửa chính và thêm các dịch vụ tùy chọn như vệ sinh động cơ, nội thất.</p>
+                        <h4 className="font-bold text-slate-800 text-sm md:text-base">{t('landing.packages.feature_personalized')}</h4>
+                        <p className="text-xs md:text-sm text-slate-400">{t('landing.packages.feature_personalized_desc')}</p>
                       </div>
                     </div>
                     <div className="flex gap-4">
@@ -172,8 +174,8 @@ export default function PackagesSection() {
                         3
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm md:text-base">Đặt cọc online {depositPercent}%</h4>
-                        <p className="text-xs md:text-sm text-slate-400">Thanh toán đặt cọc qua chuyển khoản để đảm bảo slot, không phải xếp hàng chờ đợi.</p>
+                        <h4 className="font-bold text-slate-800 text-sm md:text-base">{t('landing.packages.feature_online_deposit', { percent: depositPercent })}</h4>
+                        <p className="text-xs md:text-sm text-slate-400">{t('landing.packages.feature_online_deposit_desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -183,7 +185,7 @@ export default function PackagesSection() {
                       onClick={() => navigate('/booking?tab=regular')}
                       className="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-[0_4px_20px_-5px_rgba(16,185,129,0.3)] hover:shadow-emerald-500/30 transition-all duration-300 text-center"
                     >
-                      Đặt lịch ngay
+                      {t('landing.packages.book_now')}
                     </button>
                   </div>
                 </div>
@@ -201,22 +203,22 @@ export default function PackagesSection() {
                         </svg>
                       </div>
                       <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md">
-                        ONLINE CONFIRMED
+                        {t('landing.packages.online_confirmed')}
                       </span>
                     </div>
 
                     <div className="z-10 space-y-2">
-                      <div className="text-[11px] font-bold text-emerald-100 uppercase tracking-widest">Giữ chỗ 24/7</div>
-                      <div className="text-2xl font-black leading-tight">Nhanh Chóng & Linh Hoạt</div>
+                      <div className="text-[11px] font-bold text-emerald-100 uppercase tracking-widest">{t('landing.packages.quick_hold_label')}</div>
+                      <div className="text-2xl font-black leading-tight">{t('landing.packages.quick_tagline')}</div>
                       <p className="text-[11px] text-emerald-50/80 leading-relaxed">
-                        Đặt lịch online trước khi đi để tiết kiệm thời gian chờ. Hệ thống tự động xác nhận slot ngay lập tức.
+                        {t('landing.packages.quick_card_desc')}
                       </p>
                     </div>
 
                     <div className="pt-4 border-t border-white/20 flex justify-between items-center z-10">
                       <div>
-                        <div className="text-[10px] text-emerald-100/60 uppercase">Phí đặt cọc</div>
-                        <div className="text-lg font-bold">Chỉ {depositPercent}%</div>
+                        <div className="text-[10px] text-emerald-100/60 uppercase">{t('landing.packages.quick_deposit_label')}</div>
+                        <div className="text-lg font-bold">{t('landing.packages.quick_deposit_value', { percent: depositPercent })}</div>
                       </div>
                       <div className="w-9 h-9 rounded-full bg-white text-emerald-600 flex items-center justify-center font-bold">
                         →
@@ -238,13 +240,13 @@ export default function PackagesSection() {
               >
                 <div className="lg:col-span-7 space-y-6">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700">
-                    🔄 TIẾT KIỆM THỜI GIAN
+                    {t('landing.packages.recurring_title')}
                   </div>
                   <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                    Đặt lịch định kỳ tự động
+                    {t('landing.packages.recurring_heading')}
                   </h3>
                   <p className="text-slate-500 text-sm md:text-base leading-relaxed">
-                    Bạn quá bận rộn để nhớ đặt lịch rửa xe hàng tuần? Giải pháp đặt lịch định kỳ của AutoWashPro giúp xe của bạn luôn sạch sẽ theo một lịch trình cố định được thiết lập một lần duy nhất.
+                    {t('landing.packages.recurring_desc')}
                   </p>
 
                   <div className="space-y-4 pt-2">
@@ -253,8 +255,8 @@ export default function PackagesSection() {
                         ✓
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm md:text-base">Lên lịch hàng tuần tự động</h4>
-                        <p className="text-xs md:text-sm text-slate-400">Chọn thứ trong tuần và giờ rửa xe cố định. Hệ thống tự tạo đặt lịch mỗi tuần.</p>
+                        <h4 className="font-bold text-slate-800 text-sm md:text-base">{t('landing.packages.feature_auto_weekly')}</h4>
+                        <p className="text-xs md:text-sm text-slate-400">{t('landing.packages.feature_auto_weekly_desc')}</p>
                       </div>
                     </div>
                     <div className="flex gap-4">
@@ -262,8 +264,8 @@ export default function PackagesSection() {
                         ✓
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm md:text-base">Ưu tiên giữ slot giờ cao điểm</h4>
-                        <p className="text-xs md:text-sm text-slate-400">Lịch định kỳ luôn được hệ thống ưu tiên xếp chỗ trước kể cả trong các khung giờ cao điểm.</p>
+                        <h4 className="font-bold text-slate-800 text-sm md:text-base">{t('landing.packages.feature_peak_priority')}</h4>
+                        <p className="text-xs md:text-sm text-slate-400">{t('landing.packages.feature_peak_priority_desc')}</p>
                       </div>
                     </div>
                     <div className="flex gap-4">
@@ -271,8 +273,8 @@ export default function PackagesSection() {
                         ✓
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-sm md:text-base">Dễ dàng quản lý & thay đổi</h4>
-                        <p className="text-xs md:text-sm text-slate-400">Bạn có thể dời lịch, hủy buổi rửa xe hoặc thay đổi thông tin định kỳ ngay trong hồ sơ.</p>
+                        <h4 className="font-bold text-slate-800 text-sm md:text-base">{t('landing.packages.feature_manage')}</h4>
+                        <p className="text-xs md:text-sm text-slate-400">{t('landing.packages.feature_manage_desc')}</p>
                       </div>
                     </div>
                   </div>
@@ -282,7 +284,7 @@ export default function PackagesSection() {
                       onClick={() => navigate('/booking?tab=recurring')}
                       className="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-[0_4px_20px_-5px_rgba(16,185,129,0.3)] hover:shadow-emerald-500/30 transition-all duration-300 text-center"
                     >
-                      Thiết lập lịch định kỳ
+                      {t('landing.packages.recurring_auto_btn')}
                     </button>
                   </div>
                 </div>
@@ -300,22 +302,22 @@ export default function PackagesSection() {
                         </svg>
                       </div>
                       <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md">
-                        RECURRING VIP
+                        {t('landing.packages.recurring_vip_badge')}
                       </span>
                     </div>
 
                     <div className="z-10 space-y-2">
-                      <div className="text-[11px] font-bold text-cyan-100 uppercase tracking-widest">Tiện lợi & Tự động</div>
-                      <div className="text-2xl font-black leading-tight">Xế Cưng Luôn Sạch Bóng</div>
+                      <div className="text-[11px] font-bold text-cyan-100 uppercase tracking-widest">{t('landing.packages.recurring_card_convenience')}</div>
+                      <div className="text-2xl font-black leading-tight">{t('landing.packages.recurring_card_tagline')}</div>
                       <p className="text-[11px] text-cyan-5/80 leading-relaxed">
-                        Hệ thống tự động nhắc nhở trước 60 phút và sắp xếp chỗ đón tiếp chuyên nghiệp cho lịch rửa xe hàng tuần của bạn.
+                        {t('landing.packages.recurring_card_desc')}
                       </p>
                     </div>
 
                     <div className="pt-4 border-t border-white/20 flex justify-between items-center z-10">
                       <div>
-                        <div className="text-[10px] text-cyan-100/60 uppercase">Chu kỳ linh hoạt</div>
-                        <div className="text-lg font-bold">4 - 12 tuần</div>
+                        <div className="text-[10px] text-cyan-100/60 uppercase">{t('landing.packages.recurring_card_cycle')}</div>
+                        <div className="text-lg font-bold">{t('landing.packages.recurring_card_weeks')}</div>
                       </div>
                       <div className="w-9 h-9 rounded-full bg-white text-teal-600 flex items-center justify-center font-bold">
                         →
@@ -338,31 +340,31 @@ export default function PackagesSection() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.02)]">
                   <div className="lg:col-span-7 space-y-6">
                     <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700">
-                      💰 GIẢI PHÁP SIÊU TIẾT KIỆM
+                      {t('landing.packages.slot_deal_title')}
                     </div>
                     <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                      Gói slot trả trước (Slot packs)
+                      {t('landing.packages.slot_deal_heading')}
                     </h3>
                     <p className="text-slate-500 text-sm md:text-base leading-relaxed">
-                      Lựa chọn tối ưu về mặt kinh tế dành cho khách hàng thân thiết. Mua trước số lượt rửa xe theo gói lớn để nhận mức chiết khấu cực sâu lên đến 15% và đơn giản hóa quy trình đặt lịch.
+                      {t('landing.packages.slot_deal_desc')}
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                       <div className="p-4 rounded-2xl bg-slate-50 border border-slate-150">
-                        <div className="text-xl font-bold text-emerald-600">Giảm giá sâu</div>
-                        <p className="text-xs text-slate-400 mt-1">Chiết khấu 5% khi mua gói 5 lượt, 10% khi mua 10 lượt và 15% khi mua trên 20 lượt.</p>
+                        <div className="text-xl font-bold text-emerald-600">{t('landing.packages.feature_deep_discount')}</div>
+                        <p className="text-xs text-slate-400 mt-1">{t('landing.packages.feature_deep_discount_desc')}</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-slate-50 border border-slate-150">
-                        <div className="text-xl font-bold text-emerald-600">Không cần đặt cọc</div>
-                        <p className="text-xs text-slate-400 mt-1">Khi đặt lịch bằng gói slot, bạn không cần phải thanh toán đặt cọc {depositPercent}% tại bước xác nhận.</p>
+                        <div className="text-xl font-bold text-emerald-600">{t('landing.packages.feature_no_deposit')}</div>
+                        <p className="text-xs text-slate-400 mt-1">{t('landing.packages.feature_no_deposit_desc')}</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-slate-50 border border-slate-150">
-                        <div className="text-xl font-bold text-emerald-600">Áp dụng đa xe</div>
-                        <p className="text-xs text-slate-400 mt-1">Bạn có thể chọn chế độ "Tất cả xe" để sử dụng gói slot chung cho nhiều xe trong nhà.</p>
+                        <div className="text-xl font-bold text-emerald-600">{t('landing.packages.feature_multi_vehicle')}</div>
+                        <p className="text-xs text-slate-400 mt-1">{t('landing.packages.feature_multi_vehicle_desc')}</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-slate-50 border border-slate-150">
-                        <div className="text-xl font-bold text-emerald-600">Quản lý trực quan</div>
-                        <p className="text-xs text-slate-400 mt-1">Theo dõi số lượt còn lại, hạn sử dụng, mã coupon check-in trực tiếp tại Cổng khách hàng.</p>
+                        <div className="text-xl font-bold text-emerald-600">{t('landing.packages.feature_visual_mgmt')}</div>
+                        <p className="text-xs text-slate-400 mt-1">{t('landing.packages.feature_visual_mgmt_desc')}</p>
                       </div>
                     </div>
 
@@ -371,7 +373,7 @@ export default function PackagesSection() {
                         onClick={() => navigate('/booking?tab=slot_pack')}
                         className="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-[0_4px_20px_-5px_rgba(16,185,129,0.3)] hover:shadow-emerald-500/30 transition-all duration-300"
                       >
-                        Mua gói slot tiết kiệm ngay
+                        {t('landing.packages.buy_slot_now')}
                       </button>
                     </div>
                   </div>
@@ -388,22 +390,22 @@ export default function PackagesSection() {
                           </svg>
                         </div>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md">
-                          PREPAID PASS
+                          {t('landing.packages.prepaid_badge')}
                         </span>
                       </div>
 
                       <div className="z-10 space-y-2">
-                        <div className="text-[11px] font-bold text-amber-100 uppercase tracking-widest">Tiết kiệm & Tiện lợi</div>
-                        <div className="text-2xl font-black leading-tight">Mua Nhiều Lượt — Dùng Dần</div>
+                        <div className="text-[11px] font-bold text-amber-100 uppercase tracking-widest">{t('landing.packages.slot_card_save')}</div>
+                        <div className="text-2xl font-black leading-tight">{t('landing.packages.slot_card_tagline')}</div>
                         <p className="text-[11px] text-amber-50/80 leading-relaxed">
-                          Nhận mã gói check-in tiện lợi, quét QR tại quầy để rửa xe ngay mà không cần giao dịch thanh toán rườm rà.
+                          {t('landing.packages.slot_card_desc')}
                         </p>
                       </div>
 
                       <div className="pt-4 border-t border-white/20 flex justify-between items-center z-10">
                         <div>
-                          <div className="text-[10px] text-amber-100/60 uppercase">Chiết khấu tối đa</div>
-                          <div className="text-lg font-bold">Lên đến 15%</div>
+                          <div className="text-[10px] text-amber-100/60 uppercase">{t('landing.packages.slot_card_discount')}</div>
+                          <div className="text-lg font-bold">{t('landing.packages.slot_card_discount_val')}</div>
                         </div>
                         <div className="w-9 h-9 rounded-full bg-white text-orange-600 flex items-center justify-center font-bold">
                           →
@@ -416,18 +418,18 @@ export default function PackagesSection() {
                 {/* Slot Products list - Dynamic data loading */}
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h4 className="text-2xl font-bold text-slate-900">Các gói slot có sẵn để mua</h4>
-                    <p className="text-sm text-slate-400 mt-1">Chọn gói sản phẩm phù hợp bên dưới để đăng ký mua trực tiếp tại Cổng đặt lịch.</p>
+                    <h4 className="text-2xl font-bold text-slate-900">{t('landing.packages.available_slots')}</h4>
+                    <p className="text-sm text-slate-400 mt-1">{t('landing.packages.available_slots_desc')}</p>
                   </div>
 
                   {loading ? (
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
                       <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-emerald-600 animate-spin" />
-                      <div className="text-sm text-slate-400">Đang tải các gói slot...</div>
+                      <div className="text-sm text-slate-400">{t('landing.packages.loading_slots')}</div>
                     </div>
                   ) : packages.length === 0 ? (
                     <div className="text-center text-slate-400 py-16 bg-white border border-slate-200 rounded-3xl">
-                      Chưa có gói slot công khai nào được phát hành.
+                      {t('landing.packages.no_slots')}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start">
@@ -447,7 +449,7 @@ export default function PackagesSection() {
                           >
                             {(pkg.popular || i === 1) && (
                               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-950 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-md">
-                                Phổ biến nhất
+                                {t('landing.packages.most_popular')}
                               </div>
                             )}
                             <div className="space-y-6">
@@ -456,7 +458,7 @@ export default function PackagesSection() {
                                   {pkg.name}
                                 </h3>
                                 <p className={`text-xs mt-1.5 leading-relaxed ${pkg.popular || i === 1 ? 'text-emerald-100/80' : 'text-slate-400'}`}>
-                                  {pkg.description || 'Gói lượt rửa xe tiết kiệm.'}
+                                  {pkg.description || t('landing.packages.per_wash')}
                                 </p>
                               </div>
 
@@ -471,12 +473,12 @@ export default function PackagesSection() {
                                 )}
                               </div>
                               <p className={`text-[11px] font-medium -mt-4 ${pkg.popular || i === 1 ? 'text-emerald-100/80' : 'text-slate-400'}`}>
-                                * Giá đã bao gồm VAT 10%
+                                {t('landing.packages.vat_included')}
                               </p>
 
                               {pkg.slots && (
                                 <div className={`text-sm font-bold flex items-center gap-2 ${pkg.popular || i === 1 ? 'text-amber-300' : 'text-emerald-600'}`}>
-                                  <span>🎫</span> {pkg.slots} lượt rửa xe chất lượng cao
+                                  <span>🎫</span> {t('landing.packages.slots_count', { count: pkg.slots })}
                                 </div>
                               )}
 
@@ -497,13 +499,13 @@ export default function PackagesSection() {
                                       <svg className={`w-4 h-4 mt-0.5 shrink-0 ${pkg.popular || i === 1 ? 'text-emerald-200' : 'text-emerald-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                         <polyline points="20 6 9 17 4 12" />
                                       </svg>
-                                      <span className={pkg.popular || i === 1 ? 'text-emerald-50/90' : 'text-slate-500'}>Không cần đặt cọc {depositPercent}%</span>
+                                      <span className={pkg.popular || i === 1 ? 'text-emerald-50/90' : 'text-slate-500'}>{t('landing.packages.feature_no_deposit2', { percent: depositPercent })}</span>
                                     </li>
                                     <li className="flex items-start gap-2.5 text-xs">
                                       <svg className={`w-4 h-4 mt-0.5 shrink-0 ${pkg.popular || i === 1 ? 'text-emerald-200' : 'text-emerald-500'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                         <polyline points="20 6 9 17 4 12" />
                                       </svg>
-                                      <span className={pkg.popular || i === 1 ? 'text-emerald-50/90' : 'text-slate-500'}>Ưu tiên đặt chỗ nhanh</span>
+                                      <span className={pkg.popular || i === 1 ? 'text-emerald-50/90' : 'text-slate-500'}>{t('landing.packages.feature_priority_booking')}</span>
                                     </li>
                                   </>
                                 )}
@@ -517,7 +519,7 @@ export default function PackagesSection() {
                                     : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm'
                                 }`}
                               >
-                                Mua gói tại cổng đặt lịch
+                                {t('landing.packages.buy_at_booking')}
                               </button>
                             </div>
                           </motion.div>

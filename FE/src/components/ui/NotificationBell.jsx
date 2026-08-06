@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   CalendarCheck,
@@ -42,17 +43,18 @@ const TYPE_CONFIG = {
   system:            { Icon: Bell,                    color: 'text-slate-500',  bg: 'bg-slate-50' },
 };
 
-function timeAgo(dateStr) {
+function timeAgo(dateStr, t) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return 'Vừa xong';
-  if (m < 60) return `${m} phút trước`;
+  if (m < 1) return t('just_now');
+  if (m < 60) return `${m} ${t('minutes_ago')}`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h} giờ trước`;
-  return `${Math.floor(h / 24)} ngày trước`;
+  if (h < 24) return `${h} ${t('hours_ago')}`;
+  return `${Math.floor(h / 24)} ${t('days_ago')}`;
 }
 
 export default function NotificationBell() {
+  const { t } = useTranslation('notification');
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -146,7 +148,7 @@ export default function NotificationBell() {
       <button
         onClick={() => setOpen((p) => !p)}
         className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors shadow-sm"
-        aria-label="Thông báo"
+        aria-label={t('title')}
       >
         <Bell size={18} weight={unread > 0 ? 'fill' : 'regular'} />
         {unread > 0 && (
@@ -163,7 +165,7 @@ export default function NotificationBell() {
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div className="flex items-center gap-2">
               <Bell size={15} className="text-slate-500" weight="fill" />
-              <span className="text-sm font-semibold text-slate-700">Thông báo</span>
+              <span className="text-sm font-semibold text-slate-700">{t('title')}</span>
               {unread > 0 && (
                 <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
                   {unread}
@@ -174,7 +176,7 @@ export default function NotificationBell() {
               {unread > 0 && (
                 <button onClick={markAll}
                   className="rounded-lg px-2 py-1 text-[11px] text-blue-600 hover:bg-blue-50 transition-colors font-medium">
-                  Đọc tất cả
+                  {t('mark_all_read')}
                 </button>
               )}
               <button onClick={deleteAll}
@@ -193,7 +195,7 @@ export default function NotificationBell() {
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-10 text-slate-400">
                 <Bell size={32} weight="duotone" />
-                <p className="text-xs">Không có thông báo nào</p>
+                <p className="text-xs">{t('empty')}</p>
               </div>
             ) : (
               notifications.map((n) => {
@@ -220,7 +222,7 @@ export default function NotificationBell() {
                       <p className="mt-0.5 text-[11px] text-slate-500 leading-snug line-clamp-2">
                         {n.message}
                       </p>
-                      <p className="mt-1 text-[10px] text-slate-400">{timeAgo(n.createdAt)}</p>
+                      <p className="mt-1 text-[10px] text-slate-400">{timeAgo(n.createdAt, t)}</p>
                     </div>
 
                     {/* Unread dot */}

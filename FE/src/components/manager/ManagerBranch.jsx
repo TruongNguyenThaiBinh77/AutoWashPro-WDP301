@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import {
   Buildings,
@@ -23,8 +24,8 @@ function api(path, opts = {}) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getStoredToken()}`, ...opts.headers },
   });
 }
-async function readErr(res) {
-  try { const j = await res.json(); return j?.message || `Lỗi ${res.status}`; } catch { return `Lỗi ${res.status}`; }
+async function readErr(res, t) {
+  try { const j = await res.json(); return j?.message || t('error_prefix', { status: res.status }); } catch { return t('error_prefix', { status: res.status }); }
 }
 function Spinner({ size = 18 }) {
   return (
@@ -76,7 +77,7 @@ function EditModal({ branch, onSave, onClose, saving }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-[15px] font-semibold text-slate-800">Chỉnh sửa chi nhánh</h2>
+          <h2 className="text-[15px] font-semibold text-slate-800">{t('edit_title')}</h2>
           <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
             <X size={16} />
           </button>
@@ -88,52 +89,52 @@ function EditModal({ branch, onSave, onClose, saving }) {
         }} className="space-y-4 overflow-y-auto max-h-[70vh] px-6 py-5">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Tên chi nhánh</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_name')}</label>
               <input className={inp} value={form.name} onChange={(e) => set('name', e.target.value)} />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Số điện thoại</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_phone')}</label>
               <input className={inp} value={form.phone} onChange={(e) => set('phone', e.target.value)} />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Địa chỉ</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_address')}</label>
             <input className={inp} value={form.address} onChange={(e) => set('address', e.target.value)} />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Email</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_email')}</label>
             <input type="email" className={inp} value={form.email} onChange={(e) => set('email', e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Giờ mở</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_opening')}</label>
               <input type="time" className={inp} value={form.openingTime} onChange={(e) => set('openingTime', e.target.value)} />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Giờ đóng</label>
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_closing')}</label>
               <input type="time" className={inp} value={form.closingTime} onChange={(e) => set('closingTime', e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Tọa độ X (svgCx)</label>
-              <input type="number" className={inp} value={form.svgCx} onChange={(e) => set('svgCx', e.target.value)} placeholder="VD: 236" />
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_coord_x')}</label>
+              <input type="number" className={inp} value={form.svgCx} onChange={(e) => set('svgCx', e.target.value)} placeholder={t('coord_example')} />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Tọa độ Y (svgCy)</label>
-              <input type="number" className={inp} value={form.svgCy} onChange={(e) => set('svgCy', e.target.value)} placeholder="VD: 684" />
+              <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_coord_y')}</label>
+              <input type="number" className={inp} value={form.svgCy} onChange={(e) => set('svgCy', e.target.value)} placeholder={t('coord_example')} />
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">URL ảnh</label>
-            <input className={inp} value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="https://..." />
+            <label className="mb-1 block text-xs font-medium text-slate-600">{t('field_image_url')}</label>
+            <input className={inp} value={form.image} onChange={(e) => set('image', e.target.value)} placeholder={t('image_placeholder')} />
           </div>
           <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
             <button type="button" onClick={onClose} disabled={saving}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">Hủy</button>
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">{t('cancel')}</button>
             <button type="submit" disabled={saving}
               className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors">
-              {saving && <Spinner size={14} />}{saving ? 'Đang lưu…' : 'Lưu thay đổi'}
+              {saving && <Spinner size={14} />}{saving ? t('saving') : t('save_changes')}
             </button>
           </div>
         </form>
@@ -144,6 +145,7 @@ function EditModal({ branch, onSave, onClose, saving }) {
 
 /* ═══ Main ═══ */
 export default function ManagerBranch({ user }) {
+  const { t } = useTranslation('manager');
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -156,7 +158,7 @@ export default function ManagerBranch({ user }) {
   useEffect(() => {
     api('/branches')
       .then(async (res) => {
-        if (!res.ok) throw new Error(await readErr(res));
+        if (!res.ok) throw new Error(await readErr(res, t));
         const p = await res.json();
         const data = p?.data ?? p;
         setBranches(Array.isArray(data) ? data : []);
@@ -169,13 +171,13 @@ export default function ManagerBranch({ user }) {
     setSaving(true);
     try {
       const res = await api(`/branches/${editing._id}`, { method: 'PUT', body: JSON.stringify(form) });
-      if (!res.ok) throw new Error(await readErr(res));
+      if (!res.ok) throw new Error(await readErr(res, t));
       const p = await res.json();
       const updated = p?.data ?? p;
       setBranches((prev) => prev.map((b) => b._id === updated._id ? updated : b));
       setEditing(null);
-      notify('Cập nhật chi nhánh thành công!');
-    } catch (err) { notify(err.message || 'Cập nhật thất bại', 'error'); }
+      notify(t('update_success'));
+    } catch (err) { notify(err.message || t('update_failed'), 'error'); }
     finally { setSaving(false); }
   };
 
@@ -184,12 +186,12 @@ export default function ManagerBranch({ user }) {
     setTogglingId(branch._id);
     try {
       const res = await api(`/branches/${branch._id}/status`, { method: 'PATCH', body: JSON.stringify({ status: next }) });
-      if (!res.ok) throw new Error(await readErr(res));
+      if (!res.ok) throw new Error(await readErr(res, t));
       const p = await res.json();
       const updated = p?.data ?? p;
       setBranches((prev) => prev.map((b) => b._id === updated._id ? updated : b));
-      notify(next === 'active' ? 'Đã kích hoạt chi nhánh' : 'Đã tắt chi nhánh');
-    } catch (err) { notify(err.message || 'Thay đổi thất bại', 'error'); }
+      notify(next === 'active' ? t('success_active') : t('success_inactive'));
+    } catch (err) { notify(err.message || t('toggle_failed'), 'error'); }
     finally { setTogglingId(null); }
   };
 
@@ -203,13 +205,13 @@ export default function ManagerBranch({ user }) {
   return (
     <div className="space-y-10">
       <div>
-        <p className="text-sm text-slate-500">Thông tin chi tiết và bản đồ định vị của các chi nhánh bạn đang quản lý.</p>
+        <p className="text-sm text-slate-500">{t('branch_list_desc')}</p>
       </div>
 
       {branches.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 py-20 text-slate-400">
           <Buildings size={48} weight="duotone" className="mb-4 text-slate-300" />
-          <p>Bạn chưa được phân công quản lý chi nhánh nào.</p>
+          <p>{t('no_branches_assigned')}</p>
         </div>
       ) : (
         <div className="space-y-16">
@@ -234,10 +236,10 @@ export default function ManagerBranch({ user }) {
                         {b.name}
                         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'}`}>
                           <div className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                          {active ? 'Hoạt động' : 'Ngừng hoạt động'}
+                          {active ? t('active_status') : t('inactive_status')}
                         </span>
                       </h2>
-                      <p className="text-sm text-slate-500 mt-1">Chi tiết hoạt động</p>
+                      <p className="text-sm text-slate-500 mt-1">{t('branch_detail')}</p>
                     </div>
                   </div>
 
@@ -248,13 +250,13 @@ export default function ManagerBranch({ user }) {
                       className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold !text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm disabled:opacity-50 transition-colors"
                     >
                       {toggling ? <Spinner size={14} /> : active ? <ToggleRight size={16} className="text-emerald-500" /> : <ToggleLeft size={16} className="text-slate-400" />}
-                      {active ? 'Tắt hoạt động' : 'Bật hoạt động'}
+                      {active ? t('toggle_active') : t('toggle_inactive')}
                     </button>
                     <button
                       onClick={() => setEditing(b)}
                       className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold !text-blue-700 hover:bg-blue-100 transition-colors"
                     >
-                      <PencilSimple size={16} /> Cập nhật
+                      <PencilSimple size={16} /> {t('update_branch')}
                     </button>
                   </div>
                 </div>
@@ -288,8 +290,8 @@ export default function ManagerBranch({ user }) {
                       <MapPin size={20} weight="fill" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Địa chỉ</p>
-                      <p className="text-sm font-medium text-slate-700 leading-snug">{b.address || 'Chưa cập nhật'}</p>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('field_address')}</p>
+                      <p className="text-sm font-medium text-slate-700 leading-snug">{b.address || t('not_updated')}</p>
                     </div>
                   </div>
 
@@ -298,8 +300,8 @@ export default function ManagerBranch({ user }) {
                       <Phone size={20} weight="fill" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Điện thoại</p>
-                      <p className="text-sm font-medium text-slate-700">{b.phone || 'Chưa cập nhật'}</p>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('field_phone')}</p>
+                      <p className="text-sm font-medium text-slate-700">{b.phone || t('not_updated')}</p>
                     </div>
                   </div>
 
@@ -308,8 +310,8 @@ export default function ManagerBranch({ user }) {
                       <Envelope size={20} weight="fill" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Email liên hệ</p>
-                      <p className="text-sm font-medium text-slate-700 break-all">{b.email || 'Chưa cập nhật'}</p>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('field_email')}</p>
+                      <p className="text-sm font-medium text-slate-700 break-all">{b.email || t('not_updated')}</p>
                     </div>
                   </div>
 
@@ -318,9 +320,9 @@ export default function ManagerBranch({ user }) {
                       <Clock size={20} weight="fill" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Giờ mở cửa</p>
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{t('field_hours')}</p>
                       <p className="text-sm font-medium text-slate-700">
-                        {b.openingTime && b.closingTime ? `${b.openingTime} – ${b.closingTime}` : 'Chưa cập nhật'}
+                        {b.openingTime && b.closingTime ? `${b.openingTime} – ${b.closingTime}` : t('not_updated')}
                       </p>
                     </div>
                   </div>

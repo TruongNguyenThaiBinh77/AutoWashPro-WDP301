@@ -617,5 +617,7 @@
     "logout": "Đăng xuất",
     "new_items": "mục mới",
     "mainMenu": "Menu chính"
-  }
+  },
+  "error_no_admin_permission": "Tài khoản không có quyền quản trị.",
+  "error_no_manager_permission": "Tài khoản không có quyền quản lý chi nhánh."
 }

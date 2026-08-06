@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
 import { showToast } from '@/lib/toast';
 import useSSE from '@/hooks/useSSE';
@@ -49,6 +50,7 @@ export const STATUS_MAP = {
 };
 
 export default function RefundRequests({ detailPath = '/admin/payments/refunds' }) {
+  const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
   const load = useCallback(async (pg = page, q = search, st = statusFilter, sDate = startDate, eDate = endDate) => {
     // Validate date range
     if (sDate && eDate && new Date(sDate) > new Date(eDate)) {
-      showToast('Ngày bắt đầu không được lớn hơn ngày kết thúc!', 'error');
+      showToast(t('date_invalid'), 'error');
       return;
     }
 
@@ -91,7 +93,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
 
       const res = await api(`/refund-requests?${params}`);
       const resData = await res.json();
-      if (!res.ok) throw new Error(resData.message || 'Không thể tải danh sách yêu cầu hoàn tiền');
+      if (!res.ok) throw new Error(resData.message || t('load_error'));
 
       const dataList = resData?.data?.data || (Array.isArray(resData?.data) ? resData.data : []);
       const pageInfo = resData?.data?.pagination || { page: pg, limit: 10, totalItems: dataList.length, totalPages: 1 };
@@ -120,7 +122,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
 
   const handleStartDateChange = (val) => {
     if (val && endDate && new Date(val) > new Date(endDate)) {
-      showToast('Ngày bắt đầu không được lớn hơn ngày kết thúc!', 'error');
+      showToast(t('date_invalid'), 'error');
       return;
     }
     setStartDate(val);
@@ -129,7 +131,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
 
   const handleEndDateChange = (val) => {
     if (startDate && val && new Date(startDate) > new Date(val)) {
-      showToast('Ngày bắt đầu không được lớn hơn ngày kết thúc!', 'error');
+      showToast(t('date_invalid'), 'error');
       return;
     }
     setEndDate(val);
@@ -176,31 +178,31 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
   useSSE(token, 'refund_requests_updated', () => load(page, search, statusFilter, startDate, endDate));
 
   async function handleDeleteSingle(r) {
-    if (!(await confirmDialog({ title: 'Xác nhận xóa', message: 'Bạn có chắc chắn muốn xóa yêu cầu hoàn tiền này? Hành động này không thể hoàn tác!', danger: true }))) return;
+    if (!(await confirmDialog({ title: t('delete_confirm_title'), message: t('delete_confirm_single'), danger: true }))) return;
     try {
       const res = await api(`/refund-requests/${r._id}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || 'Xóa yêu cầu hoàn tiền thất bại');
+      if (!res.ok) throw new Error(data.message || t('delete_failed'));
       setRequests(prev => prev.filter(item => item._id !== r._id));
-      showToast('Đã xóa yêu cầu hoàn tiền thành công', 'success');
+      showToast(t('delete_success'), 'success');
       load(page, search, statusFilter, startDate, endDate);
     } catch (e) { showToast(e.message, 'error'); }
   }
 
   async function deleteRequestsByRange() {
     if (deleteAll) {
-      if (!(await confirmDialog({ title: 'Xác nhận xóa tất cả', message: 'Bạn có chắc muốn xóa TOÀN BỘ dữ liệu yêu cầu hoàn tiền? Hành động này không thể hoàn tác!', danger: true }))) return;
+      if (!(await confirmDialog({ title: t('delete_all_title'), message: t('delete_all_confirm'), danger: true }))) return;
     } else {
-      if (!deleteDateFrom || !deleteDateTo) return showToast('Vui lòng chọn khoảng ngày', 'error');
-      if (!(await confirmDialog({ title: 'Xác nhận xóa', message: `Bạn có chắc muốn xóa yêu cầu hoàn tiền từ ${deleteDateFrom} đến ${deleteDateTo}? Hành động này không thể hoàn tác!`, danger: true }))) return;
+      if (!deleteDateFrom || !deleteDateTo) return showToast(t('select_date_range'), 'error');
+      if (!(await confirmDialog({ title: t('delete_confirm_title'), message: t('delete_range_confirm', { from: deleteDateFrom, to: deleteDateTo }), danger: true }))) return;
     }
     setDeleting(true);
     try {
       const params = deleteAll ? 'all=true' : `dateFrom=${deleteDateFrom}&dateTo=${deleteDateTo}`;
       const res = await api(`/refund-requests/range?${params}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || 'Xóa thất bại');
-      showToast(data.message || 'Đã xóa thành công', 'success');
+      if (!res.ok) throw new Error(data.message || t('delete_failed'));
+      showToast(data.message || t('delete_success'), 'success');
       setShowDeleteModal(false);
       setDeleteDateFrom('');
       setDeleteDateTo('');
@@ -224,7 +226,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
               type="text"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Tìm kiếm theo tên khách hàng..."
+              placeholder={t('search_placeholder')}
               className="w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2 pl-9 pr-4 text-xs text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
             />
             {search && (
@@ -245,10 +247,10 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="rounded-xl border border-slate-200 bg-slate-50/60 py-2 px-3 text-xs font-semibold text-slate-700 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="pending">Chờ duyệt</option>
-              <option value="approved">Đã hoàn tiền</option>
-              <option value="rejected">Đã từ chối</option>
+              <option value="all">{t('status_all')}</option>
+              <option value="pending">{t('status_pending')}</option>
+              <option value="approved">{t('status_approved')}</option>
+              <option value="rejected">{t('status_rejected')}</option>
             </select>
           </div>
 
@@ -257,18 +259,18 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
             <button
               onClick={() => load(page, search, statusFilter, startDate, endDate)}
               disabled={loading}
-              title="Làm mới dữ liệu"
+              title={t('refresh')}
               className="flex h-8 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors cursor-pointer"
             >
               <ArrowClockwise size={13} className={loading ? 'animate-spin' : ''} />
-              <span>Làm mới</span>
+              <span>{t('refresh')}</span>
             </button>
             <button
               onClick={() => setShowDeleteModal(true)}
               className="flex h-8 items-center gap-1.5 rounded-xl bg-red-600 px-3.5 text-xs font-semibold text-white hover:bg-red-500 transition-colors cursor-pointer shadow-2xs"
             >
               <Trash size={13} />
-              <span>Xóa dữ liệu</span>
+              <span>{t('delete_data')}</span>
             </button>
           </div>
         </div>
@@ -277,7 +279,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
         <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
             <Calendar size={14} className="text-slate-400" />
-            <span>Khoảng ngày:</span>
+            <span>{t('date_range')}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -287,7 +289,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
               onChange={(e) => handleStartDateChange(e.target.value)}
               className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-1.5 text-xs text-slate-700 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
-            <span className="text-xs text-slate-400">đến</span>
+            <span className="text-xs text-slate-400">{t('to')}</span>
             <input
               type="date"
               value={endDate}
@@ -301,7 +303,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
             onClick={handleTodayClick}
             className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
           >
-            ⚡ Hôm nay
+            {t('today')}
           </button>
 
           {(search || statusFilter !== 'all' || startDate || endDate) && (
@@ -309,7 +311,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
               onClick={handleClearFilters}
               className="text-xs font-medium text-slate-400 hover:text-slate-600 underline ml-auto cursor-pointer"
             >
-              Xóa bộ lọc
+              {t('clear_filters')}
             </button>
           )}
         </div>
@@ -325,7 +327,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
       ) : requests.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-slate-400 rounded-2xl border border-slate-200 bg-white shadow-xs">
           <ArrowUUpLeft size={48} weight="duotone" />
-          <p className="text-sm font-medium">Không tìm thấy yêu cầu hoàn tiền nào.</p>
+          <p className="text-sm font-medium">{t('no_results')}</p>
         </div>
       ) : (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -333,13 +335,13 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
             <table className="w-full border-collapse text-left text-sm text-slate-600">
               <thead className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3.5">Khách hàng</th>
-                  <th className="px-4 py-3.5">Mã đơn</th>
-                  <th className="px-4 py-3.5">Lý do</th>
-                  <th className="px-4 py-3.5 text-right">Số tiền</th>
-                  <th className="px-4 py-3.5">Trạng thái</th>
-                  <th className="px-4 py-3.5">Ngày gửi</th>
-                  <th className="px-4 py-3.5 text-right">Thao tác</th>
+                  <th className="px-4 py-3.5">{t('col_customer')}</th>
+                  <th className="px-4 py-3.5">{t('col_booking_code')}</th>
+                  <th className="px-4 py-3.5">{t('col_reason')}</th>
+                  <th className="px-4 py-3.5 text-right">{t('col_amount')}</th>
+                  <th className="px-4 py-3.5">{t('col_status')}</th>
+                  <th className="px-4 py-3.5">{t('col_date')}</th>
+                  <th className="px-4 py-3.5 text-right">{t('col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -385,21 +387,21 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => goToBooking(r)}
-                            title="Xem đơn đặt"
+                            title={t('view_booking')}
                             className="flex h-8 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
                           >
-                            Xem đơn
+                            {t('view_booking')}
                           </button>
                           <button
                             onClick={() => handleOpenDetail(r)}
-                            title="Xem chi tiết"
+                            title={t('view_detail')}
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
                           >
                             <Eye size={16} />
                           </button>
                           <button
                             onClick={() => handleDeleteSingle(r)}
-                            title="Xóa yêu cầu"
+                            title={t('delete_request')}
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
                           >
                             <Trash size={16} />
@@ -416,7 +418,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
           {/* Pagination Bar (10 items / page) */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/40 px-6 py-3.5 text-xs text-slate-500">
             <div>
-              Hiển thị <span className="font-semibold text-slate-700">{((pagination.page - 1) * pagination.limit) + 1}</span> - <span className="font-semibold text-slate-700">{Math.min(pagination.page * pagination.limit, pagination.totalItems)}</span> trên tổng số <span className="font-semibold text-slate-700">{pagination.totalItems}</span> yêu cầu
+              {t('showing')} <span className="font-semibold text-slate-700">{((pagination.page - 1) * pagination.limit) + 1}</span> - <span className="font-semibold text-slate-700">{Math.min(pagination.page * pagination.limit, pagination.totalItems)}</span> {t('of')} <span className="font-semibold text-slate-700">{pagination.totalItems}</span> {t('requests')}
             </div>
 
             {pagination.totalPages > 1 && (
@@ -426,7 +428,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
                   disabled={pagination.page <= 1 || loading}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer"
                 >
-                  ← Trước
+                  {t('prev')}
                 </button>
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pNum) => (
                   <button
@@ -446,7 +448,7 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
                   disabled={pagination.page >= pagination.totalPages || loading}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer"
                 >
-                  Sau →
+                  {t('next')}
                 </button>
               </div>
             )}
@@ -459,28 +461,28 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => { if (!deleting) setShowDeleteModal(false); }}>
           <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
-              <h2 className="font-semibold text-slate-800 text-sm">Xóa yêu cầu hoàn tiền theo khoảng ngày</h2>
+              <h2 className="font-semibold text-slate-800 text-sm">{t('delete_range_title')}</h2>
               <button disabled={deleting} onClick={() => setShowDeleteModal(false)} className="text-slate-400 hover:text-slate-600 disabled:opacity-30 text-lg cursor-pointer">✕</button>
             </div>
             <div className="p-6 space-y-4 text-xs">
               <p className="text-slate-600">
-                {deleteAll ? 'Bạn sắp xóa toàn bộ dữ liệu yêu cầu hoàn tiền.' : 'Chọn khoảng ngày muốn xóa.'}
-                <span className="font-semibold text-red-600"> Hành động này không thể hoàn tác!</span>
+                {deleteAll ? t('delete_all_data') : t('select_date_range')}
+                <span className="font-semibold text-red-600"> {t('cannot_undo')}</span>
               </p>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={deleteAll} onChange={(e) => setDeleteAll(e.target.checked)}
                   className="rounded border-slate-300 text-red-600 focus:ring-red-400" />
-                <span className="font-medium text-slate-700">Xóa tất cả dữ liệu</span>
+                <span className="font-medium text-slate-700">{t('delete_all_data')}</span>
               </label>
               {!deleteAll && (
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="block text-slate-500 mb-1 font-medium">Từ ngày</label>
+                    <label className="block text-slate-500 mb-1 font-medium">{t('from_date')}</label>
                     <input type="date" value={deleteDateFrom} onChange={(e) => setDeleteDateFrom(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400" />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-slate-500 mb-1 font-medium">Đến ngày</label>
+                    <label className="block text-slate-500 mb-1 font-medium">{t('to_date')}</label>
                     <input type="date" value={deleteDateTo} onChange={(e) => setDeleteDateTo(e.target.value)}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400" />
                   </div>
@@ -489,11 +491,11 @@ export default function RefundRequests({ detailPath = '/admin/payments/refunds' 
             </div>
             <div className="border-t border-slate-100 px-6 py-4 flex gap-3 justify-end">
               <button disabled={deleting} onClick={() => setShowDeleteModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 cursor-pointer">Hủy</button>
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 cursor-pointer">{t('cancel')}</button>
               <button onClick={deleteRequestsByRange} disabled={deleting || (!deleteAll && (!deleteDateFrom || !deleteDateTo))}
                 className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-500 disabled:opacity-50 cursor-pointer">
                 {deleting ? <Spinner size={14} className="animate-spin" /> : <Trash size={14} />}
-                {deleting ? 'Đang xóa...' : 'Xóa dữ liệu'}
+                {deleting ? t('deleting') : t('delete_data')}
               </button>
             </div>
           </div>

@@ -28,10 +28,10 @@ const TIER_BADGE_CLS = {
 };
 
 const FALLBACK_TIERS = [
-  { id: 'bronze', name: 'Đồng', minPoints: 0 },
-  { id: 'silver', name: 'Bạc', minPoints: 100000 },
-  { id: 'gold', name: 'Vàng', minPoints: 500000 },
-  { id: 'diamond', name: 'Kim Cương', minPoints: 1000000 },
+  { id: 'bronze', nameKey: 'landing.gifts.tier.bronze', minPoints: 0 },
+  { id: 'silver', nameKey: 'landing.gifts.tier.silver', minPoints: 100000 },
+  { id: 'gold', nameKey: 'landing.gifts.tier.gold', minPoints: 500000 },
+  { id: 'diamond', nameKey: 'landing.gifts.tier.diamond', minPoints: 1000000 },
 ];
 
 function buildTierMaps(tiers) {
@@ -697,17 +697,17 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                           </div>
                           <div className="mt-auto flex items-center justify-between text-[11px] text-slate-400 mb-3">
                             {cancelled
-                              ? <span className="text-rose-500 font-bold">Đã hủy</span>
+                              ? <span className="text-rose-500 font-bold">{t('landing.gifts.redeemed.status_cancelled')}</span>
                               : received
-                                ? <span className="text-emerald-600 font-bold">Đã nhận quà</span>
+                                ? <span className="text-emerald-600 font-bold">{t('landing.gifts.redeemed.status_received')}</span>
                                 : sent
-                                  ? <span className="text-blue-600 font-bold">Đã gửi · Chờ xác nhận nhận quà</span>
-                                  : <span className="text-emerald-600 font-bold">Chờ gửi quà</span>}
+                                  ? <span className="text-blue-600 font-bold">{t('landing.gifts.redeemed.status_sent')}</span>
+                                  : <span className="text-emerald-600 font-bold">{t('landing.gifts.redeemed.status_pending')}</span>}
                           </div>
                           {!cancelled && !received && (
-                          <button onClick={() => { navigator.clipboard.writeText(rd.code); showToast('Đã copy mã đổi thưởng!', 'success'); }}
+                          <button onClick={() => { navigator.clipboard.writeText(rd.code); showToast(t('landing.gifts.copy_code'), 'success'); }}
                             className="mt-auto w-full py-2.5 rounded-xl font-bold text-sm border bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200 transition-all">
-                            Copy mã đổi thưởng
+                            {t('landing.gifts.copy')}
                           </button>
                           )}
                         </div>
@@ -721,8 +721,8 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
             {filterType === 'mine' && myRewards.length === 0 && (
               <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl shadow-sm">
                 <div className="text-4xl mb-4">🎁</div>
-                <p className="text-slate-500 font-medium">Bạn chưa đổi phần quà vật lý nào.</p>
-                <p className="text-xs text-slate-400 mt-1">Chuyển sang tab "Quà vật lý" để đổi điểm lấy quà.</p>
+                <p className="text-slate-500 font-medium">{t('landing.gifts.empty_mine')}</p>
+                <p className="text-xs text-slate-400 mt-1">{t('landing.gifts.empty_mine_hint')}</p>
               </div>
             )}
           </div>
@@ -735,14 +735,14 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.12),transparent_70%)] pointer-events-none" />
               
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-200/80 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3 relative z-10">
-                ✨ Vòng Quay May Mắn
+                {t('landing.gifts.wheel.eyebrow')}
               </div>
 
-              <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-2 relative z-10 tracking-tight">Vòng Quay Trúng Thưởng</h3>
-              <p className="text-slate-500 mb-6 relative z-10 max-w-md text-xs md:text-sm font-medium leading-relaxed">Thanh toán thành công đơn dịch vụ để tích lũy thêm lượt quay và săn quà độc quyền!</p>
-              
+              <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-2 relative z-10 tracking-tight">{t('landing.gifts.wheel.heading')}</h3>
+              <p className="text-slate-500 mb-6 relative z-10 max-w-md text-xs md:text-sm font-medium leading-relaxed">{t('landing.gifts.wheel.subtitle')}</p>
+
               <div className="bg-white/90 border border-emerald-200/90 rounded-full px-7 py-3 mb-8 relative z-10 shadow-sm flex items-center gap-2.5">
-                <span className="text-slate-700 text-sm font-bold">Lượt quay khả dụng:</span>
+                <span className="text-slate-700 text-sm font-bold">{t('landing.gifts.wheel.spins_available')}</span>
                 <span className="text-emerald-600 text-2xl font-black">{user ? spinCount : 0}</span>
               </div>
 
@@ -758,18 +758,18 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
               </div>
 
               <div className="mt-8 relative z-10 flex flex-col items-center">
-                 <button 
+                 <button
                    onClick={handleSpinClick}
                    disabled={spinning || (user && spinCount <= 0)}
                    className={`px-16 py-4.5 rounded-full font-black text-xl transition-all shadow-xl cursor-pointer ${
-                     spinning 
-                       ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none border border-slate-300' 
+                     spinning
+                       ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none border border-slate-300'
                        : (user && spinCount <= 0)
                          ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none border border-slate-300'
                          : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-600/30 hover:from-emerald-500 hover:to-teal-500 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 border border-emerald-500/20'
                    }`}
                  >
-                   {spinning ? 'ĐANG QUAY...' : 'QUAY NGAY'}
+                   {spinning ? t('landing.gifts.wheel.spinning') : t('landing.gifts.wheel.spin_now')}
                  </button>
               </div>
 
@@ -795,20 +795,20 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                          {isNoPrize ? '🍀' : '🎁'}
                        </div>
                        <h4 className="text-2xl font-black text-slate-900 mb-1">
-                         {isNoPrize ? 'Chúc Bạn May Mắn!' : 'Chúc Mừng Bạn!'}
+                         {isNoPrize ? t('landing.gifts.wheel.no_prize_title') : t('landing.gifts.wheel.win_title')}
                        </h4>
                        <p className="text-xs font-medium text-slate-500 mb-5">
-                         {isNoPrize ? 'Rất tiếc lượt quay này chưa trúng phần quà nào.' : 'Bạn đã may mắn quay trúng phần quà:'}
+                         {isNoPrize ? t('landing.gifts.wheel.no_prize_desc') : t('landing.gifts.wheel.win_desc')}
                        </p>
                        <div className={`text-lg font-bold mb-6 p-4 rounded-2xl border shadow-2xs ${
                          isNoPrize 
                            ? 'bg-slate-50 text-slate-700 border-slate-200' 
                            : 'bg-emerald-50/80 text-emerald-700 border-emerald-200/80'
                        }`}>
-                         {spinResult.prize?.name || (isNoPrize ? 'Chúc bạn may mắn lần sau' : 'Phần quà bí mật')}
+                         {spinResult.prize?.name || (isNoPrize ? t('landing.gifts.wheel.no_prize_fallback') : t('landing.gifts.wheel.secret_prize'))}
                        </div>
                        {!isNoPrize && spinResult.voucher && (
-                         <p className="text-xs text-slate-500 mb-6 font-medium">Mã ưu đãi đã được tự động thêm vào mục <b>Ưu Đãi</b> của bạn!</p>
+                         <p className="text-xs text-slate-500 mb-6 font-medium" dangerouslySetInnerHTML={{ __html: t('landing.gifts.wheel.auto_claimed') }} />
                        )}
                        <button 
                          onClick={() => setSpinResult(null)}
@@ -818,7 +818,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/20'
                          }`}
                        >
-                         {isNoPrize ? 'Thử lại' : 'Nhận quà ngay'}
+                         {isNoPrize ? t('landing.gifts.wheel.try_again') : t('landing.gifts.wheel.claim_prize')}
                        </button>
                      </div>
                   </motion.div>
@@ -833,15 +833,15 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                   🏆
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-slate-900">Xem lại các phần quà đã quay trúng</h4>
-                  <p className="text-xs text-slate-500">Xem danh sách đầy đủ mã voucher và quà tặng từ các lượt quay trước</p>
+                  <h4 className="text-base font-bold text-slate-900">{t('landing.gifts.history_banner.title')}</h4>
+                  <p className="text-xs text-slate-500">{t('landing.gifts.history_banner.description')}</p>
                 </div>
               </div>
               <button
                 onClick={() => setActiveTab('history')}
                 className="px-6 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-all shrink-0 cursor-pointer shadow-sm"
               >
-                Lịch sử quay thưởng →
+                {t('landing.gifts.history_banner.cta')}
               </button>
             </div>
           </div>
@@ -854,38 +854,38 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                   🏆
                 </div>
                 <div>
-                  <h4 className="text-xl font-black text-slate-900">Lịch Sử Quay Thưởng Của Bạn</h4>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">Tất cả các phần quà và mã ưu đãi bạn đã may mắn quay trúng</p>
+                  <h4 className="text-xl font-black text-slate-900">{t('landing.gifts.history.title')}</h4>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">{t('landing.gifts.history.subtitle')}</p>
                 </div>
               </div>
               {spinHistory.length > 0 && (
                 <span className="text-xs font-bold px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Tổng trúng: {spinHistory.length} phần quà
+                  {t('landing.gifts.history.total_wins', { count: spinHistory.length })}
                 </span>
               )}
             </div>
 
             {!user ? (
               <div className="text-center py-16 bg-slate-50/50 rounded-2xl border border-slate-200">
-                <p className="text-slate-500 text-sm font-medium mb-4">Vui lòng đăng nhập để xem danh sách phần quà đã trúng</p>
+                <p className="text-slate-500 text-sm font-medium mb-4">{t('landing.gifts.history.login_prompt')}</p>
                 <button onClick={onOpenAuth} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs shadow-md">
-                  Đăng Nhập
+                  {t('landing.gifts.history.login_btn')}
                 </button>
               </div>
             ) : historyLoading ? (
-              <div className="text-center py-16 text-slate-400 text-sm font-medium">Đang tải lịch sử trúng quà...</div>
+              <div className="text-center py-16 text-slate-400 text-sm font-medium">{t('landing.gifts.history.loading')}</div>
             ) : spinHistory.length === 0 ? (
               <div className="text-center py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                 <div className="w-14 h-14 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-3xl mx-auto mb-3">
                   🎁
                 </div>
-                <h5 className="text-base font-bold text-slate-800">Chưa có phần quà nào</h5>
-                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Bạn chưa trúng phần quà nào từ vòng quay. Hãy sang tab Vòng quay để thử vận may ngay!</p>
+                <h5 className="text-base font-bold text-slate-800">{t('landing.gifts.history.empty_title')}</h5>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">{t('landing.gifts.history.empty_desc')}</p>
                 <button
                   onClick={() => setActiveTab('wheel')}
                   className="mt-5 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm cursor-pointer"
                 >
-                  Quay thưởng ngay ⚡
+                  {t('landing.gifts.history.cta')}
                 </button>
               </div>
             ) : (
@@ -893,7 +893,7 @@ export default function GiftStoreSection({ user, onOpenAuth }) {
                 {spinHistory.map((item, idx) => {
                   const isUsed = item.status === 'used';
                   const isExpired = item.status === 'expired';
-                  const statusLabel = isUsed ? 'Đã sử dụng' : isExpired ? 'Đã hết hạn' : 'Còn hiệu lực';
+                  const statusLabel = isUsed ? t('landing.gifts.history.status_used') : isExpired ? t('landing.gifts.history.status_expired') : t('landing.gifts.history.status_active');
                   const statusCls = isUsed ? 'bg-slate-100 text-slate-500 border-slate-200' : isExpired ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
                   return (

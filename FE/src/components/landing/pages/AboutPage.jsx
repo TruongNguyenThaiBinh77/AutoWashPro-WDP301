@@ -162,7 +162,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
                   <p className="text-sm text-slate-500 mt-1">{t('landing.about.cardTagline')}</p>
                   <div className="mt-4 flex items-center justify-center gap-1 text-emerald-600 text-sm font-medium">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                    Since 2019
+                    {t('landing.about.since')}
                   </div>
                 </div>
               </div>

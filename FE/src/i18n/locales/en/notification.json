@@ -4,5 +4,9 @@
   "all": "All",
   "unread": "Unread",
   "empty": "No notifications yet",
-  "view_all": "View all notifications"
+  "view_all": "View all notifications",
+  "just_now": "Just now",
+  "minutes_ago": "min ago",
+  "hours_ago": "hr ago",
+  "days_ago": "days ago"
 }

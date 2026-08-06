@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, FreeMode } from 'swiper/modules';
@@ -10,6 +11,7 @@ import 'swiper/css/free-mode';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function MapSection({ onSelectBranch }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [branches, setBranches] = useState([]);
   const [isBeginning, setIsBeginning] = useState(true);
@@ -43,7 +45,7 @@ export default function MapSection({ onSelectBranch }) {
         {/* Header section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12">
           <h2 className="text-3xl md:text-[2.5rem] font-bold text-black tracking-tight mb-6 md:mb-0">
-            Hệ thống chi nhánh
+            {t('landing.map.branch_system')}
           </h2>
           
           <div className="flex items-center gap-4 w-full md:w-auto">

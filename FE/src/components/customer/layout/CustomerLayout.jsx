@@ -3,20 +3,19 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { User, Calendar, CreditCard, Bell, Gift, LogOut, ChevronDown, Award, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../../landing/layout/Navbar';
-import { translateText } from '@/utils/notifTranslator';
 
 const TIER_BADGES = {
-  diamond: { label: 'Kim cương', bg: 'bg-blue-50 text-blue-600 border-blue-200' },
-  gold: { label: 'Vàng', bg: 'bg-amber-50 text-amber-600 border-amber-200' },
-  silver: { label: 'Bạc', bg: 'bg-slate-100 text-slate-700 border-slate-300' },
-  bronze: { label: 'Đồng', bg: 'bg-orange-50 text-orange-600 border-orange-200' },
+  diamond: { labelKey: 'tier_diamond', bg: 'bg-blue-50 text-blue-600 border-blue-200' },
+  gold: { labelKey: 'tier_gold', bg: 'bg-amber-50 text-amber-600 border-amber-200' },
+  silver: { labelKey: 'tier_silver', bg: 'bg-slate-100 text-slate-700 border-slate-300' },
+  bronze: { labelKey: 'tier_bronze', bg: 'bg-orange-50 text-orange-600 border-orange-200' },
 };
 
 const HISTORY_SUB_TABS = [
-  { key: 'calendar', label: '📅 Lịch tháng' },
-  { key: 'week', label: '🔄 Đặt lịch định kỳ' },
-  { key: 'list', label: '📋 Đặt lịch thường' },
-  { key: 'slot_packs', label: '🎫 Gói lượt' },
+  { key: 'calendar', labelKey: 'tab_calendar' },
+  { key: 'week', labelKey: 'tab_week' },
+  { key: 'list', labelKey: 'tab_list' },
+  { key: 'slot_packs', labelKey: 'tab_slot_packs' },
 ];
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -37,7 +36,7 @@ export default function CustomerLayout({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tierList, setTierList] = useState([]);
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('customer');
   const currentLang = i18n.language || 'vi';
 
   useEffect(() => {
@@ -67,19 +66,19 @@ export default function CustomerLayout({
   };
 
   const sidebarLinks = [
-    { label: 'Thông tin cá nhân', to: '/profile', icon: User, badge: null },
-    { label: 'Ví của tôi', to: '/wallet', icon: Wallet, badge: null },
-    { label: 'Lịch sử đặt xe', to: '/history', icon: Calendar, badge: null, hasSubMenu: true },
-    { label: 'Lịch sử thanh toán', to: '/payments', icon: CreditCard, badge: null },
-    { label: 'Thông báo', to: '/notifications', icon: Bell, badge: null },
-    { label: 'Kho quà & Tích điểm', to: '/rewards', icon: Award, badge: null },
+    { labelKey: 'layout.profile', to: '/profile', icon: User, badge: null },
+    { labelKey: 'layout.wallet', to: '/wallet', icon: Wallet, badge: null },
+    { labelKey: 'layout.booking_history', to: '/history', icon: Calendar, badge: null, hasSubMenu: true },
+    { labelKey: 'layout.payment_history', to: '/payments', icon: CreditCard, badge: null },
+    { labelKey: 'layout.notifications', to: '/notifications', icon: Bell, badge: null },
+    { labelKey: 'layout.rewards', to: '/rewards', icon: Award, badge: null },
   ];
 
   // Dynamic tier info: prefer API name, fallback to hardcoded map
   const apiTier = tierList.find(t => (t.id || '').toLowerCase() === (user?.tier || 'bronze').toLowerCase());
   const fallbackTier = TIER_BADGES[user?.tier] || TIER_BADGES.bronze;
   const tierInfo = {
-    label: apiTier?.name || fallbackTier.label,
+    label: apiTier?.name || t(fallbackTier.labelKey),
     bg: fallbackTier.bg,
   };
 
@@ -115,7 +114,7 @@ export default function CustomerLayout({
                 }`}
               >
                 <Icon size={16} />
-                <span>{translateText(link.label, currentLang)}</span>
+                <span>{t(link.labelKey)}</span>
               </Link>
             );
           })}
@@ -135,24 +134,24 @@ export default function CustomerLayout({
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-bold text-slate-900 truncate">
-                  {user?.name || translateText('Thành viên', currentLang)}
+                  {user?.name || t('layout.member_fallback')}
                 </h3>
                 <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
                 <div className="mt-1.5 flex items-center gap-1.5">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${tierInfo.bg}`}>
                     <Award size={11} />
-                    {translateText(tierInfo.label, currentLang)}
+                    {tierInfo.label}
                   </span>
                   {user?.loyaltyPoints !== undefined && (
                     <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      {user.loyaltyPoints}{currentLang === 'en' ? 'pts' : 'p'}
+                      {user.loyaltyPoints}{t('layout.points_label')}
                     </span>
                   )}
                 </div>
                 <div className="mt-1.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-bold bg-blue-50 text-blue-700 border-blue-200">
                     <Wallet size={11} />
-                    {currentLang === 'en' ? 'Wallet' : 'Ví'}: {(user?.walletBalance || 0).toLocaleString('vi-VN')}đ
+                    {t('layout.wallet_label')}: {(user?.walletBalance || 0).toLocaleString('vi-VN')}đ
                   </span>
                 </div>
               </div>
@@ -160,7 +159,7 @@ export default function CustomerLayout({
           </div>
 
           <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            {translateText('CÀI ĐẶT & QUẢN LÝ TÀI KHOẢN', currentLang)}
+            {t('layout.account_settings')}
           </div>
 
           {/* Sidebar Navigation */}
@@ -192,7 +191,7 @@ export default function CustomerLayout({
                         }`}>
                           <Icon size={16} />
                         </div>
-                        <span>{translateText(link.label, currentLang)}</span>
+                        <span>{t(link.labelKey)}</span>
                       </div>
                       <ChevronDown
                         size={16}
@@ -217,7 +216,7 @@ export default function CustomerLayout({
                                   : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                               }`}
                             >
-                              <span>{translateText(subTab.label, currentLang)}</span>
+                              <span>{t(subTab.labelKey)}</span>
                             </button>
                           );
                         })}
@@ -244,7 +243,7 @@ export default function CustomerLayout({
                   }`}>
                     <Icon size={16} />
                   </div>
-                  <span>{translateText(link.label, currentLang)}</span>
+                  <span>{t(link.labelKey)}</span>
                 </Link>
               );
             })}
@@ -259,7 +258,7 @@ export default function CustomerLayout({
               <div className="p-2 rounded-xl bg-rose-100/80 text-rose-600">
                 <LogOut size={16} />
               </div>
-              <span>{translateText('Đăng xuất', currentLang)}</span>
+              <span>{t('layout.logout')}</span>
             </button>
           </div>
         </aside>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Compass, MapPin, Clock, Warning } from '@phosphor-icons/react';
@@ -33,6 +34,7 @@ function decodePolyline(encoded) {
 }
 
 export default function DirectionsMap({ destLat, destLng, destAddress, destName, onClose }) {
+  const { t } = useTranslation();
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const routeLayersRef = useRef([]);
@@ -69,13 +71,13 @@ export default function DirectionsMap({ destLat, destLng, destAddress, destName,
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError('Trình duyệt không hỗ trợ định vị');
+      setError(t('landing.directions.no_geolocation'));
       setLoading(false);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => { setError('Không thể lấy vị trí. Vui lòng cho phép định vị.'); setLoading(false); },
+      () => { setError(t('landing.directions.location_denied')); setLoading(false); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, []);
@@ -95,13 +97,13 @@ export default function DirectionsMap({ destLat, destLng, destAddress, destName,
       iconAnchor: [9, 9],
     });
     const marker = L.marker([userLoc.lat, userLoc.lng], { icon: userIcon }).addTo(mapInstance.current)
-      .bindPopup('Vị trí của bạn');
+      .bindPopup(t('landing.directions.your_location'));
     routeLayersRef.current.push(marker);
 
     fetch(`${OSRM_BASE}/${userLoc.lng},${userLoc.lat};${destLng},${destLat}?overview=full&geometries=polyline&steps=true`)
       .then((r) => r.json())
       .then((data) => {
-        if (!data.routes || data.routes.length === 0) throw new Error('Không tìm thấy đường đi');
+        if (!data.routes || data.routes.length === 0) throw new Error(t('landing.directions.no_route'));
         const r = data.routes[0];
         setRoute({
           distance: r.distance,
@@ -136,26 +138,26 @@ export default function DirectionsMap({ destLat, destLng, destAddress, destName,
           {loading && (
             <div className="flex flex-col items-center justify-center py-10 text-slate-400">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600 mb-3" />
-              <p className="text-sm">Đang tìm đường đi…</p>
+              <p className="text-sm">{t('landing.directions.loading')}</p>
             </div>
           )}
           {error && (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
               <Warning size={24} className="text-amber-500" weight="duotone" />
               <p className="text-sm text-slate-600">{error}</p>
-              <button onClick={() => { setError(''); setLoading(true); navigator.geolocation.getCurrentPosition((p) => setUserLoc({ lat: p.coords.latitude, lng: p.coords.longitude }), () => setError('Không thể lấy vị trí')); }}
-                className="text-xs text-emerald-600 hover:underline font-medium">Thử lại</button>
+              <button onClick={() => { setError(''); setLoading(true); navigator.geolocation.getCurrentPosition((p) => setUserLoc({ lat: p.coords.latitude, lng: p.coords.longitude }), () => setError(t('landing.directions.location_denied'))); }}
+                className="text-xs text-emerald-600 hover:underline font-medium">{t('landing.directions.retry')}</button>
             </div>
           )}
           {!loading && !error && route && (
             <>
               <div className="flex gap-3">
                 <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2 text-center flex-1">
-                  <p className="text-[10px] text-emerald-600 font-medium uppercase">Khoảng cách</p>
+                  <p className="text-[10px] text-emerald-600 font-medium uppercase">{t('landing.directions.distance')}</p>
                   <p className="text-base font-bold text-emerald-800">{fmtDistance(route.distance)}</p>
                 </div>
                 <div className="rounded-lg bg-blue-50 border border-blue-100 px-3 py-2 text-center flex-1">
-                  <p className="text-[10px] text-blue-600 font-medium uppercase">Thời gian</p>
+                  <p className="text-[10px] text-blue-600 font-medium uppercase">{t('landing.directions.duration')}</p>
                   <p className="text-base font-bold text-blue-800">{fmtDuration(route.duration)}</p>
                 </div>
               </div>
@@ -166,7 +168,7 @@ export default function DirectionsMap({ destLat, destLng, destAddress, destName,
                       {i + 1}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm text-slate-700 leading-snug">{step.maneuver?.modifier ? `${step.maneuver.modifier === 'slight left' ? 'rẽ trái nhẹ' : step.maneuver.modifier === 'slight right' ? 'rẽ phải nhẹ' : step.maneuver.modifier === 'left' ? 'rẽ trái' : step.maneuver.modifier === 'right' ? 'rẽ phải' : step.maneuver.modifier === 'uturn' ? 'quay đầu' : 'đi thẳng'} ` : ''}{step.name ? `vào ${step.name}` : ''}</p>
+                      <p className="text-sm text-slate-700 leading-snug">{step.maneuver?.modifier ? t(`landing.directions.${step.maneuver.modifier.replace(' ', '_')}`) + ' ' : ''}{step.name ? t('landing.directions.onto', { name: step.name }) : ''}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] text-slate-400">{fmtDistance(step.distance)}</span>
                         {step.duration > 60 && <span className="text-[11px] text-slate-400">· {fmtDuration(step.duration)}</span>}
@@ -181,7 +183,7 @@ export default function DirectionsMap({ destLat, destLng, destAddress, destName,
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
               >
-                Mở trong Google Maps
+                {t('landing.directions.open_google_maps')}
               </a>
             </>
           )}
