@@ -1,0 +1,12 @@
+{
+  "points": "Điểm tích lũy",
+  "tier": {
+    "title": "Hạng thành viên",
+    "bronze": "Đồng",
+    "silver": "Bạc",
+    "gold": "Vàng",
+    "diamond": "Kim Cương"
+  },
+  "history": "Lịch sử biến động điểm",
+  "redeem": "Đổi điểm quà tặng"
+}

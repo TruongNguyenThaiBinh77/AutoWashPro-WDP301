@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Calendar, CreditCard, Bell, Gift, LogOut, ChevronDown, Award, Wallet } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../../landing/layout/Navbar';
+import { translateText } from '@/utils/notifTranslator';
 
 const TIER_BADGES = {
   diamond: { label: 'Kim cương', bg: 'bg-blue-50 text-blue-600 border-blue-200' },
@@ -35,6 +37,8 @@ export default function CustomerLayout({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tierList, setTierList] = useState([]);
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
 
   useEffect(() => {
     fetch(`${apiBase || API_BASE}/loyalty/tiers`)
@@ -111,7 +115,7 @@ export default function CustomerLayout({
                 }`}
               >
                 <Icon size={16} />
-                <span>{link.label}</span>
+                <span>{translateText(link.label, currentLang)}</span>
               </Link>
             );
           })}
@@ -131,24 +135,24 @@ export default function CustomerLayout({
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-bold text-slate-900 truncate">
-                  {user?.name || 'Thành viên'}
+                  {user?.name || translateText('Thành viên', currentLang)}
                 </h3>
                 <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
                 <div className="mt-1.5 flex items-center gap-1.5">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${tierInfo.bg}`}>
                     <Award size={11} />
-                    {tierInfo.label}
+                    {translateText(tierInfo.label, currentLang)}
                   </span>
                   {user?.loyaltyPoints !== undefined && (
                     <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      {user.loyaltyPoints}p
+                      {user.loyaltyPoints}{currentLang === 'en' ? 'pts' : 'p'}
                     </span>
                   )}
                 </div>
                 <div className="mt-1.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-bold bg-blue-50 text-blue-700 border-blue-200">
                     <Wallet size={11} />
-                    Ví: {(user?.walletBalance || 0).toLocaleString('vi-VN')}đ
+                    {currentLang === 'en' ? 'Wallet' : 'Ví'}: {(user?.walletBalance || 0).toLocaleString('vi-VN')}đ
                   </span>
                 </div>
               </div>
@@ -156,7 +160,7 @@ export default function CustomerLayout({
           </div>
 
           <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Cài đặt & Quản lý tài khoản
+            {translateText('CÀI ĐẶT & QUẢN LÝ TÀI KHOẢN', currentLang)}
           </div>
 
           {/* Sidebar Navigation */}
@@ -188,7 +192,7 @@ export default function CustomerLayout({
                         }`}>
                           <Icon size={16} />
                         </div>
-                        <span>{link.label}</span>
+                        <span>{translateText(link.label, currentLang)}</span>
                       </div>
                       <ChevronDown
                         size={16}
@@ -198,23 +202,22 @@ export default function CustomerLayout({
                       />
                     </div>
 
-                    {/* Sub-tab items */}
+                    {/* Sub-menu accordion items */}
                     {historyExpanded && (
-                      <div className="mt-1 ml-6 pl-4 border-l-2 border-slate-100 space-y-0.5">
-                        {HISTORY_SUB_TABS.map(tab => {
-                          const isTabActive = isHistoryPage && currentViewMode === tab.key;
+                      <div className="ml-5 pl-4 border-l-2 border-slate-100 my-1 space-y-1">
+                        {HISTORY_SUB_TABS.map((subTab) => {
+                          const isSubActive = isHistoryPage && currentViewMode === subTab.key;
                           return (
                             <button
-                              key={tab.key}
-                              type="button"
-                              onClick={() => handleSubTabClick(tab.key)}
-                              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                                isTabActive
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-transparent'
+                              key={subTab.key}
+                              onClick={() => handleSubTabClick(subTab.key)}
+                              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+                                isSubActive
+                                  ? 'bg-emerald-100/70 text-emerald-800 font-bold'
+                                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/50'
                               }`}
                             >
-                              {tab.label}
+                              <span>{translateText(subTab.label, currentLang)}</span>
                             </button>
                           );
                         })}
@@ -224,56 +227,45 @@ export default function CustomerLayout({
                 );
               }
 
-              // Normal sidebar link (no arrows)
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all group ${
+                  className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all group ${
                     active
                       ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-200/80 shadow-xs'
                       : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl transition-colors ${
-                      active
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700'
-                    }`}>
-                      <Icon size={16} />
-                    </div>
-                    <span>{link.label}</span>
+                  <div className={`p-2 rounded-xl transition-colors ${
+                    active
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700'
+                  }`}>
+                    <Icon size={16} />
                   </div>
-                  {link.badge && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                      {link.badge}
-                    </span>
-                  )}
+                  <span>{translateText(link.label, currentLang)}</span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Bottom Logout Button */}
-          <div className="mt-auto pt-3 border-t border-slate-100">
+          {/* Logout Button at bottom */}
+          <div className="pt-3 mt-auto border-t border-slate-100">
             <button
-              type="button"
               onClick={onLogout}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+              className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-red-50 text-red-600">
-                  <LogOut size={16} />
-                </div>
-                <span>Đăng xuất</span>
+              <div className="p-2 rounded-xl bg-rose-100/80 text-rose-600">
+                <LogOut size={16} />
               </div>
+              <span>{translateText('Đăng xuất', currentLang)}</span>
             </button>
           </div>
         </aside>
 
-        {/* Main Content Area on Right */}
-        <main className="flex-1 min-w-0 p-4 md:p-8 lg:p-10 max-w-7xl">
+        {/* Right Main Content Panel */}
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

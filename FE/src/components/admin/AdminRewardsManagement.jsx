@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import { confirmDialog } from '@/lib/confirm';
 import {
@@ -16,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import TierBadge from '@/components/ui/TierBadge';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
+import { translateText } from '@/utils/notifTranslator';
 
 function api(path, opts = {}) {
   return fetch(`${getApiBaseUrl()}${path}`, {
@@ -73,8 +75,10 @@ const REDEMPTION_STATUS = {
 };
 
 function StatusBadge({ status }) {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'vi';
   const s = REDEMPTION_STATUS[status] || { label: status, cls: 'bg-slate-50 text-slate-600 border-slate-200' };
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${s.cls}`}>{s.label}</span>;
+  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${s.cls}`}>{translateText(s.label, lang)}</span>;
 }
 
 /* ═══ Cấu hình quà tặng vật lý (Reward CRUD) ═══ */
@@ -431,8 +435,12 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
     finally { setVerifying(null); }
   };
 
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'vi';
+
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
+      {/* Thanh công cụ tìm kiếm và lọc */}
       <div className="flex flex-wrap items-center gap-3">
         <button onClick={fetch_} disabled={loading}
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white !text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-colors">
@@ -442,7 +450,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Tìm theo mã đổi thưởng hoặc tên quà..."
+            placeholder={translateText('Tìm theo mã đổi thưởng hoặc tên quà...', lang)}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-colors"
@@ -456,11 +464,11 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
         </div>
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 transition-colors">
-          <option value="">Tất cả trạng thái</option>
-          <option value="claimed">Chờ gửi quà</option>
-          <option value="sent">Đã gửi cho khách</option>
-          <option value="received">Khách đã nhận</option>
-          <option value="cancelled">Đã hủy</option>
+          <option value="">{translateText('Tất cả trạng thái', lang)}</option>
+          <option value="claimed">{translateText('Chờ gửi quà', lang)}</option>
+          <option value="sent">{translateText('Đã gửi cho khách', lang)}</option>
+          <option value="received">{translateText('Khách đã nhận', lang)}</option>
+          <option value="cancelled">{translateText('Đã hủy', lang)}</option>
         </select>
       </div>
 
@@ -473,7 +481,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
       ) : redemptions.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-20">
           <Package size={40} weight="thin" className="text-slate-300" />
-          <p className="text-sm text-slate-500">Chưa có lượt đổi thưởng nào</p>
+          <p className="text-sm text-slate-500">{translateText('Chưa có lượt đổi thưởng nào', lang)}</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -481,11 +489,11 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold text-slate-500">
-                  <th className="px-4 py-3">Khách hàng</th>
-                  <th className="px-4 py-3">Quà tặng</th>
-                  <th className="px-4 py-3">Ngày đổi</th>
-                  <th className="px-4 py-3">Trạng thái</th>
-                  <th className="px-4 py-3">Chi nhánh / Người gửi</th>
+                  <th className="px-4 py-3">{translateText('Khách hàng', lang)}</th>
+                  <th className="px-4 py-3">{translateText('Quà tặng', lang)}</th>
+                  <th className="px-4 py-3">{translateText('Ngày đổi', lang)}</th>
+                  <th className="px-4 py-3">{translateText('Trạng thái', lang)}</th>
+                  <th className="px-4 py-3">{translateText('Chi nhánh / Người gửi', lang)}</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -504,7 +512,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-slate-800 line-clamp-1">{snap.name || '—'}</p>
-                        <p className="text-[11px] text-amber-600 font-semibold">{Number(snap.pointCost || rd.pointsSpent || 0).toLocaleString('vi-VN')} điểm</p>
+                        <p className="text-[11px] text-amber-600 font-semibold">{Number(snap.pointCost || rd.pointsSpent || 0).toLocaleString('vi-VN')} {translateText('điểm', lang)}</p>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500">{formatDate(rd.createdAt)}</td>
                       <td className="px-4 py-3"><StatusBadge status={rd.status} /></td>
@@ -513,7 +521,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                           <>
                             {rd.sentAt && <p>{formatDate(rd.sentAt)}</p>}
                             {rd.branchId?.name && <p className="text-slate-400">{rd.branchId.name}</p>}
-                            {rd.sentBy?.name && <p className="text-slate-400">bởi {rd.sentBy.name}</p>}
+                            {rd.sentBy?.name && <p className="text-slate-400">{lang === 'en' ? 'by ' : 'bởi '}{rd.sentBy.name}</p>}
                           </>
                         ) : <span className="text-slate-300">—</span>}
                       </td>
@@ -522,7 +530,7 @@ export function RedemptionsTab({ isManager = false, managerBranchId = '' }) {
                           <button onClick={() => handleSent(rd)} disabled={sending === rd._id}
                             className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-60 transition-colors">
                             {sending === rd._id ? <Spinner size={12} /> : <PaperPlaneTilt size={13} />}
-                            {sending === rd._id ? 'Đang gửi...' : 'Đã gửi quà cho khách'}
+                            {sending === rd._id ? (lang === 'en' ? 'Sending...' : 'Đang gửi...') : translateText('Đã gửi quà cho khách', lang)}
                           </button>
                         ) : canVerify ? (
                           <div className="flex items-center gap-1.5">

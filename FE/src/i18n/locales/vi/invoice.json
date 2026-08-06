@@ -1,0 +1,13 @@
+{
+  "title": "Hóa đơn thanh toán",
+  "total": "Tổng tiền",
+  "subtotal": "Tạm tính",
+  "discount": "Giảm giá",
+  "payment_method": "Phương thức thanh toán",
+  "transaction_id": "Mã giao dịch",
+  "paid": "Đã thanh toán",
+  "unpaid": "Chưa thanh toán",
+  "refunded": "Đã hoàn tiền",
+  "download": "Tải hóa đơn",
+  "print": "In hóa đơn"
+}

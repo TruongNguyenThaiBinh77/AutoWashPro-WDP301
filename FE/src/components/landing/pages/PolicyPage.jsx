@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
 import { useSystemConfig } from '../../../hooks/useSystemConfig.jsx';
 import { getApiBaseUrl } from '../../../lib/authStorage.js';
+import { translateText } from '@/utils/notifTranslator';
 
 const getFallbackPolicies = ({ depositPercent, noShowGraceMinutes, minAdvanceMinutes } = {}) => [
   {
@@ -166,10 +168,10 @@ const getFallbackPolicies = ({ depositPercent, noShowGraceMinutes, minAdvanceMin
   },
 ];
 
-function Sidebar({ policies = [], activeSection, onSelect }) {
+function Sidebar({ policies = [], activeSection, onSelect, currentLang }) {
   return (
     <nav className="space-y-1 sticky top-24">
-      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 pb-2">Danh sách chính sách</p>
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 pb-2">{translateText('Danh sách chính sách', currentLang)}</p>
       {policies.map(p => {
         const key = p.slug || p.id;
         return (

@@ -1,0 +1,11 @@
+{
+  "balance": "Wallet Balance",
+  "topup": "Top Up Wallet",
+  "history": {
+    "title": "Wallet Transaction History",
+    "deposit": "Deposit",
+    "withdraw": "Withdrawal",
+    "payment": "Service Payment",
+    "refund": "Refund"
+  }
+}

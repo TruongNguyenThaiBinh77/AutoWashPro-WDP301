@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Không có quyền truy cập",
+  "forbidden": "Quyền bị từ chối",
+  "not_found": "Không tìm thấy dữ liệu",
+  "server_error": "Lỗi máy chủ nội bộ. Vui lòng thử lại sau.",
+  "network_error": "Mất kết nối mạng. Vui lòng kiểm tra lại đường truyền."
+}

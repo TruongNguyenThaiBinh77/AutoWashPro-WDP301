@@ -13,8 +13,10 @@ import Label from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 import { getApiBaseUrl } from '@/lib/authStorage';
+import { useTranslation } from 'react-i18next';
 
 export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, onGoogleLoginSuccess }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const [authMode, setAuthMode] = useState('login');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -231,15 +233,15 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Quay lại
+                {t('common.back')}
               </button>
             )}
 
             <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-              {authMode === 'forgot' ? 'Khôi phục' : 'Chào mừng'}
+              {authMode === 'forgot' ? t('auth.forgot_title') : authMode === 'login' ? t('auth.login_title') : t('auth.register_title')}
             </h2>
             <p className="mt-2 text-sm text-slate-400">
-              {authMode === 'login' ? 'Vui lòng đăng nhập để tiếp tục.' : authMode === 'register' ? 'Tạo tài khoản mới để bắt đầu.' : 'Lấy lại mật khẩu của bạn.'}
+              {authMode === 'login' ? t('auth.login_now') : authMode === 'register' ? t('auth.register_now') : t('auth.forgot_title')}
             </p>
 
             {/* Toggle Tabs */}
@@ -255,7 +257,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   )}
                   onClick={() => { setAuthMode('login'); setAuthError(''); setStatusMessage(''); }}
                 >
-                  Đăng nhập
+                  {t('auth.login_btn')}
                 </button>
                 <button
                   type="button"
@@ -267,7 +269,7 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   )}
                   onClick={() => { setAuthMode('register'); setAuthError(''); setStatusMessage(''); }}
                 >
-                  Đăng ký
+                  {t('auth.register_btn')}
                 </button>
               </div>
             )}

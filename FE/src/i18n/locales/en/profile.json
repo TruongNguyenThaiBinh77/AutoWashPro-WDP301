@@ -1,0 +1,8 @@
+{
+  "title": "My Personal Profile",
+  "update": "Update Profile",
+  "change_password": "Change Password",
+  "current_password": "Current Password",
+  "new_password": "New Password",
+  "update_success": "Profile updated successfully"
+}

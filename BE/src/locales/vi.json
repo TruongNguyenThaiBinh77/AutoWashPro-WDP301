@@ -1,0 +1,36 @@
+{
+  "common": {
+    "success": "Thành công",
+    "invalid_data": "Dữ liệu không hợp lệ",
+    "internal_error": "Lỗi hệ thống",
+    "not_found": "Không tìm thấy dữ liệu",
+    "unauthorized": "Không có quyền truy cập",
+    "forbidden": "Truy cập bị từ chối"
+  },
+  "auth": {
+    "register_success": "Đăng ký thành công",
+    "login_success": "Đăng nhập thành công",
+    "google_login_success": "Đăng nhập Google thành công",
+    "logout_success": "Đăng xuất thành công",
+    "refresh_success": "Đã làm mới token",
+    "profile_fetched": "Đã lấy thông tin hồ sơ",
+    "profile_updated": "Cập nhật hồ sơ thành công",
+    "password_changed": "Đổi mật khẩu thành công",
+    "otp_sent": "Mã OTP đã được gửi đến email của bạn",
+    "otp_verified": "Xác thực OTP thành công",
+    "password_reset": "Đặt lại mật khẩu thành công",
+    "email_exists": "Email này đã được đăng ký",
+    "invalid_credentials": "Email hoặc mật khẩu không chính xác",
+    "account_suspended": "Tài khoản của bạn đã bị tạm khóa"
+  },
+  "booking": {
+    "created": "Đặt lịch thành công",
+    "cancelled": "Hủy lịch hẹn thành công",
+    "updated": "Cập nhật lịch hẹn thành công",
+    "not_found": "Không tìm thấy lịch hẹn"
+  },
+  "notification": {
+    "profile_updated_title": "Cập nhật thông tin",
+    "profile_updated_msg": "Thông tin cá nhân của bạn đã được cập nhật thành công."
+  }
+}

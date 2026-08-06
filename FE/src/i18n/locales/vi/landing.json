@@ -1,0 +1,14 @@
+{
+  "hero": {
+    "title": "Dịch vụ rửa xe & Chăm sóc xe chuyên nghiệp",
+    "subtitle": "Đặt lịch trực tuyến dễ dàng, tiết kiệm thời gian và tận hưởng trải nghiệm đẳng cấp.",
+    "cta_book": "Đặt lịch ngay",
+    "cta_services": "Khám phá dịch vụ"
+  },
+  "footer": {
+    "featured_services": "Dịch vụ nổi bật",
+    "policies_support": "Chính sách & Hỗ trợ",
+    "contact_us": "Liên hệ trực tiếp",
+    "satisfaction_guarantee": "Cam kết hài lòng 100%"
+  }
+}

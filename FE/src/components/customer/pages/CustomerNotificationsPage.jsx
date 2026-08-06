@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import useSSE from '@/hooks/useSSE';
+import { translateNotification, translateText } from '@/utils/notifTranslator';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -29,6 +31,8 @@ function formatDateTime(d) {
 
 export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -121,26 +125,28 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
         {/* Actions */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs text-slate-500">
-            {unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Không có thông báo mới'}
+            {unreadCount > 0
+              ? (currentLang === 'en' ? `${unreadCount} unread notifications` : `${unreadCount} thông báo chưa đọc`)
+              : translateText('Không có thông báo mới', currentLang)}
           </p>
           <div className="flex gap-2">
             {unreadCount > 0 && (
               <button onClick={markAllRead}
                 className="px-3.5 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                ✓ Đọc hết
+                ✓ {translateText('Đánh dấu đã đọc', currentLang)}
               </button>
             )}
             {notifications.length > 0 && (
               <button onClick={deleteAll}
                 className="px-3 py-1.5 rounded-lg border border-red-200 bg-white text-xs font-semibold text-red-500 hover:bg-red-50">
-                Xóa tất cả
+                {translateText('Xóa tất cả', currentLang)}
               </button>
             )}
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-slate-400 text-sm">Đang tải...</div>
+          <div className="text-center py-20 text-slate-400 text-sm">{translateText('Đang tải...', currentLang)}</div>
         ) : notifications.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
@@ -148,12 +154,13 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
                 <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
               </svg>
             </div>
-            <p className="text-slate-500 font-medium">Không có thông báo</p>
+            <p className="text-slate-500 font-medium">{translateText('Không có thông báo nào', currentLang)}</p>
           </div>
         ) : (
           <div className="space-y-1">
             {notifications.map(n => {
               const nId = n._id || n.id;
+              const translated = translateNotification(n, currentLang);
               return (
                 <div key={nId} onClick={() => handleItemClick(n)}
                   className={`p-4 rounded-xl border cursor-pointer transition-colors ${
@@ -166,12 +173,12 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <p className={`text-sm ${n.isRead ? 'text-slate-600' : 'text-slate-900 font-semibold'}`}>
-                          {n.title || n.message || 'Thông báo'}
+                          {translated.title || 'Notification'}
                         </p>
                         {!n.isRead && <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0 mt-1.5" />}
                       </div>
-                      {n.message && (
-                        <p className="text-xs text-slate-500 mt-1">{n.message}</p>
+                      {translated.message && (
+                        <p className="text-xs text-slate-500 mt-1">{translated.message}</p>
                       )}
                       <p className="text-[10px] text-slate-400 mt-1.5">{formatDateTime(n.createdAt)}</p>
                     </div>

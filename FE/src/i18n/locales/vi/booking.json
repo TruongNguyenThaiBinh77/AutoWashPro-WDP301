@@ -1,0 +1,30 @@
+{
+  "title": "Đặt lịch dịch vụ",
+  "subtitle": "Chọn chi nhánh, dịch vụ và thời gian phù hợp.",
+  "create": {
+    "title": "Tạo lịch hẹn mới",
+    "button": "Xác nhận đặt lịch",
+    "select_branch": "Chọn chi nhánh",
+    "select_package": "Chọn gói dịch vụ",
+    "select_date": "Chọn ngày rửa xe",
+    "select_time": "Chọn giờ hẹn",
+    "select_vehicle": "Chọn xe của bạn"
+  },
+  "status": {
+    "pending": "Chờ xác nhận",
+    "confirmed": "Đã xác nhận",
+    "processing": "Đang làm rửa xe",
+    "completed": "Hoàn thành",
+    "cancelled": "Đã hủy",
+    "failed": "Thất bại"
+  },
+  "detail": {
+    "code": "Mã đặt lịch",
+    "date": "Ngày hẹn",
+    "time": "Giờ hẹn",
+    "branch": "Chi nhánh",
+    "package": "Gói dịch vụ",
+    "vehicle": "Thông tin xe",
+    "price": "Tổng chi phí"
+  }
+}

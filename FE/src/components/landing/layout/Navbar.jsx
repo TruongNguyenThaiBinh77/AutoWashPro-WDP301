@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
+import { translateNotification } from '@/utils/notifTranslator';
 import { getStoredToken } from '@/lib/authStorage';
 import useSSE from '@/hooks/useSSE';
 
@@ -182,12 +185,15 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
     return () => window.removeEventListener('scroll', handleScroll);
   }, [prevScroll, shouldAlwaysShow]);
 
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
+
   const navItems = [
-    { label: 'Trang chủ', to: '/' },
-    { label: 'Giới thiệu', to: '/about' },
-    { label: 'Đặt lịch', to: '/booking' },
-    { label: 'Quà tặng', to: '/gifts' },
-    { label: 'Cửa hàng', to: '/map' },
+    { label: t('nav.home'), to: '/' },
+    { label: t('nav.about'), to: '/about' },
+    { label: t('nav.booking'), to: '/booking' },
+    { label: t('nav.gifts'), to: '/gifts' },
+    { label: t('nav.stores'), to: '/map' },
   ];
 
   function isActive(to) {
@@ -248,7 +254,10 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Nút chuyển đổi ngôn ngữ ngay sát bên trái biểu tượng Thông báo */}
+              <LanguageSwitcher isLightBg={!isTransparent} />
+
               {user ? (
                 <>
                   {/* ── NOTIFICATION BELL ── */}
@@ -260,7 +269,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                           ? 'text-white/80 hover:bg-white/10'
                           : 'text-slate-600 hover:bg-slate-100'
                       } ${notifOpen ? (isTransparent ? 'bg-white/10' : 'bg-slate-100') : ''}`}
-                      title="Thông báo"
+                      title={t('notifications.title')}
                     >
                       <Bell size={20} />
                       {badgeText && (
@@ -282,13 +291,13 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                         >
                           {/* Header */}
                           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                            <h3 className="text-base font-bold text-slate-900">Thông báo</h3>
+                            <h3 className="text-base font-bold text-slate-900">{t('notifications.title')}</h3>
                             {unreadCount > 0 && (
                               <button
                                 onClick={markAllAsRead}
                                 className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                               >
-                                Đánh dấu đã đọc tất cả
+                                {t('notifications.mark_all_read')}
                               </button>
                             )}
                           </div>
@@ -303,7 +312,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
-                              Tất cả
+                              {t('notifications.all')}
                             </button>
                             <button
                               onClick={() => setNotifFilter('unread')}
@@ -313,7 +322,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                                   : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                               }`}
                             >
-                              Chưa đọc
+                              {t('notifications.unread')}
                             </button>
                           </div>
 
@@ -325,12 +334,13 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                               <div className="py-12 text-center">
                                 <div className="text-3xl mb-2">🔔</div>
                                 <p className="text-sm text-slate-400 font-medium">
-                                  {notifFilter === 'unread' ? 'Không có thông báo chưa đọc' : 'Chưa có thông báo nào'}
+                                  {t('notifications.empty')}
                                 </p>
                               </div>
                             ) : (
                               notifications.map(n => {
                                 const icon = NOTIF_ICONS[n.type] || NOTIF_ICONS.system;
+                                const translated = translateNotification(n, currentLang);
                                 return (
                                   <button
                                     key={n._id}
@@ -348,10 +358,10 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className={`text-sm leading-snug ${!n.isRead ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
-                                        {n.title || 'Thông báo'}
+                                        {translated.title || t('notifications.title')}
                                       </p>
-                                      {n.message && (
-                                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
+                                      {translated.message && (
+                                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{translated.message}</p>
                                       )}
                                       <p className={`text-[11px] mt-1 font-semibold ${!n.isRead ? 'text-emerald-600' : 'text-slate-400'}`}>
                                         {timeAgo(n.createdAt)}
@@ -375,7 +385,7 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToProfile, onGo
                               }}
                               className="w-full py-3 text-center text-sm font-bold text-emerald-600 hover:bg-emerald-50 transition-colors"
                             >
-                              Xem tất cả thông báo
+                              {t('notifications.view_all')}
                             </button>
                           </div>
                         </motion.div>

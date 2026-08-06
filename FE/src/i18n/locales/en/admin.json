@@ -1,0 +1,7 @@
+{
+  "dashboard": "System Administration Overview",
+  "users": "User Accounts & Role Permissions",
+  "branches": "Branch Network Management",
+  "system_config": "Business Rules & System Settings",
+  "reports": "System-wide Statistical Reports"
+}

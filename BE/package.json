@@ -24,6 +24,8 @@
     "express-validator": "^7.2.0",
     "google-auth-library": "^10.9.0",
     "helmet": "^7.1.0",
+    "i18next": "^26.3.6",
+    "i18next-http-middleware": "^3.9.8",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.0",
     "morgan": "^1.10.0",

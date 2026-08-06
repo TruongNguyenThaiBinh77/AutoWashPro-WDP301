@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Drop } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import DashboardShell from '@/components/layout/DashboardShell';
 import useSSE from '@/hooks/useSSE';
 import { ADMIN_BRAND, ADMIN_MENU_ITEMS, ADMIN_PAGE_META } from '@/config/adminMenu';
 import { clearSession, getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
 import NotificationBell from '@/components/ui/NotificationBell';
+import { translateText } from '@/utils/notifTranslator';
 
 function api(path) {
   return fetch(`${getApiBaseUrl()}${path}`, { headers: { Authorization: `Bearer ${getStoredToken()}` } });
@@ -63,6 +65,8 @@ export default function AdminLayout({ user, onLogout }) {
   const navigate = useNavigate();
   const meta = resolvePageMeta(location.pathname, location.search);
   const [badges, setBadges] = useState({});
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
 
   // Đếm số mục "mới / cần xử lý" toàn hệ thống: đơn chờ xác nhận + đánh giá chưa phản hồi + thanh toán chưa xem
   const token = getStoredToken();
@@ -139,24 +143,28 @@ export default function AdminLayout({ user, onLogout }) {
     navigate('/', { replace: true });
   }
 
+  const translatedTitle = translateText(meta.title, currentLang);
+  const translatedDesc = translateText(meta.description, currentLang);
+
   return (
     <DashboardShell
       brand={{
         ...ADMIN_BRAND,
+        tagline: translateText(ADMIN_BRAND.tagline, currentLang),
         logo: <Drop size={24} weight="fill" className="text-primary" aria-hidden />,
       }}
       menuItems={ADMIN_MENU_ITEMS}
       badges={badges}
       user={{
-        name: user?.name || 'Quản trị viên',
-        roleLabel: user?.role ? `Vai trò: ${user.role}` : 'Admin',
+        name: user?.name || translateText('Quản trị viên', currentLang),
+        roleLabel: user?.role ? `${translateText('Vai trò', currentLang)}: ${user.role}` : 'Admin',
       }}
       onLogout={handleLogout}
       header={
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">{meta.title}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{meta.description}</p>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">{translatedTitle}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{translatedDesc}</p>
           </div>
           <NotificationBell />
         </div>

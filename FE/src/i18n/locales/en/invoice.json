@@ -1,0 +1,13 @@
+{
+  "title": "Payment Invoice",
+  "total": "Total Amount",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "payment_method": "Payment Method",
+  "transaction_id": "Transaction ID",
+  "paid": "Paid",
+  "unpaid": "Unpaid",
+  "refunded": "Refunded",
+  "download": "Download Invoice",
+  "print": "Print Invoice"
+}

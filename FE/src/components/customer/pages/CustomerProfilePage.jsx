@@ -4,8 +4,10 @@ import {
   User, Phone, Mail, Car, Lock, Plus, Edit2, Trash2, CheckCircle2,
   AlertTriangle, Award, Gift, Sparkles, X, Check, ShieldCheck, Camera, Upload, Link as LinkIcon, Image as ImageIcon
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { showToast as fireToast } from '@/lib/toast';
 import { confirmDialog } from '@/lib/confirm';
+import { translateText } from '@/utils/notifTranslator';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -22,6 +24,8 @@ function formatCurrency(val) {
 }
 
 export default function CustomerProfilePage({ user, vehicles: initialVehicles, onLogout, apiBase, token, onBack, onUserUpdate }) {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
   const [vehicles, setVehicles] = useState(initialVehicles || []);
   const avatarInputRef = useRef(null);
   
@@ -395,10 +399,10 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
             <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-slate-800 truncate">{user?.name || 'Khách hàng'}</h1>
+                <h1 className="text-2xl font-bold text-slate-800 truncate">{user?.name || (currentLang === 'en' ? 'Customer' : 'Khách hàng')}</h1>
                 <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-bold ${currentTierObj.bg || 'bg-amber-50 text-amber-700 border-amber-200'}`}>
                   <Award className="w-3.5 h-3.5" />
-                  {currentTierObj.label || 'Thành viên'}
+                  {translateText(currentTierObj.label, currentLang) || (currentLang === 'en' ? 'Member' : 'Thành viên')}
                 </span>
               </div>
               <p className="text-sm text-slate-500 flex items-center gap-2">
@@ -419,35 +423,35 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-teal-50/40 p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">ĐIỂM THƯỞNG</span>
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{translateText('ĐIỂM THƯỞNG', currentLang)}</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm">
                 <Gift className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-emerald-700 font-mono tracking-tight">{formatCurrency(availableRewardPoints)}</p>
-            <p className="text-[11px] text-emerald-600 font-medium mt-1">Dùng để đổi Voucher & quà ưu đãi</p>
+            <p className="text-[11px] text-emerald-600 font-medium mt-1">{translateText('Dùng để đổi Voucher & quà ưu đãi', currentLang)}</p>
           </div>
 
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/60 to-sky-50/40 p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">XE ĐÃ ĐĂNG KÝ</span>
+              <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">{translateText('XE ĐÃ ĐĂNG KÝ', currentLang)}</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 text-white shadow-sm">
                 <Car className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-blue-700 font-mono tracking-tight">{vehicles.length}</p>
-            <p className="text-[11px] text-blue-600 font-medium mt-1">Phương tiện lưu trong tài khoản</p>
+            <p className="text-[11px] text-blue-600 font-medium mt-1">{translateText('Phương tiện lưu trong tài khoản', currentLang)}</p>
           </div>
 
           <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">LƯỢT QUAY MAY MẮN</span>
+              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">{translateText('LƯỢT QUAY MAY MẮN', currentLang)}</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-sm">
                 <Sparkles className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-amber-700 font-mono tracking-tight">{spinCount}</p>
-            <p className="text-[11px] text-amber-600 font-medium mt-1">Lượt quay may mắn nhận quà</p>
+            <p className="text-[11px] text-amber-600 font-medium mt-1">{translateText('Lượt quay may mắn nhận quà', currentLang)}</p>
           </div>
         </div>
 
@@ -455,14 +459,20 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
         {nextTierObj && (
           <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
             <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
-              <span className="uppercase tracking-wider">TIẾN TRÌNH LÊN HẠNG {nextTierObj.label?.toUpperCase()}</span>
-              <span className="font-mono text-emerald-700">{formatCurrency(currentPoints)} / {formatCurrency(nextMin)} điểm</span>
+              <span className="uppercase tracking-wider">
+                {currentLang === 'en'
+                  ? `${translateText(nextTierObj.label, currentLang).toUpperCase()} TIER PROGRESS`
+                  : `TIẾN TRÌNH LÊN HẠNG ${nextTierObj.label?.toUpperCase()}`}
+              </span>
+              <span className="font-mono text-emerald-700">{formatCurrency(currentPoints)} / {formatCurrency(nextMin)} {currentLang === 'en' ? 'pts' : 'điểm'}</span>
             </div>
             <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
               <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500 rounded-full" style={{ width: `${progressPercent}%` }} />
             </div>
             <p className="text-xs text-slate-500 mt-2 font-medium">
-              Bạn cần tích lũy thêm <strong className="text-emerald-600">{formatCurrency(Math.max(0, nextMin - currentPoints))}</strong> điểm để nâng lên hạng {nextTierObj.label}.
+              {currentLang === 'en'
+                ? `You need ${formatCurrency(Math.max(0, nextMin - currentPoints))} more points to upgrade to ${translateText(nextTierObj.label, currentLang)} tier.`
+                : `Bạn cần tích lũy thêm ${formatCurrency(Math.max(0, nextMin - currentPoints))} điểm để nâng lên hạng ${nextTierObj.label}.`}
             </p>
           </div>
         )}
@@ -479,30 +489,30 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <User className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-800">Thông tin cá nhân</h2>
-                <p className="text-xs text-slate-500">Cập nhật họ tên, sđt và ảnh đại diện</p>
+                <h2 className="text-lg font-bold text-slate-800">{translateText('Thông tin cá nhân', currentLang)}</h2>
+                <p className="text-xs text-slate-500">{translateText('Cập nhật họ tên, sđt và ảnh đại diện', currentLang)}</p>
               </div>
             </div>
 
             <button onClick={() => setShowEditProfileModal(true)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">
-              <Edit2 className="w-3.5 h-3.5" /> Chỉnh sửa
+              <Edit2 className="w-3.5 h-3.5" /> {translateText('Chỉnh sửa', currentLang)}
             </button>
           </div>
 
           <div className="space-y-4">
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">HỌ VÀ TÊN</span>
-              <p className="text-sm font-semibold text-slate-800">{user?.name || 'Chưa cập nhật'}</p>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('HỌ VÀ TÊN', currentLang)}</span>
+              <p className="text-sm font-semibold text-slate-800">{user?.name || (currentLang === 'en' ? 'Not updated' : 'Chưa cập nhật')}</p>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">SỐ ĐIỆN THOẠI</span>
-              <p className="text-sm font-semibold text-slate-800">{user?.phone || 'Chưa cập nhật'}</p>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('SỐ ĐIỆN THOẠI', currentLang)}</span>
+              <p className="text-sm font-semibold text-slate-800">{user?.phone || (currentLang === 'en' ? 'Not updated' : 'Chưa cập nhật')}</p>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">EMAIL (KHÔNG THỂ THAY ĐỔI)</span>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('EMAIL (KHÔNG THỂ THAY ĐỔI)', currentLang)}</span>
               <p className="text-sm font-semibold text-slate-600">{user?.email}</p>
             </div>
           </div>
@@ -516,32 +526,32 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <Lock className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-800">Đổi mật khẩu</h2>
-                <p className="text-xs text-slate-500">Cập nhật mật khẩu bảo vệ tài khoản</p>
+                <h2 className="text-lg font-bold text-slate-800">{translateText('Đổi mật khẩu', currentLang)}</h2>
+                <p className="text-xs text-slate-500">{translateText('Cập nhật mật khẩu bảo vệ tài khoản', currentLang)}</p>
               </div>
             </div>
 
             <button onClick={() => setShowChangePassModal(true)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">
-              <Edit2 className="w-3.5 h-3.5" /> Chỉnh sửa
+              <Edit2 className="w-3.5 h-3.5" /> {translateText('Chỉnh sửa', currentLang)}
             </button>
           </div>
 
           <div className="space-y-4">
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 flex items-center justify-between">
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">MẬT KHẨU</span>
+                <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('MẬT KHẨU', currentLang)}</span>
                 <p className="text-sm font-mono font-bold text-slate-800">••••••••</p>
               </div>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 text-xs font-semibold">
-                <ShieldCheck className="w-4 h-4" /> Đã bảo vệ
+                <ShieldCheck className="w-4 h-4" /> {translateText('Đã bảo vệ', currentLang)}
               </span>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">XÁC THỰC TÀI KHOẢN</span>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('XÁC THỰC TÀI KHOẢN', currentLang)}</span>
               <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Đã liên kết với email {user?.email}
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> {translateText('Đã liên kết với email', currentLang)} {user?.email}
               </p>
             </div>
           </div>
@@ -557,14 +567,14 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
               <Car className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Phương tiện của tôi ({vehicles.length})</h2>
-              <p className="text-xs text-slate-500">Danh sách các xe dùng để đặt lịch dịch vụ rửa xe</p>
+              <h2 className="text-xl font-bold text-slate-800">{translateText('Phương tiện của tôi', currentLang)} ({vehicles.length})</h2>
+              <p className="text-xs text-slate-500">{translateText('Danh sách các xe dùng để đặt lịch dịch vụ rửa xe', currentLang)}</p>
             </div>
           </div>
 
           <button onClick={() => setShowAddVehicle(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-sm">
-            <Plus className="w-4 h-4" /> Thêm xe mới
+            <Plus className="w-4 h-4" /> {translateText('+ Thêm xe mới', currentLang)}
           </button>
         </div>
 
@@ -604,7 +614,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                   <h3 className="text-base font-bold text-slate-800">{brandModel}</h3>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium">
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 capitalize">{v.vehicleType || 'sedan'}</span>
-                    {v.color && <span className="rounded-md bg-slate-100 px-2 py-0.5">{v.color}</span>}
+                    {v.color && <span className="rounded-md bg-slate-100 px-2 py-0.5">{translateText(v.color, currentLang)}</span>}
                     {v.year && <span className="rounded-md bg-slate-100 px-2 py-0.5">{v.year}</span>}
                   </div>
                 </div>

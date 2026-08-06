@@ -1,0 +1,36 @@
+{
+  "common": {
+    "success": "Success",
+    "invalid_data": "Invalid data provided",
+    "internal_error": "Internal server error",
+    "not_found": "Resource not found",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden"
+  },
+  "auth": {
+    "register_success": "Registration successful",
+    "login_success": "Login successful",
+    "google_login_success": "Google login successful",
+    "logout_success": "Logout successful",
+    "refresh_success": "Token refreshed successfully",
+    "profile_fetched": "Profile retrieved successfully",
+    "profile_updated": "Profile updated successfully",
+    "password_changed": "Password changed successfully",
+    "otp_sent": "OTP code has been sent to your email",
+    "otp_verified": "OTP verified successfully",
+    "password_reset": "Password reset successfully",
+    "email_exists": "This email is already registered",
+    "invalid_credentials": "Invalid email or password",
+    "account_suspended": "Your account has been suspended"
+  },
+  "booking": {
+    "created": "Booking created successfully",
+    "cancelled": "Booking cancelled successfully",
+    "updated": "Booking updated successfully",
+    "not_found": "Booking not found"
+  },
+  "notification": {
+    "profile_updated_title": "Profile Updated",
+    "profile_updated_msg": "Your personal profile has been updated successfully."
+  }
+}

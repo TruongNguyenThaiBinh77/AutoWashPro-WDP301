@@ -1,0 +1,7 @@
+{
+  "unauthorized": "Unauthorized access",
+  "forbidden": "Access forbidden",
+  "not_found": "Resource not found",
+  "server_error": "Internal server error. Please try again later.",
+  "network_error": "Network error. Please check your internet connection."
+}

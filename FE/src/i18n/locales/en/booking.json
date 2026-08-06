@@ -1,0 +1,30 @@
+{
+  "title": "Service Booking",
+  "subtitle": "Select your preferred branch, service, and time slot.",
+  "create": {
+    "title": "Create New Appointment",
+    "button": "Confirm Booking",
+    "select_branch": "Select Branch",
+    "select_package": "Select Service Package",
+    "select_date": "Select Date",
+    "select_time": "Select Time Slot",
+    "select_vehicle": "Select Your Vehicle"
+  },
+  "status": {
+    "pending": "Pending Confirmation",
+    "confirmed": "Confirmed",
+    "processing": "Washing in Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "failed": "Failed"
+  },
+  "detail": {
+    "code": "Booking Code",
+    "date": "Appointment Date",
+    "time": "Appointment Time",
+    "branch": "Branch Location",
+    "package": "Service Package",
+    "vehicle": "Vehicle Details",
+    "price": "Total Price"
+  }
+}

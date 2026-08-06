@@ -1,0 +1,12 @@
+{
+  "points": "Accumulated Points",
+  "tier": {
+    "title": "Membership Tier",
+    "bronze": "Bronze",
+    "silver": "Silver",
+    "gold": "Gold",
+    "diamond": "Diamond"
+  },
+  "history": "Points History",
+  "redeem": "Redeem Reward Gifts"
+}

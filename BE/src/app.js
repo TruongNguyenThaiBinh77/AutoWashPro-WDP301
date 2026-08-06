@@ -28,9 +28,12 @@ const ALLOWED_VERCEL_HOSTS = new Set([
   'auto-wash-pro-wdp301.vercel.app',
 ]);
 
+const { i18next, middleware: i18nMiddleware } = require('./config/i18n');
+
 const app = express();
 app.set('trust proxy', 1);
 
+app.use(i18nMiddleware.handle(i18next));
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
@@ -57,7 +60,7 @@ app.use(cors({
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language']
 }));
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));

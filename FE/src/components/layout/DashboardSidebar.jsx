@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { List } from '@phosphor-icons/react';
-import { SignOut } from '@phosphor-icons/react';
+import { List, SignOut } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 
 /**
  * Sidebar tái sử dụng cho Admin, Manager, Staff (cùng UI, khác menuItems).
@@ -18,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
  */
 export default function DashboardSidebar({ brand, menuItems, user, onLogout, className, badges = {} }) {
   const [collapsed, setCollapsed] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <aside
@@ -45,8 +47,8 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          aria-label={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
-          title={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+          aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
+          title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
         >
           <List size={16} weight="bold" />
         </button>
@@ -58,6 +60,7 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
         {menuItems.map((item) => {
           const Icon = item.icon;
           const count = badges[item.id] || 0;
+          const itemLabel = t(`menu.${item.id}`, item.label);
           return (
             <NavLink
               key={item.id}
@@ -72,7 +75,7 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                 )
               }
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? itemLabel : undefined}
             >
               <span className="relative shrink-0">
                 <Icon size={20} weight="duotone" aria-hidden />
@@ -80,10 +83,10 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
                   <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-sidebar" aria-hidden />
                 )}
               </span>
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && <span className="truncate">{itemLabel}</span>}
               {!collapsed && count > 0 && (
                 <span className="ml-auto inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold text-white"
-                  title={`${count} mục mới`}>
+                  title={`${count} ${t('sidebar.new_items')}`}>
                   {count > 99 ? '99+' : count}
                 </span>
               )}
@@ -93,7 +96,7 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
       </nav>
 
       <div className="mt-auto shrink-0 border-t border-sidebar-border">
-        <div className={cn('flex items-center px-4 py-4', collapsed ? 'justify-center' : 'gap-3')}>
+        <div className={cn('flex items-center px-4 py-4', collapsed ? 'flex-col gap-2 justify-center' : 'gap-2')}>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{user.name}</p>
@@ -102,14 +105,18 @@ export default function DashboardSidebar({ brand, menuItems, user, onLogout, cla
               ) : null}
             </div>
           )}
+          
+          {/* Nút chuyển đổi ngôn ngữ đặt ngay cạnh nút Đăng xuất */}
+          <LanguageSwitcher isCompact={collapsed} isLightBg={false} />
+
           <Button
             type="button"
             variant="ghost"
             size="icon"
             className="shrink-0 text-muted-foreground hover:text-destructive"
             onClick={onLogout}
-            aria-label="Đăng xuất"
-            title="Đăng xuất"
+            aria-label={t('sidebar.logout')}
+            title={t('sidebar.logout')}
           >
             <SignOut size={20} weight="bold" />
           </Button>

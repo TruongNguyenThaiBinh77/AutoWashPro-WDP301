@@ -1,7 +1,9 @@
-﻿import Navbar from '../layout/Navbar';
+import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
 import PackagesSection from '../sections/PackagesSection';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { translateText } from '@/utils/notifTranslator';
 
 const stats = [
   { value: '50.000+', label: 'Lượt rửa xe' },
@@ -74,6 +76,9 @@ function fadeInUp(i = 0) {
 }
 
 export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, onGoToHistory, onGoToPayments, onGoToNotifications }) {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
+
   return (
     <div className="bg-white min-h-screen">
       <Navbar onOpenAuth={onOpenAuth} user={user} onLogout={onLogout} onGoToProfile={onGoToProfile} onGoToHistory={onGoToHistory} onGoToPayments={onGoToPayments} onGoToNotifications={onGoToNotifications} />
@@ -86,14 +91,14 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
         </div>
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <motion.p {...fadeInUp(0)} className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-200 mb-6 backdrop-blur-sm border border-white/10">
-            #1 Dịch vụ rửa xe tại Việt Nam
+            {translateText('#1 Dịch vụ rửa xe tại Việt Nam', currentLang)}
           </motion.p>
           <motion.h1 {...fadeInUp(1)} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-            Chúng tôi yêu xe của bạn{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">như chính bạn</span>
+            {translateText('Chúng tôi yêu xe của bạn', currentLang)}{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300">{translateText('như chính bạn', currentLang)}</span>
           </motion.h1>
           <motion.p {...fadeInUp(2)} className="text-emerald-100/80 text-lg max-w-2xl mx-auto leading-relaxed">
-            AutoWashPro ra đời với sứ mệnh mang đến trải nghiệm chăm sóc xe chuyên nghiệp, tiện lợi và đáng tin cậy cho mọi chủ xe tại Việt Nam.
+            {translateText('AutoWashPro ra đời với sứ mệnh mang đến trải nghiệm chăm sóc xe chuyên nghiệp, tiện lợi và đáng tin cậy cho mọi chủ xe tại Việt Nam.', currentLang)}
           </motion.p>
           <motion.div {...fadeInUp(3)} className="flex items-center justify-center gap-4 mt-10">
             <div className="flex -space-x-2">
@@ -106,7 +111,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
               ))}
             </div>
             <p className="text-sm text-emerald-200/70">
-              Được <span className="font-semibold text-emerald-200">50.000+</span> khách hàng tin dùng
+              {currentLang === 'en' ? 'Trusted by ' : 'Được '}<span className="font-semibold text-emerald-200">50.000+</span> {currentLang === 'en' ? 'customers nationwide' : 'khách hàng tin dùng'}
             </p>
           </motion.div>
         </div>
@@ -121,7 +126,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
               <motion.div key={s.label} {...fadeInUp(i)}
                 className="rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-200/50 px-5 py-6 text-center hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
                 <p className="text-2xl md:text-3xl font-extrabold text-emerald-600">{s.value}</p>
-                <p className="text-xs text-slate-500 mt-1 font-medium">{s.label}</p>
+                <p className="text-xs text-slate-500 mt-1 font-medium">{translateText(s.label, currentLang)}</p>
               </motion.div>
             ))}
           </div>
@@ -133,21 +138,17 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div {...fadeInUp(0)}>
-              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Câu chuyện</p>
+              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{translateText('Câu chuyện', currentLang)}</p>
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
-                Từ một ý tưởng nhỏ{' '}
-                <span className="text-emerald-600">đến chuỗi cửa hàng</span> rửa xe hàng đầu
+                {translateText('Từ một ý tưởng nhỏ', currentLang)}{' '}
+                <span className="text-emerald-600">{translateText('đến chuỗi cửa hàng', currentLang)}</span> {translateText('rửa xe hàng đầu', currentLang)}
               </h2>
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  AutoWashPro được thành lập vào năm 2019 bởi đội ngũ những người đam mê xe hơi và dịch vụ khách hàng. 
-                  Chúng tôi nhận thấy việc rửa xe tại Việt Nam còn nhiều bất cập: thời gian chờ lâu, chất lượng không đồng nhất, 
-                  và khó khăn trong việc đặt lịch.
+                  {translateText('AutoWashPro được thành lập vào năm 2019 bởi đội ngũ những người đam mê xe hơi và dịch vụ khách hàng. Chúng tôi nhận thấy việc rửa xe tại Việt Nam còn nhiều bất cập: thời gian chờ lâu, chất lượng không đồng nhất, và khó khăn trong việc đặt lịch.', currentLang)}
                 </p>
                 <p>
-                  Từ đó, chúng tôi xây dựng một hệ thống rửa xe chuyên nghiệp với quy trình chuẩn hóa, ứng dụng đặt lịch thông minh, 
-                  và cam kết chất lượng cho từng chiếc xe. Sau hơn 5 năm, AutoWashPro đã trở thành thương hiệu rửa xe được yêu thích nhất 
-                  tại TP. Hồ Chí Minh và đang mở rộng ra các tỉnh thành khác.
+                  {translateText('Từ đó, chúng tôi xây dựng một hệ thống rửa xe chuyên nghiệp với quy trình chuẩn hóa, ứng dụng đặt lịch thông minh, và cam kết chất lượng cho từng chiếc xe. Sau hơn 5 năm, AutoWashPro đã trở thành thương hiệu rửa xe được yêu thích nhất tại TP. Hồ Chí Minh và đang mở rộng ra các tỉnh thành khác.', currentLang)}
                 </p>
               </div>
             </motion.div>
@@ -160,7 +161,7 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
                     </svg>
                   </div>
                   <p className="text-lg font-bold text-slate-800">AutoWashPro</p>
-                  <p className="text-sm text-slate-500 mt-1">Chăm sóc xe tận tâm</p>
+                  <p className="text-sm text-slate-500 mt-1">{translateText('Chăm sóc xe tận tâm', currentLang)}</p>
                   <div className="mt-4 flex items-center justify-center gap-1 text-emerald-600 text-sm font-medium">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     Since 2019
@@ -177,8 +178,8 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
       <section className="py-20 bg-slate-50/60">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeInUp(0)} className="text-center mb-14">
-            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Giá trị cốt lõi</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">Tại sao chọn chúng tôi?</h2>
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">{translateText('Giá trị cốt lõi', currentLang)}</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">{translateText('Tại sao chọn chúng tôi?', currentLang)}</h2>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {values.map((v, i) => (
@@ -187,8 +188,8 @@ export default function AboutPage({ onOpenAuth, user, onLogout, onGoToProfile, o
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
                   {v.icon}
                 </div>
-                <h3 className="font-bold text-slate-800 mb-2">{v.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{v.desc}</p>
+                <h3 className="font-bold text-slate-800 mb-2">{translateText(v.title, currentLang)}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{translateText(v.desc, currentLang)}</p>
               </motion.div>
             ))}
           </div>

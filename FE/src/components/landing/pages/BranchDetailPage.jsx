@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl } from '@/lib/authStorage';
 import {
   MapPin, Clock, Phone, Envelope, ArrowRight, Tag,
@@ -8,6 +9,7 @@ import {
 import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
 import DirectionsMap from '../widgets/DirectionsMap';
+import { translateText } from '@/utils/notifTranslator';
 
 const API_BASE = getApiBaseUrl() || 'http://localhost:5000/api';
 
@@ -21,6 +23,8 @@ const VOUCHER_TYPE_MAP = {
 };
 
 export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToProfile, onGoToHistory, onGoToPayments, onGoToNotifications }) {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.pathname.split('/').filter(Boolean).pop();

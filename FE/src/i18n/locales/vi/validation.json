@@ -1,0 +1,7 @@
+{
+  "required": "Trường này là bắt buộc",
+  "invalid_email": "Email không hợp lệ",
+  "invalid_phone": "Số điện thoại không hợp lệ",
+  "min_length": "Bắt buộc tối thiểu {{min}} ký tự",
+  "password_mismatch": "Mật khẩu xác nhận không trùng khớp"
+}

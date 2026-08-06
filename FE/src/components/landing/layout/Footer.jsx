@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp, Phone, Mail, Clock, MapPin, ShieldCheck, Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl } from '../../../lib/authStorage.js';
+import { translateText } from '@/utils/notifTranslator';
 
 const DEFAULT_SERVICES = [
   { title: 'Rửa xe bọt tuyết cao cấp', linkUrl: '/#services' },
@@ -20,6 +22,8 @@ const DEFAULT_POLICIES = [
 ];
 
 export default function Footer() {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language || 'vi';
   const [featuredServices, setFeaturedServices] = useState(DEFAULT_SERVICES);
   const [policyList, setPolicyList] = useState(DEFAULT_POLICIES);
 
@@ -154,14 +158,14 @@ export default function Footer() {
           <div>
             <h4 className="text-emerald-700 text-xs font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              Dịch vụ nổi bật
+              {translateText('Dịch vụ nổi bật', currentLang)}
             </h4>
             <ul className="space-y-2.5 text-sm font-medium">
               {featuredServices.map((item, idx) => (
                 <li key={item._id || item.slug || idx}>
                   <a href={item.linkUrl || '/#services'} className="text-slate-600 hover:text-emerald-600 hover:translate-x-1 transition-all duration-200 inline-block">
                     {item.icon && <span className="mr-1.5">{item.icon}</span>}
-                    {item.title}
+                    {translateText(item.title, currentLang)}
                   </a>
                 </li>
               ))}
@@ -172,13 +176,13 @@ export default function Footer() {
           <div>
             <h4 className="text-emerald-700 text-xs font-extrabold uppercase tracking-wider mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              Chính sách & Hỗ trợ
+              {translateText('Chính sách & Hỗ trợ', currentLang)}
             </h4>
             <ul className="space-y-2.5 text-sm font-medium">
               {policyList.map((item, idx) => (
                 <li key={item._id || item.slug || idx}>
                   <a href={`/policies#${item.slug}`} className="text-slate-600 hover:text-emerald-600 transition-colors flex items-center gap-2">
-                    <span>{item.icon || '📜'}</span> {item.title}
+                    <span>{item.icon || '📜'}</span> {translateText(item.title, currentLang)}
                   </a>
                 </li>
               ))}

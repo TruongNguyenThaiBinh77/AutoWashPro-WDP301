@@ -1,0 +1,11 @@
+{
+  "balance": "Số dư ví",
+  "topup": "Nạp tiền vào ví",
+  "history": {
+    "title": "Lịch sử giao dịch ví",
+    "deposit": "Nạp tiền",
+    "withdraw": "Rút tiền",
+    "payment": "Thanh toán dịch vụ",
+    "refund": "Hoàn tiền"
+  }
+}

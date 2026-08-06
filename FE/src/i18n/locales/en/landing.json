@@ -1,0 +1,14 @@
+{
+  "hero": {
+    "title": "Professional Car Wash & Detailing Services",
+    "subtitle": "Book online easily, save time, and enjoy a premium automotive care experience.",
+    "cta_book": "Book Appointment",
+    "cta_services": "Explore Services"
+  },
+  "footer": {
+    "featured_services": "Featured Services",
+    "policies_support": "Policies & Support",
+    "contact_us": "Direct Contact",
+    "satisfaction_guarantee": "100% Satisfaction Guarantee"
+  }
+}
