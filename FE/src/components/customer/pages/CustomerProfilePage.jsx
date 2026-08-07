@@ -12,10 +12,18 @@ import { translateText } from '@/utils/notifTranslator';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const FALLBACK_TIER_MAP = {
-  diamond: { label: 'Kim cương', color: 'text-cyan-600', bg: 'bg-cyan-50 border-cyan-200', minPoints: 1000000, benefits: ['Tất cả ưu đãi của hạng Vàng', 'Giảm 10% khi mua gói dịch vụ', 'Hệ số nhân điểm x2.0', 'Tặng 2 lần xịt gầm miễn phí mỗi tháng'] },
-  gold: { label: 'Vàng', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', minPoints: 500000, benefits: ['Tất cả ưu đãi của hạng Bạc', 'Hệ số nhân điểm x1.5', 'Giảm 5% khi mua gói dịch vụ', 'Tặng 1 lần xịt gầm miễn phí mỗi tháng'] },
-  silver: { label: 'Bạc', color: 'text-slate-600', bg: 'bg-slate-100 border-slate-300', minPoints: 100000, benefits: ['Tất cả ưu đãi của hạng Đồng', 'Hệ số nhân điểm x1.2', 'Ưu tiên xếp lịch khi đông xe'] },
-  bronze: { label: 'Đồng', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200', minPoints: 0, benefits: ['Tích điểm cho mỗi lần rửa xe', 'Nhận ưu đãi vào dịp sinh nhật'] },
+  diamond: { labelKey: 'customer.profile.tier.diamond', color: 'text-cyan-600', bg: 'bg-cyan-50 border-cyan-200', minPoints: 1000000, benefitKeys: ['customer.profile.tier.benefit.diamond1', 'customer.profile.tier.benefit.diamond2', 'customer.profile.tier.benefit.diamond3', 'customer.profile.tier.benefit.diamond4'] },
+  gold: { labelKey: 'customer.profile.tier.gold', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', minPoints: 500000, benefitKeys: ['customer.profile.tier.benefit.gold1', 'customer.profile.tier.benefit.gold2', 'customer.profile.tier.benefit.gold3', 'customer.profile.tier.benefit.gold4'] },
+  silver: { labelKey: 'customer.profile.tier.silver', color: 'text-slate-600', bg: 'bg-slate-100 border-slate-300', minPoints: 100000, benefitKeys: ['customer.profile.tier.benefit.silver1', 'customer.profile.tier.benefit.silver2', 'customer.profile.tier.benefit.silver3'] },
+  bronze: { labelKey: 'customer.profile.tier.bronze', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200', minPoints: 0, benefitKeys: ['customer.profile.tier.benefit.bronze1', 'customer.profile.tier.benefit.bronze2'] },
+};
+
+const TIER_LABEL_KEYS = {
+  bronze: 'customer.profile.tier.bronze',
+  silver: 'customer.profile.tier.silver',
+  gold: 'customer.profile.tier.gold',
+  diamond: 'customer.profile.tier.diamond',
+  ruby: 'customer.profile.tier.ruby',
 };
 
 function formatCurrency(val) {
@@ -24,7 +32,7 @@ function formatCurrency(val) {
 }
 
 export default function CustomerProfilePage({ user, vehicles: initialVehicles, onLogout, apiBase, token, onBack, onUserUpdate }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'vi';
   const [vehicles, setVehicles] = useState(initialVehicles || []);
   const avatarInputRef = useRef(null);
@@ -65,7 +73,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
           if (Array.isArray(payload.data)) {
             setTierList(payload.data);
             const map = {};
-            payload.data.forEach(t => map[t.id] = { label: t.name, color: t.color, bg: t.bg, minPoints: t.minPoints, benefits: t.benefits || [], ...t });
+            payload.data.forEach(t => map[t.id] = { labelKey: TIER_LABEL_KEYS[(t.id || '').toLowerCase()] || null, label: t.name, color: t.color, bg: t.bg, minPoints: t.minPoints, benefits: t.benefits || [], ...t });
             setTierConfig(map);
           }
         }
@@ -85,7 +93,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      fireToast.error('Dung lượng ảnh tối đa là 5MB');
+      fireToast.error(t('customer.profile.avatarSizeLimit'));
       return;
     }
     const reader = new FileReader();
@@ -107,15 +115,15 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || 'Cập nhật thất bại');
+        throw new Error(errData.message || t('customer.profile.updateFail'));
       }
       const payload = await res.json();
       const updated = payload?.data || payload;
       setShowEditProfileModal(false);
-      fireToast.success('Cập nhật thông tin cá nhân thành công!');
+      fireToast.success(t('customer.profile.updateSuccess'));
       if (onUserUpdate) onUserUpdate(updated);
     } catch (e) {
-      fireToast.error(e.message || 'Cập nhật thất bại');
+      fireToast.error(e.message || t('customer.profile.updateFail'));
     } finally {
       setProfileSaving(false);
     }
@@ -125,11 +133,11 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
   async function handleChangePassword(e) {
     e.preventDefault();
     if (passForm.newPassword !== passForm.confirmPassword) {
-      fireToast.error('Mật khẩu mới không khớp!');
+      fireToast.error(t('customer.profile.passMismatch'));
       return;
     }
     if (passForm.newPassword.length < 6) {
-      fireToast.error('Mật khẩu mới phải từ 6 ký tự trở lên');
+      fireToast.error(t('customer.profile.passTooShort'));
       return;
     }
 
@@ -145,13 +153,13 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || 'Đổi mật khẩu thất bại');
+        throw new Error(errData.message || t('customer.profile.changePassFail'));
       }
-      fireToast.success('Đổi mật khẩu thành công!');
+      fireToast.success(t('customer.profile.changePassSuccess'));
       setShowChangePassModal(false);
       setPassForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (e) {
-      fireToast.error(e.message || 'Đổi mật khẩu thất bại');
+      fireToast.error(e.message || t('customer.profile.changePassFail'));
     } finally {
       setPassSaving(false);
     }
@@ -169,7 +177,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
       const currentYear = new Date().getFullYear();
       if (cleanPayload.year && (cleanPayload.year < 1900 || cleanPayload.year > currentYear)) {
-        throw new Error(`Năm sản xuất không được lớn hơn năm hiện tại (${currentYear})`);
+        throw new Error(t('customer.profile.yearInvalid', { year: currentYear }));
       }
 
       const res = await fetch(`${apiBase || API_BASE}/vehicles`, {
@@ -183,16 +191,16 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
         if (!errMsg && Array.isArray(errData.errors) && errData.errors.length > 0) {
           errMsg = errData.errors.map(err => err.msg).join(', ');
         }
-        throw new Error(errMsg || 'Thêm xe thất bại');
+        throw new Error(errMsg || t('customer.profile.addVehicleFail'));
       }
       const payload = await res.json();
       const newVehicle = payload?.data || payload;
       setVehicles(prev => [...prev, newVehicle]);
       setShowAddVehicle(false);
       setForm({ licensePlate: '', vehicleType: 'sedan', brand: '', model: '', color: '', year: '' });
-      fireToast.success('Thêm phương tiện thành công');
+      fireToast.success(t('customer.profile.addVehicleSuccess'));
     } catch (e) {
-      fireToast.error(e.message || 'Thêm xe thất bại');
+      fireToast.error(e.message || t('customer.profile.addVehicleFail'));
     } finally {
       setSubmitting(false);
     }
@@ -212,7 +220,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
       const currentYear = new Date().getFullYear();
       if (cleanPayload.year && (cleanPayload.year < 1900 || cleanPayload.year > currentYear)) {
-        throw new Error(`Năm sản xuất không được lớn hơn năm hiện tại (${currentYear})`);
+        throw new Error(t('customer.profile.yearInvalid', { year: currentYear }));
       }
 
       const res = await fetch(`${apiBase || API_BASE}/vehicles/${vId}`, {
@@ -226,16 +234,16 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
         if (!errMsg && Array.isArray(errData.errors) && errData.errors.length > 0) {
           errMsg = errData.errors.map(err => err.msg).join(', ');
         }
-        throw new Error(errMsg || 'Cập nhật xe thất bại');
+        throw new Error(errMsg || t('customer.profile.updateVehicleFail'));
       }
       const payload = await res.json();
       const updated = payload?.data || payload;
       setVehicles(prev => prev.map(v => ((v._id || v.id) === vId ? updated : v)));
       setShowEditVehicle(false);
       setEditVehicle(null);
-      fireToast.success('Đã cập nhật xe thành công');
+      fireToast.success(t('customer.profile.updateVehicleSuccess'));
     } catch (e) {
-      fireToast.error(e.message || 'Cập nhật xe thất bại');
+      fireToast.error(e.message || t('customer.profile.updateVehicleFail'));
     } finally {
       setEditSubmitting(false);
     }
@@ -258,15 +266,15 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
   async function handleDeleteVehicle(vehicle) {
     const vId = vehicle._id || vehicle.id;
     const plate = vehicle.licensePlate || '';
-    const brandModel = [vehicle.brand, vehicle.model].filter(Boolean).join(' ') || 'Xe';
+    const brandModel = [vehicle.brand, vehicle.model].filter(Boolean).join(' ') || t('customer.profile.vehicle');
 
     if (!(await confirmDialog({
-      title: 'Xóa phương tiện',
-      confirmLabel: 'Xóa',
+      title: t('customer.profile.deleteVehicleTitle'),
+      confirmLabel: t('customer.profile.delete'),
       danger: true,
       content: (
         <div className="space-y-3">
-          <p className="text-sm text-slate-600">Bạn có chắc chắn muốn xóa phương tiện này? Hành động này không thể hoàn tác.</p>
+          <p className="text-sm text-slate-600">{t('customer.profile.deleteVehicleConfirm')}</p>
           <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500">
               <Car className="w-5 h-5" />
@@ -287,10 +295,10 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || errData.error || 'Xóa xe thất bại');
+        throw new Error(errData.message || errData.error || t('customer.profile.deleteVehicleFail'));
       }
       setVehicles(prev => prev.filter(v => (v._id || v.id) !== vId));
-      fireToast.success('Đã xóa xe thành công');
+      fireToast.success(t('customer.profile.deleteVehicleSuccess'));
     } catch (e) {
       if (e.message.includes('lịch hẹn đang hoạt động')) {
         const msg = e.message;
@@ -305,9 +313,9 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
         });
 
         await confirmDialog({
-          title: 'Không thể xóa phương tiện',
+          title: t('customer.profile.cannotDeleteTitle'),
           hideCancel: true,
-          confirmLabel: 'Đã hiểu',
+          confirmLabel: t('customer.profile.gotIt'),
           content: (
             <div className="space-y-4">
               <div className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200/70">
@@ -315,16 +323,16 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div className="space-y-1 min-w-0 flex-1">
-                  <h4 className="text-sm font-bold text-amber-900">Bảo vệ liên kết dữ liệu hệ thống</h4>
+                  <h4 className="text-sm font-bold text-amber-900">{t('customer.profile.deleteBlockedHeading')}</h4>
                   <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                    Xe <strong>{plate}</strong> đang có <strong>{count} lịch hẹn đang hoạt động</strong>. Vui lòng hoàn thành hoặc hủy các lịch hẹn này trước khi xóa xe.
+                    {t('customer.profile.deleteBlockedMessage', { plate, count })}
                   </p>
                 </div>
               </div>
               {bookings.length > 0 && (
                 <div className="space-y-2">
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-                    Các lịch hẹn đang hoạt động:
+                    {t('customer.profile.activeBookings')}
                   </span>
                   <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">
                     {bookings.slice(0, 4).map((b, i) => (
@@ -343,7 +351,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
           ),
         });
       } else {
-        fireToast.error(e.message || 'Xóa xe thất bại');
+        fireToast.error(e.message || t('customer.profile.deleteVehicleFail'));
       }
     }
   }
@@ -352,6 +360,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
   const effectiveTierMap = tierConfig || FALLBACK_TIER_MAP;
   const currentTierId = (user?.tier || 'bronze').toLowerCase();
   const currentTierObj = effectiveTierMap[currentTierId] || FALLBACK_TIER_MAP.bronze;
+  const resolveTierLabel = (obj) => (obj?.labelKey ? t(obj.labelKey) : (obj?.label || ''));
 
   const currentPoints = user?.lifetimePoints ?? user?.totalPointsEarned ?? user?.loyaltyPoints ?? 0;
   const availableRewardPoints = user?.loyaltyPoints || 0;
@@ -388,7 +397,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
               ) : (
                 (user?.name || user?.email || 'U').charAt(0).toUpperCase()
               )}
-              <button onClick={() => setShowEditProfileModal(true)} title="Đổi ảnh đại diện"
+              <button onClick={() => setShowEditProfileModal(true)} title={t('customer.profile.changeAvatar')}
                 className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity cursor-pointer">
                 <Camera className="w-6 h-6" />
               </button>
@@ -399,10 +408,10 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
             <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-slate-800 truncate">{user?.name || (currentLang === 'en' ? 'Customer' : 'Khách hàng')}</h1>
+                <h1 className="text-2xl font-bold text-slate-800 truncate">{user?.name || t('customer.profile.customer')}</h1>
                 <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-bold ${currentTierObj.bg || 'bg-amber-50 text-amber-700 border-amber-200'}`}>
                   <Award className="w-3.5 h-3.5" />
-                  {translateText(currentTierObj.label, currentLang) || (currentLang === 'en' ? 'Member' : 'Thành viên')}
+                  {resolveTierLabel(currentTierObj) || t('customer.profile.member')}
                 </span>
               </div>
               <p className="text-sm text-slate-500 flex items-center gap-2">
@@ -423,35 +432,35 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-teal-50/40 p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{translateText('ĐIỂM THƯỞNG', currentLang)}</span>
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{t('customer.profile.rewardPoints')}</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm">
                 <Gift className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-emerald-700 font-mono tracking-tight">{formatCurrency(availableRewardPoints)}</p>
-            <p className="text-[11px] text-emerald-600 font-medium mt-1">{translateText('Dùng để đổi Voucher & quà ưu đãi', currentLang)}</p>
+            <p className="text-[11px] text-emerald-600 font-medium mt-1">{t('customer.profile.rewardPointsHint')}</p>
           </div>
 
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/60 to-sky-50/40 p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">{translateText('XE ĐÃ ĐĂNG KÝ', currentLang)}</span>
+              <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">{t('customer.profile.registeredVehicles')}</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 text-white shadow-sm">
                 <Car className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-blue-700 font-mono tracking-tight">{vehicles.length}</p>
-            <p className="text-[11px] text-blue-600 font-medium mt-1">{translateText('Phương tiện lưu trong tài khoản', currentLang)}</p>
+            <p className="text-[11px] text-blue-600 font-medium mt-1">{t('customer.profile.registeredVehiclesHint')}</p>
           </div>
 
           <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-5 relative overflow-hidden group">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">{translateText('LƯỢT QUAY MAY MẮN', currentLang)}</span>
+              <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">{t('customer.profile.spinCount')}</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-sm">
                 <Sparkles className="w-5 h-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-amber-700 font-mono tracking-tight">{spinCount}</p>
-            <p className="text-[11px] text-amber-600 font-medium mt-1">{translateText('Lượt quay may mắn nhận quà', currentLang)}</p>
+            <p className="text-[11px] text-amber-600 font-medium mt-1">{t('customer.profile.spinCountHint')}</p>
           </div>
         </div>
 
@@ -460,19 +469,15 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
           <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
             <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
               <span className="uppercase tracking-wider">
-                {currentLang === 'en'
-                  ? `${translateText(nextTierObj.label, currentLang).toUpperCase()} TIER PROGRESS`
-                  : `TIẾN TRÌNH LÊN HẠNG ${nextTierObj.label?.toUpperCase()}`}
+                {t('customer.profile.tierProgress', { tier: resolveTierLabel(nextTierObj).toUpperCase() })}
               </span>
-              <span className="font-mono text-emerald-700">{formatCurrency(currentPoints)} / {formatCurrency(nextMin)} {currentLang === 'en' ? 'pts' : 'điểm'}</span>
+              <span className="font-mono text-emerald-700">{formatCurrency(currentPoints)} / {formatCurrency(nextMin)} {t('customer.profile.points')}</span>
             </div>
             <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
               <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500 rounded-full" style={{ width: `${progressPercent}%` }} />
             </div>
             <p className="text-xs text-slate-500 mt-2 font-medium">
-              {currentLang === 'en'
-                ? `You need ${formatCurrency(Math.max(0, nextMin - currentPoints))} more points to upgrade to ${translateText(nextTierObj.label, currentLang)} tier.`
-                : `Bạn cần tích lũy thêm ${formatCurrency(Math.max(0, nextMin - currentPoints))} điểm để nâng lên hạng ${nextTierObj.label}.`}
+              {t('customer.profile.tierProgressHint', { points: formatCurrency(Math.max(0, nextMin - currentPoints)), tier: resolveTierLabel(nextTierObj) })}
             </p>
           </div>
         )}
@@ -489,30 +494,30 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <User className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-800">{translateText('Thông tin cá nhân', currentLang)}</h2>
-                <p className="text-xs text-slate-500">{translateText('Cập nhật họ tên, sđt và ảnh đại diện', currentLang)}</p>
+                <h2 className="text-lg font-bold text-slate-800">{t('customer.profile.personalInfo')}</h2>
+                <p className="text-xs text-slate-500">{t('customer.profile.personalInfoHint')}</p>
               </div>
             </div>
 
             <button onClick={() => setShowEditProfileModal(true)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">
-              <Edit2 className="w-3.5 h-3.5" /> {translateText('Chỉnh sửa', currentLang)}
+              <Edit2 className="w-3.5 h-3.5" /> {t('customer.profile.edit')}
             </button>
           </div>
 
           <div className="space-y-4">
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('HỌ VÀ TÊN', currentLang)}</span>
-              <p className="text-sm font-semibold text-slate-800">{user?.name || (currentLang === 'en' ? 'Not updated' : 'Chưa cập nhật')}</p>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('customer.profile.fullNameLabel')}</span>
+              <p className="text-sm font-semibold text-slate-800">{user?.name || t('customer.profile.notUpdated')}</p>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('SỐ ĐIỆN THOẠI', currentLang)}</span>
-              <p className="text-sm font-semibold text-slate-800">{user?.phone || (currentLang === 'en' ? 'Not updated' : 'Chưa cập nhật')}</p>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('customer.profile.phoneLabel')}</span>
+              <p className="text-sm font-semibold text-slate-800">{user?.phone || t('customer.profile.notUpdated')}</p>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('EMAIL (KHÔNG THỂ THAY ĐỔI)', currentLang)}</span>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('customer.profile.emailLabel')}</span>
               <p className="text-sm font-semibold text-slate-600">{user?.email}</p>
             </div>
           </div>
@@ -526,32 +531,32 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <Lock className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-800">{translateText('Đổi mật khẩu', currentLang)}</h2>
-                <p className="text-xs text-slate-500">{translateText('Cập nhật mật khẩu bảo vệ tài khoản', currentLang)}</p>
+                <h2 className="text-lg font-bold text-slate-800">{t('customer.profile.changePassword')}</h2>
+                <p className="text-xs text-slate-500">{t('customer.profile.changePasswordHint')}</p>
               </div>
             </div>
 
             <button onClick={() => setShowChangePassModal(true)}
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">
-              <Edit2 className="w-3.5 h-3.5" /> {translateText('Chỉnh sửa', currentLang)}
+              <Edit2 className="w-3.5 h-3.5" /> {t('customer.profile.edit')}
             </button>
           </div>
 
           <div className="space-y-4">
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 flex items-center justify-between">
               <div>
-                <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('MẬT KHẨU', currentLang)}</span>
+                <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('customer.profile.passwordLabel')}</span>
                 <p className="text-sm font-mono font-bold text-slate-800">••••••••</p>
               </div>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 text-xs font-semibold">
-                <ShieldCheck className="w-4 h-4" /> {translateText('Đã bảo vệ', currentLang)}
+                <ShieldCheck className="w-4 h-4" /> {t('customer.profile.protected')}
               </span>
             </div>
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{translateText('XÁC THỰC TÀI KHOẢN', currentLang)}</span>
+              <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('customer.profile.accountVerificationLabel')}</span>
               <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> {translateText('Đã liên kết với email', currentLang)} {user?.email}
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> {t('customer.profile.linkedToEmail')} {user?.email}
               </p>
             </div>
           </div>
@@ -567,32 +572,32 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
               <Car className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">{translateText('Phương tiện của tôi', currentLang)} ({vehicles.length})</h2>
-              <p className="text-xs text-slate-500">{translateText('Danh sách các xe dùng để đặt lịch dịch vụ rửa xe', currentLang)}</p>
+              <h2 className="text-xl font-bold text-slate-800">{t('customer.profile.myVehicles')} ({vehicles.length})</h2>
+              <p className="text-xs text-slate-500">{t('customer.profile.myVehiclesHint')}</p>
             </div>
           </div>
 
           <button onClick={() => setShowAddVehicle(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-sm">
-            <Plus className="w-4 h-4" /> {translateText('+ Thêm xe mới', currentLang)}
+            <Plus className="w-4 h-4" /> {t('customer.profile.addNewVehicle')}
           </button>
         </div>
 
         {vehicles.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/50">
             <Car className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-sm font-bold text-slate-700">Chưa có phương tiện nào được đăng ký</p>
-            <p className="text-xs text-slate-400 mt-1">Thêm xe mới để thực hiện đặt lịch rửa xe nhanh chóng</p>
+            <p className="text-sm font-bold text-slate-700">{t('customer.profile.noVehicles')}</p>
+            <p className="text-xs text-slate-400 mt-1">{t('customer.profile.noVehiclesHint')}</p>
             <button onClick={() => setShowAddVehicle(true)}
               className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition-colors">
-              <Plus className="w-4 h-4" /> Thêm xe ngay
+              <Plus className="w-4 h-4" /> {t('customer.profile.addVehicleNow')}
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {vehicles.map((v) => {
               const vId = v._id || v.id;
-              const brandModel = [v.brand, v.model].filter(Boolean).join(' ') || 'Phương tiện';
+              const brandModel = [v.brand, v.model].filter(Boolean).join(' ') || t('customer.profile.vehicle');
               return (
                 <div key={vId} className="group relative rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-300 hover:shadow-md transition-all">
                   <div className="flex items-start justify-between gap-3 mb-3">
@@ -602,10 +607,10 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => openEditVehicle(v)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors" title="Sửa">
+                      <button onClick={() => openEditVehicle(v)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors" title={t('customer.profile.edit')}>
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDeleteVehicle(v)} className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors" title="Xóa">
+                      <button onClick={() => handleDeleteVehicle(v)} className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors" title={t('customer.profile.delete')}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -631,7 +636,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl border border-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-bold text-slate-800">Chỉnh sửa thông tin cá nhân</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t('customer.profile.editProfileTitle')}</h3>
                 <button onClick={() => setShowEditProfileModal(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
                   <X className="w-5 h-5" />
                 </button>
@@ -641,7 +646,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 
                 {/* AVATAR EDIT SECTION */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">Ảnh đại diện</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">{t('customer.profile.avatar')}</label>
                   <div className="flex items-center gap-4">
                     <div className="relative h-16 w-16 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-extrabold text-2xl overflow-hidden ring-2 ring-emerald-100">
                       {profileForm.avatar ? (
@@ -656,12 +661,12 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                       <div className="flex flex-wrap items-center gap-2">
                         <button type="button" onClick={() => avatarInputRef.current?.click()}
                           className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs">
-                          <Upload className="w-3.5 h-3.5" /> Chọn từ máy
+                          <Upload className="w-3.5 h-3.5" /> {t('customer.profile.chooseFromDevice')}
                         </button>
                         {profileForm.avatar && (
                           <button type="button" onClick={() => setProfileForm({ ...profileForm, avatar: '' })}
                             className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
-                            Xóa ảnh
+                            {t('customer.profile.removePhoto')}
                           </button>
                         )}
                       </div>
@@ -669,7 +674,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hoặc dán URL link ảnh đại diện</label>
+                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('customer.profile.orPasteAvatarUrl')}</label>
                     <div className="relative">
                       <LinkIcon className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                       <input type="text" value={profileForm.avatar} onChange={e => setProfileForm({ ...profileForm, avatar: e.target.value })}
@@ -680,19 +685,19 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
                 <div className="border-t border-slate-100 pt-3 space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Họ và tên *</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">{t('customer.profile.fullName')}</label>
                     <input type="text" value={profileForm.name} onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
                       required className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Số điện thoại</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">{t('customer.profile.phoneNumber')}</label>
                     <input type="text" value={profileForm.phone} onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
-                      placeholder="Nhập số điện thoại" className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                      placeholder={t('customer.profile.phonePlaceholder')} className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Email (Không thể thay đổi)</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">{t('customer.profile.emailImmutable')}</label>
                     <input type="email" value={user?.email || ''} disabled
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-400 cursor-not-allowed" />
                   </div>
@@ -701,11 +706,11 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <div className="pt-3 flex gap-3">
                   <button type="button" onClick={() => setShowEditProfileModal(false)}
                     className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                    Hủy
+                    {t('customer.profile.cancel')}
                   </button>
                   <button type="submit" disabled={profileSaving}
                     className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm">
-                    {profileSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    {profileSaving ? t('customer.profile.saving') : t('customer.profile.saveChanges')}
                   </button>
                 </div>
               </form>
@@ -721,7 +726,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl border border-slate-100 space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-bold text-slate-800">Đổi mật khẩu</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t('customer.profile.changePassword')}</h3>
                 <button onClick={() => setShowChangePassModal(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
                   <X className="w-5 h-5" />
                 </button>
@@ -729,31 +734,31 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Mật khẩu hiện tại *</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">{t('customer.profile.currentPassword')}</label>
                   <input type="password" value={passForm.currentPassword} onChange={e => setPassForm({ ...passForm, currentPassword: e.target.value })}
                     required placeholder="••••••••" className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Mật khẩu mới *</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">{t('customer.profile.newPassword')}</label>
                   <input type="password" value={passForm.newPassword} onChange={e => setPassForm({ ...passForm, newPassword: e.target.value })}
-                    required placeholder="Tối thiểu 6 ký tự" className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                    required placeholder={t('customer.profile.minPasswordHint')} className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Xác nhận mật khẩu mới *</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">{t('customer.profile.confirmPassword')}</label>
                   <input type="password" value={passForm.confirmPassword} onChange={e => setPassForm({ ...passForm, confirmPassword: e.target.value })}
-                    required placeholder="Nhập lại mật khẩu mới" className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
+                    required placeholder={t('customer.profile.retypePasswordPlaceholder')} className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none" />
                 </div>
 
                 <div className="pt-3 flex gap-3">
                   <button type="button" onClick={() => setShowChangePassModal(false)}
                     className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
-                    Hủy
+                    {t('customer.profile.cancel')}
                   </button>
                   <button type="submit" disabled={passSaving}
                     className="flex-1 rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white hover:bg-slate-800 disabled:opacity-50 transition-colors shadow-sm">
-                    {passSaving ? 'Đang lưu...' : 'Cập nhật mật khẩu'}
+                    {passSaving ? t('customer.profile.saving') : t('customer.profile.updatePassword')}
                   </button>
                 </div>
               </form>
@@ -769,7 +774,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl border border-slate-100 space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-bold text-slate-800">Thêm phương tiện mới</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t('customer.profile.addVehicleTitle')}</h3>
                 <button onClick={() => setShowAddVehicle(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
                   <X className="w-5 h-5" />
                 </button>
@@ -777,48 +782,48 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
               <form onSubmit={handleAddVehicle} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Biển số xe *</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.licensePlate')}</label>
                   <input type="text" value={form.licensePlate} onChange={e => setForm({ ...form, licensePlate: e.target.value })}
-                    required onInvalid={e => e.target.setCustomValidity('Vui lòng nhập biển số xe.')} onInput={e => e.target.setCustomValidity('')}
-                    placeholder="Ví dụ: 30A-123.45" className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 uppercase focus:border-emerald-500 outline-none" />
+                    required onInvalid={e => e.target.setCustomValidity(t('customer.profile.licensePlateRequired'))} onInput={e => e.target.setCustomValidity('')}
+                    placeholder={t('customer.profile.licensePlatePlaceholder')} className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 uppercase focus:border-emerald-500 outline-none" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Hãng xe</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.brand')}</label>
                     <input type="text" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })}
-                      placeholder="Toyota, Honda..." className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
+                      placeholder={t('customer.profile.brandPlaceholder')} className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Dòng xe</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.model')}</label>
                     <input type="text" value={form.model} onChange={e => setForm({ ...form, model: e.target.value })}
-                      placeholder="Camry, Civic..." className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
+                      placeholder={t('customer.profile.modelPlaceholder')} className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Loại xe</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.vehicleType')}</label>
                     <select value={form.vehicleType} onChange={e => setForm({ ...form, vehicleType: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none">
-                      <option value="sedan">Sedan (4 chỗ)</option>
-                      <option value="suv">SUV / Crossover (5-7 chỗ)</option>
-                      <option value="pickup">Bán tải (Pickup)</option>
-                      <option value="van">Van / MPV</option>
+                      <option value="sedan">{t('customer.profile.vehicleType.sedan')}</option>
+                      <option value="suv">{t('customer.profile.vehicleType.suv')}</option>
+                      <option value="pickup">{t('customer.profile.vehicleType.pickup')}</option>
+                      <option value="van">{t('customer.profile.vehicleType.van')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Màu sắc</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.color')}</label>
                     <input type="text" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })}
-                      placeholder="Trắng, Đen..." className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
+                      placeholder={t('customer.profile.colorPlaceholder')} className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Năm sản xuất (Tùy chọn)</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.manufactureYear')}</label>
                   <input type="number" value={form.year} onChange={e => setForm({ ...form, year: e.target.value })}
-                    placeholder="Ví dụ: 2023" min="1900" max={new Date().getFullYear()}
-                    onInvalid={e => e.target.setCustomValidity(`Năm sản xuất phải nằm trong khoảng từ 1900 đến ${new Date().getFullYear()}.`)}
+                    placeholder={t('customer.profile.yearPlaceholder')} min="1900" max={new Date().getFullYear()}
+                    onInvalid={e => e.target.setCustomValidity(t('customer.profile.yearInvalidHint', { year: new Date().getFullYear() }))}
                     onInput={e => e.target.setCustomValidity('')}
                     className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                 </div>
@@ -826,11 +831,11 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <div className="pt-3 flex gap-3">
                   <button type="button" onClick={() => setShowAddVehicle(false)}
                     className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50">
-                    Hủy
+                    {t('customer.profile.cancel')}
                   </button>
                   <button type="submit" disabled={submitting}
                     className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
-                    {submitting ? 'Đang thêm...' : 'Lưu phương tiện'}
+                    {submitting ? t('customer.profile.adding') : t('customer.profile.saveVehicle')}
                   </button>
                 </div>
               </form>
@@ -846,7 +851,7 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl border border-slate-100 space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-lg font-bold text-slate-800">Cập nhật phương tiện</h3>
+                <h3 className="text-lg font-bold text-slate-800">{t('customer.profile.updateVehicleTitle')}</h3>
                 <button onClick={() => setShowEditVehicle(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
                   <X className="w-5 h-5" />
                 </button>
@@ -854,20 +859,20 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
               <form onSubmit={handleUpdateVehicle} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Biển số xe *</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.licensePlate')}</label>
                   <input type="text" value={editFormVehicle.licensePlate} onChange={e => setEditFormVehicle({ ...editFormVehicle, licensePlate: e.target.value })}
-                    required onInvalid={e => e.target.setCustomValidity('Vui lòng nhập biển số xe.')} onInput={e => e.target.setCustomValidity('')}
+                    required onInvalid={e => e.target.setCustomValidity(t('customer.profile.licensePlateRequired'))} onInput={e => e.target.setCustomValidity('')}
                     className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 uppercase focus:border-emerald-500 outline-none" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Hãng xe</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.brand')}</label>
                     <input type="text" value={editFormVehicle.brand} onChange={e => setEditFormVehicle({ ...editFormVehicle, brand: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Dòng xe</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.model')}</label>
                     <input type="text" value={editFormVehicle.model} onChange={e => setEditFormVehicle({ ...editFormVehicle, model: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                   </div>
@@ -875,27 +880,27 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Loại xe</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.vehicleType')}</label>
                     <select value={editFormVehicle.vehicleType} onChange={e => setEditFormVehicle({ ...editFormVehicle, vehicleType: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none">
-                      <option value="sedan">Sedan (4 chỗ)</option>
-                      <option value="suv">SUV / Crossover (5-7 chỗ)</option>
-                      <option value="pickup">Bán tải (Pickup)</option>
-                      <option value="van">Van / MPV</option>
+                      <option value="sedan">{t('customer.profile.vehicleType.sedan')}</option>
+                      <option value="suv">{t('customer.profile.vehicleType.suv')}</option>
+                      <option value="pickup">{t('customer.profile.vehicleType.pickup')}</option>
+                      <option value="van">{t('customer.profile.vehicleType.van')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Màu sắc</label>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.color')}</label>
                     <input type="text" value={editFormVehicle.color} onChange={e => setEditFormVehicle({ ...editFormVehicle, color: e.target.value })}
                       className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Năm sản xuất (Tùy chọn)</label>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">{t('customer.profile.manufactureYear')}</label>
                   <input type="number" value={editFormVehicle.year} onChange={e => setEditFormVehicle({ ...editFormVehicle, year: e.target.value })}
-                    placeholder="Ví dụ: 2023" min="1900" max={new Date().getFullYear()}
-                    onInvalid={e => e.target.setCustomValidity(`Năm sản xuất phải nằm trong khoảng từ 1900 đến ${new Date().getFullYear()}.`)}
+                    placeholder={t('customer.profile.yearPlaceholder')} min="1900" max={new Date().getFullYear()}
+                    onInvalid={e => e.target.setCustomValidity(t('customer.profile.yearInvalidHint', { year: new Date().getFullYear() }))}
                     onInput={e => e.target.setCustomValidity('')}
                     className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:border-emerald-500 outline-none" />
                 </div>
@@ -903,11 +908,11 @@ export default function CustomerProfilePage({ user, vehicles: initialVehicles, o
                 <div className="pt-3 flex gap-3">
                   <button type="button" onClick={() => setShowEditVehicle(false)}
                     className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50">
-                    Hủy
+                    {t('customer.profile.cancel')}
                   </button>
                   <button type="submit" disabled={editSubmitting}
                     className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
-                    {editSubmitting ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+                    {editSubmitting ? t('customer.profile.updating') : t('customer.profile.saveChanges')}
                   </button>
                 </div>
               </form>

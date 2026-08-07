@@ -36,5 +36,6 @@
   "noRedeemable": "Không có mẫu đổi điểm nào",
   "yourPoints": "Số điểm của bạn",
   "redeemHint": "Chọn mẫu để đổi điểm lấy mã giảm",
-  "saving": "đang tiết kiệm"
+  "saving": "đang tiết kiệm",
+  "tierExclusive": "D?nh ri?ng h?ng {{tier}}"
 }

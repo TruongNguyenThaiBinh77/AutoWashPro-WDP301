@@ -12,12 +12,147 @@
     "satisfaction_guarantee": "Cam kết hài lòng 100%"
   },
   "gifts": {
-    "title": "Kho quà ưu đãi & Đổi thưởng",
-    "subtitle": "Đổi điểm tích lũy lấy Voucher giảm giá và quà tặng vật lý hấp dẫn.",
-    "points_balance": "Số điểm tích lũy của bạn",
-    "redeem_button": "Đổi quà ngay",
-    "out_of_stock": "Đã tạm hết quà",
-    "eligible": "Đủ điều kiện đổi"
+    "eyebrow": "KHO QUÀ ƯU ĐÃI & ĐỔI THƯỞNG",
+    "title": "Quà Tặng & Ưu Đãi Độc Quyền",
+    "subtitle": "Đổi điểm tích lũy lấy voucher giảm giá và quà tặng vật lý hấp dẫn.",
+    "pointsLabel": "Điểm tích lũy: ",
+    "login": {
+      "title": "Đăng nhập để xem ưu đãi",
+      "message": "Bạn cần đăng nhập để xem và đổi quà.",
+      "button": "Đăng nhập ngay"
+    },
+    "tabs": {
+      "discount": "Voucher Giảm Giá",
+      "wheel": "Vòng Quay May Mắn",
+      "history": "Lịch Sử Quay Thưởng"
+    },
+    "redeemPhysical": {
+      "title": "Quà Tặng Vật Lý",
+      "description": "Đổi điểm lấy quà tặng chất lượng."
+    },
+    "redeemVoucher": {
+      "title": "Voucher Giảm Giá",
+      "description": "Sử dụng điểm để đổi voucher giảm giá."
+    },
+    "redeemed": {
+      "fallbackName": "Phần quà",
+      "redeemedOn": "Đã đổi ngày {{date}}",
+      "codeLabel": "Mã:",
+      "status_cancelled": "Đã hủy",
+      "status_received": "Đã nhận quà",
+      "status_sent": "Đã gửi · Chờ xác nhận nhận quà",
+      "status_pending": "Chờ gửi quà"
+    },
+    "filter": {
+      "physical": "Quà vật lý",
+      "voucher": "Voucher",
+      "mine": "Quà của tôi"
+    },
+    "loading": {
+      "gifts": "Đang tải quà tặng...",
+      "vouchers": "Đang tải voucher..."
+    },
+    "empty": {
+      "physicalGifts": "Chưa có quà tặng vật lý nào.",
+      "vouchers": "Chưa có voucher nào."
+    },
+    "wheel": {
+      "eyebrow": "✨ Vòng Quay May Mắn",
+      "heading": "Vòng Quay Trúng Thưởng",
+      "subtitle": "Thanh toán thành công đơn dịch vụ để tích lũy thêm lượt quay và săn quà độc quyền!",
+      "spins_available": "Lượt quay khả dụng:",
+      "spin_now": "QUAY NGAY",
+      "spinning": "ĐANG QUAY...",
+      "no_prize_title": "Chúc Bạn May Mắn!",
+      "win_title": "Chúc Mừng Bạn!",
+      "no_prize_desc": "Rất tiếc lượt quay này chưa trúng phần quà nào.",
+      "win_desc": "Bạn đã may mắn quay trúng phần quà:",
+      "no_prize_fallback": "Chúc bạn may mắn lần sau",
+      "secret_prize": "Phần quà bí mật",
+      "auto_claimed": "Mã ưu đãi đã được tự động thêm vào mục <b>Ưu Đãi</b> của bạn!",
+      "try_again": "Thử lại",
+      "claim_prize": "Nhận quà ngay"
+    },
+    "voucher": {
+      "discountPercent": "Giảm {{value}}%",
+      "discountAmount": "Giảm {{value}}",
+      "forYou": "Dành cho bạn",
+      "redeemBadge": "Đổi",
+      "promoBadge": "Ưu đãi",
+      "remaining_one": "Còn {{count}} suất",
+      "remaining_other": "Còn {{count}} suất",
+      "expiry": "Hết hạn: {{date}}",
+      "copied": "Đã sao chép",
+      "copyCode": "Sao chép mã"
+    },
+    "tier": {
+      "bronze": "Đồng",
+      "silver": "Bạc",
+      "gold": "Vàng",
+      "diamond": "Kim Cương"
+    },
+    "reward": {
+      "allTiers": "Tất cả",
+      "tier_one": "{{tier}}",
+      "tier_other": "{{tier}}",
+      "stockLeft_one": "Còn {{count}} sản phẩm",
+      "stockLeft_other": "Còn {{count}} sản phẩm",
+      "needTier": "Cần hạng {{tier}}",
+      "needMore": "Cần thêm {{points}} điểm"
+    },
+    "error": {
+      "fetchHistory": "Không thể tải lịch sử",
+      "insufficientVoucherPoints": "Điểm không đủ để đổi voucher",
+      "redeemVoucher": "Đổi voucher thất bại",
+      "insufficientTier": "Hạng thành viên không đủ (cần {{tier}})",
+      "insufficientRewardPoints": "Điểm không đủ để đổi quà",
+      "redeemReward": "Đổi quà thất bại",
+      "noSpinLeft": "Bạn đã hết lượt quay",
+      "spin": "Quay thất bại"
+    },
+    "confirm": {
+      "redeemTitle": "Xác nhận đổi quà",
+      "redeemMessage": "Dùng {{points}} điểm để đổi \"{{name}}\"?",
+      "redeem": "Xác nhận đổi",
+      "redeemRewardTitle": "Xác nhận đổi phần quà",
+      "redeemRewardMessage": "Dùng {{points}} điểm để đổi \"{{name}}\"?"
+    },
+    "success": {
+      "redeemVoucher": "Đổi voucher thành công!",
+      "redeemRewardTitle": "Đổi Thành Công!",
+      "redeemRewardContent": "Bạn đã đổi thành công \"{{name}}\"!",
+      "copiedCode": "Đã sao chép mã!",
+      "codeSaved": "Hãy lưu mã này để sử dụng."
+    },
+    "processing": "Đang xử lý...",
+    "redeemNow": "Đổi ngay",
+    "soldOut": "Đã hết",
+    "close": "Đóng",
+    "copy": "Sao chép",
+    "points_one": "{{count}} điểm",
+    "points_other": "{{count}} điểm",
+    "history_banner": {
+      "title": "Xem lại các phần quà đã quay trúng",
+      "description": "Xem danh sách đầy đủ mã voucher và quà tặng từ các lượt quay trước",
+      "cta": "Lịch sử quay thưởng →"
+    },
+    "history": {
+      "title": "Lịch Sử Quay Thưởng Của Bạn",
+      "subtitle": "Tất cả các phần quà và mã ưu đãi bạn đã may mắn quay trúng",
+      "total_wins": "Tổng trúng: {{count}} phần quà",
+      "login_prompt": "Vui lòng đăng nhập để xem danh sách phần quà đã trúng",
+      "login_btn": "Đăng Nhập",
+      "loading": "Đang tải lịch sử trúng quà...",
+      "empty_title": "Chưa có phần quà nào",
+      "empty_desc": "Bạn chưa trúng phần quà nào từ vòng quay. Hãy sang tab Vòng quay để thử vận may ngay!",
+      "cta": "Quay thưởng ngay ⚡",
+      "status_used": "Đã sử dụng",
+      "status_expired": "Đã hết hạn",
+      "status_active": "Còn hiệu lực"
+    },
+    "copy_code": "Đã copy mã đổi thưởng!",
+    "empty_mine": "Bạn chưa đổi phần quà vật lý nào.",
+    "empty_mine_hint": "Chuyển sang tab \"Quà vật lý\" để đổi điểm lấy quà."
   },
   "about": {
     "since": "Hoạt động từ năm 2019"
@@ -90,7 +225,7 @@
     "feature_visual_mgmt_desc": "Theo dõi số lượt còn lại, hạn sử dụng, mã coupon check-in trực tiếp tại Cổng khách hàng.",
     "buy_slot_now": "Mua gói slot tiết kiệm ngay",
     "available_slots": "Các gói slot có sẵn để mua",
-    "available_slots_desc": "Chọn gói phù hợp với nhu cầu sử dụng",
+    "available_slots_desc": "Chọn gói sản phẩm phù hợp bên dưới để đăng ký mua trực tiếp tại Cổng đặt lịch.",
     "loading_slots": "Đang tải các gói slot...",
     "no_slots": "Chưa có gói slot công khai nào được phát hành.",
     "most_popular": "Phổ biến nhất",
@@ -114,164 +249,11 @@
     "slot_card_discount": "Chiết khấu tối đa",
     "slot_card_discount_val": "Lên đến 15%",
     "buy_at_booking": "Mua gói tại cổng đặt lịch",
-    "quick_deposit_label": "Phí đặt cọc",
-    "quick_deposit_value": "Chỉ {{percent}}%",
-    "available_slots_desc": "Chọn gói sản phẩm phù hợp bên dưới để đăng ký mua trực tiếp tại Cổng đặt lịch.",
     "recurring_card_convenience": "Tiện lợi & Tự động",
     "recurring_card_tagline": "Xế Cưng Luôn Sạch Bóng",
     "recurring_card_desc": "Hệ thống tự động nhắc nhở trước 60 phút và sắp xếp chỗ đón tiếp chuyên nghiệp cho lịch rửa xe hàng tuần của bạn.",
     "recurring_card_cycle": "Chu kỳ linh hoạt",
     "recurring_card_weeks": "4 - 12 tuần"
-  },
-  "gifts": {
-    "eyebrow": "KHO QUÀ ƯU ĐÃI & ĐỔI THƯỞNG",
-    "title": "Quà Tặng & Ưu Đãi Độc Quyền",
-    "subtitle": "Đổi điểm tích lũy lấy voucher giảm giá và quà tặng vật lý hấp dẫn.",
-    "pointsLabel": "Điểm tích lũy: ",
-    "login": {
-      "title": "Đăng nhập để xem ưu đãi",
-      "message": "Bạn cần đăng nhập để xem và đổi quà.",
-      "button": "Đăng nhập ngay"
-    },
-    "tabs": {
-      "discount": "Voucher Giảm Giá",
-      "wheel": "Vòng Quay May Mắn",
-      "history": "Lịch Sử Quay Thưởng"
-    },
-    "redeemPhysical": {
-      "title": "Quà Tặng Vật Lý",
-      "description": "Đổi điểm lấy quà tặng chất lượng."
-    },
-    "redeemVoucher": {
-      "title": "Voucher Giảm Giá",
-      "description": "Sử dụng điểm để đổi voucher giảm giá."
-    },
-    "redeemed": {
-      "title": "Quà Đã Đổi",
-      "description": "Danh sách phần quà bạn đã đổi."
-    },
-    "filter": {
-      "physical": "Quà vật lý",
-      "voucher": "Voucher",
-      "mine": "Quà của tôi"
-    },
-    "loading": {
-      "gifts": "Đang tải quà tặng...",
-      "vouchers": "Đang tải voucher..."
-    },
-    "empty": {
-      "physicalGifts": "Chưa có quà tặng vật lý nào.",
-      "vouchers": "Chưa có voucher nào."
-    },
-    "wheel": {
-      "empty": "Chưa có phần quà"
-    },
-    "voucher": {
-      "discountPercent": "Giảm {{value}}%",
-      "discountAmount": "Giảm {{value}}",
-      "forYou": "Dành cho bạn",
-      "redeemBadge": "Đổi",
-      "promoBadge": "Ưu đãi",
-      "remaining_one": "Còn {{count}} suất",
-      "remaining_other": "Còn {{count}} suất",
-      "expiry": "Hết hạn: {{date}}",
-      "copied": "Đã sao chép",
-      "copyCode": "Sao chép mã"
-    },
-    "tier": {
-      "bronze": "Đồng",
-      "silver": "Bạc",
-      "gold": "Vàng",
-      "diamond": "Kim Cương"
-    },
-    "reward": {
-      "allTiers": "Tất cả",
-      "tier_one": "{{tier}}",
-      "tier_other": "{{tier}}",
-      "stockLeft_one": "Còn {{count}} sản phẩm",
-      "stockLeft_other": "Còn {{count}} sản phẩm",
-      "needTier": "Cần hạng {{tier}}",
-      "needMore": "Cần thêm {{points}} điểm"
-    },
-    "error": {
-      "fetchHistory": "Không thể tải lịch sử",
-      "insufficientVoucherPoints": "Điểm không đủ để đổi voucher",
-      "redeemVoucher": "Đổi voucher thất bại",
-      "insufficientTier": "Hạng thành viên không đủ (cần {{tier}})",
-      "insufficientRewardPoints": "Điểm không đủ để đổi quà",
-      "redeemReward": "Đổi quà thất bại",
-      "noSpinLeft": "Bạn đã hết lượt quay",
-      "spin": "Quay thất bại"
-    },
-    "confirm": {
-      "redeemTitle": "Xác nhận đổi quà",
-      "redeemMessage": "Dùng {{points}} điểm để đổi \"{{name}}\"?",
-      "redeem": "Xác nhận đổi",
-      "redeemRewardTitle": "Xác nhận đổi phần quà",
-      "redeemRewardMessage": "Dùng {{points}} điểm để đổi \"{{name}}\"?"
-    },
-    "success": {
-      "redeemVoucher": "Đổi voucher thành công!",
-      "redeemRewardTitle": "Đổi Thành Công!",
-      "redeemRewardContent": "Bạn đã đổi thành công \"{{name}}\"!",
-      "copiedCode": "Đã sao chép mã!",
-      "codeSaved": "Hãy lưu mã này để sử dụng."
-    },
-    "processing": "Đang xử lý...",
-    "redeemNow": "Đổi ngay",
-    "soldOut": "Đã hết",
-    "close": "Đóng",
-    "copy": "Sao chép",
-    "redeemed": {
-      "fallbackName": "Phần quà",
-      "redeemedOn": "Đã đổi ngày {{date}}",
-      "codeLabel": "Mã:",
-      "status_cancelled": "Đã hủy",
-      "status_received": "Đã nhận quà",
-      "status_sent": "Đã gửi · Chờ xác nhận nhận quà",
-      "status_pending": "Chờ gửi quà"
-    },
-    "points_one": "{{count}} điểm",
-    "points_other": "{{count}} điểm",
-    "wheel": {
-      "eyebrow": "✨ Vòng Quay May Mắn",
-      "heading": "Vòng Quay Trúng Thưởng",
-      "subtitle": "Thanh toán thành công đơn dịch vụ để tích lũy thêm lượt quay và săn quà độc quyền!",
-      "spins_available": "Lượt quay khả dụng:",
-      "spin_now": "QUAY NGAY",
-      "spinning": "ĐANG QUAY...",
-      "no_prize_title": "Chúc Bạn May Mắn!",
-      "win_title": "Chúc Mừng Bạn!",
-      "no_prize_desc": "Rất tiếc lượt quay này chưa trúng phần quà nào.",
-      "win_desc": "Bạn đã may mắn quay trúng phần quà:",
-      "no_prize_fallback": "Chúc bạn may mắn lần sau",
-      "secret_prize": "Phần quà bí mật",
-      "auto_claimed": "Mã ưu đãi đã được tự động thêm vào mục <b>Ưu Đãi</b> của bạn!",
-      "try_again": "Thử lại",
-      "claim_prize": "Nhận quà ngay"
-    },
-    "history_banner": {
-      "title": "Xem lại các phần quà đã quay trúng",
-      "description": "Xem danh sách đầy đủ mã voucher và quà tặng từ các lượt quay trước",
-      "cta": "Lịch sử quay thưởng →"
-    },
-    "history": {
-      "title": "Lịch Sử Quay Thưởng Của Bạn",
-      "subtitle": "Tất cả các phần quà và mã ưu đãi bạn đã may mắn quay trúng",
-      "total_wins": "Tổng trúng: {{count}} phần quà",
-      "login_prompt": "Vui lòng đăng nhập để xem danh sách phần quà đã trúng",
-      "login_btn": "Đăng Nhập",
-      "loading": "Đang tải lịch sử trúng quà...",
-      "empty_title": "Chưa có phần quà nào",
-      "empty_desc": "Bạn chưa trúng phần quà nào từ vòng quay. Hãy sang tab Vòng quay để thử vận may ngay!",
-      "cta": "Quay thưởng ngay ⚡",
-      "status_used": "Đã sử dụng",
-      "status_expired": "Đã hết hạn",
-      "status_active": "Còn hiệu lực"
-    },
-    "copy_code": "Đã copy mã đổi thưởng!",
-    "empty_mine": "Bạn chưa đổi phần quà vật lý nào.",
-    "empty_mine_hint": "Chuyển sang tab \"Quà vật lý\" để đổi điểm lấy quà."
   },
   "directions": {
     "no_geolocation": "Trình duyệt không hỗ trợ định vị",
@@ -453,7 +435,7 @@
     "account_number_label": "Số tài khoản",
     "account_holder_label": "Chủ tài khoản",
     "transfer_content": "Nội dung chuyển khoản",
-    "copy_label": "Copy",
+    "copy_label": "Sao ch?p",
     "transaction_id": "Mã giao dịch",
     "checking_payment": "Đang kiểm tra thanh toán...",
     "cancel_transaction": "Hủy giao dịch",
@@ -491,7 +473,7 @@
     "error_vnpay_relogin": "Bạn cần đăng nhập lại để hoàn tất đặt lịch",
     "error_check_slots": "Lỗi kiểm tra lịch",
     "error_draft_data": "Lỗi dữ liệu draft",
-    "error_weeks_positive": "Số tuần phải là số nguyên dương lớn hơn 1",
+    "error_weeks_positive": "Số tuần lặp lại phải là số nguyên dương lớn hơn 1.",
     "error_date_future": "Chỉ được chọn ngày từ hiện tại trở đi vào tương lai!",
     "error_vehicle_plate": "Vui lòng nhập biển số xe",
     "error_vehicle_brand": "Vui lòng nhập hãng xe",
@@ -531,7 +513,6 @@
     "voucher_select": "Chọn",
     "voucher_applied_label": "Đã áp dụng: {{code}}",
     "voucher_click_label": "Bấm để chọn ưu đãi",
-    "price_breakdown": "CHI TIẾT GIÁ DỊCH VỤ",
     "main_package_fallback": "Gói dịch vụ chính",
     "pack_name_fallback": "Gói lượt",
     "optional_paid_label": "Dịch vụ chọn thêm (Trả phí)",
@@ -539,36 +520,16 @@
     "points_reward_label": "Thưởng tích điểm thành viên",
     "points_amount": "+{{count}} điểm",
     "points_calc": "{{base}} × {{pct}}% (tỷ lệ tích điểm) × {{mult}} (hạng {{tier}})",
-    "points_note": "* Sẽ được cộng sau khi đơn hàng của bạn hoàn thành.",
-    "recurring_calc_title": "CÁCH TÍNH TỔNG TIỀN",
-    "price_per_session_title": "Giá mỗi buổi (sau khi giảm)",
-    "discount_applied_note": "Đã trừ ưu đãi của bạn",
     "scheduled_sessions_title": "Số buổi đặt định kỳ",
-    "scheduled_note": "{{days}} ngày × {{weeks}} tuần (đã loại buổi trùng lịch)",
     "session_count": "× {{count}} buổi",
     "estimated_total_title": "Tổng dự kiến",
     "estimated_note": "{{price}} × {{count}} buổi",
-    "grand_total": "Thành tiền tổng cộng",
-    "vat_note": "* Giá đã bao gồm VAT 10%",
-    "processing_login": "Đang xử lý đặt lịch sau đăng nhập...",
     "payment_full_label": "Thanh toán (100%)",
     "payment_deposit_label": "Đặt cọc ({{percent}}%)",
-    "paid_badge": "ĐÃ THANH TOÁN",
-    "deposited_badge": "ĐÃ CỌC",
-    "remaining_after": "Còn lại (thanh toán sau)",
-    "remaining_zero": "0đ",
     "recurring_time_fallback": "{{time}} · {{count}} buổi định kỳ",
     "pay_full_amount": "Thanh toán 100%",
-    "payment_amount_label": "Số tiền cần thanh toán",
-    "processing_payment": "ĐANG XỬ LÝ...",
-    "payment_select_title_full": "Thanh toán",
-    "payment_select_title_deposit": "Thanh toán đặt cọc",
-    "payment_select_desc_full": "Vui lòng thanh toán để hoàn tất đặt lịch",
-    "payment_select_desc_deposit": "Vui lòng đặt cọc để hoàn tất đặt lịch",
     "deposit_success_title_full": "Thanh toán thành công!",
     "deposit_success_title_deposit": "Đặt cọc thành công!",
-    "deposit_success_desc_full": "Thanh toán 100% hoàn tất, lịch hẹn đã được xác nhận.",
-    "deposit_success_desc_deposit": "Cảm ơn bạn, lịch hẹn đã được xác nhận.",
     "bank_name_default": "Ngân hàng TMCP Quân đội (MB)",
     "paying_100": "Thanh toán 100%",
     "open_now": "🟢 Đang hoạt động",
@@ -578,30 +539,21 @@
     "error_save_vehicle": "Không thể lưu thông tin xe",
     "error_create_booking": "Không thể tạo lịch hẹn",
     "error_link_payment": "Liên kết thanh toán thất bại",
-    "error_vnpay_create": "Tạo thanh toán VNPay thất bại",
-    "error_vnpay_url": "Không nhận được URL thanh toán",
     "error_vnpay_failed": "Thanh toán VNPay thất bại",
     "error_vnpay_process": "Lỗi xử lý kết quả thanh toán VNPay",
     "error_wallet_insufficient": "Số dư ví không đủ để thanh toán",
     "error_wallet_failed": "Thanh toán ví thất bại",
-    "error_draft_data": "Lỗi dữ liệu draft",
     "error_confirm_payment": "Lỗi xác nhận thanh toán",
     "error_after_payment": "Không thể tạo lịch hẹn sau thanh toán",
     "vnpay_cancelled": "Giao dịch bị hủy",
     "vnpay_insufficient": "Thẻ/Tài khoản không đủ số dư",
     "vnpay_failed_generic": "Thanh toán VNPay thất bại",
-    "error_deposit_insufficient": "Số dư ví không đủ để thanh toán",
     "error_select_time": "Vui lòng chọn khung giờ.",
     "error_select_vehicle": "Vui lòng chọn xe.",
     "error_fill_vehicle": "Vui lòng điền đầy đủ thông tin.",
-    "error_weeks_positive": "Số tuần lặp lại phải là số nguyên dương lớn hơn 1.",
     "error_all_conflict": "Rất tiếc, tất cả các buổi dự kiến đều bị trùng lịch hoặc đã qua thời gian. Vui lòng chọn ngày/khung giờ khác nhé!",
-    "error_check_slots": "Lỗi kiểm tra lịch",
     "error_recurring_create": "Lỗi tạo lịch định kỳ",
     "saving_vehicle": "Đang thêm...",
-    "save_vehicle": "Lưu xe",
-    "unnamed_vehicle": "Xe chưa đặt tên",
-    "recurring_time_fallback": "{{time}} · {{count}} buổi định kỳ",
     "tier_label_fallback": "Thành viên",
     "weeks_label": "{{count}} tuần",
     "preview_valid": "{{count}} buổi hợp lệ",

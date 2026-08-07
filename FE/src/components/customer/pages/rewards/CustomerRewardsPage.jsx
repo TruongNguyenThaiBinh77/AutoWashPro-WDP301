@@ -5,6 +5,7 @@ import TierBadge from '@/components/ui/TierBadge';
 import { confirmDialog } from '@/lib/confirm';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
 import useSSE from '@/hooks/useSSE';
+import { useTranslation } from 'react-i18next';
 
 const apiBase = getApiBaseUrl();
 
@@ -15,8 +16,8 @@ function api(path, opts = {}) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getStoredToken()}`, ...opts.headers },
   });
 }
-async function readErr(res) {
-  try { const j = await res.json(); return j?.message || `Lỗi ${res.status}`; } catch { return `Lỗi ${res.status}`; }
+async function readErr(res, t) {
+  try { const j = await res.json(); return j?.message || (t ? t('customer.rewards.httpError', { status: res.status }) : `Lỗi ${res.status}`); } catch { return t ? t('customer.rewards.httpError', { status: res.status }) : `Lỗi ${res.status}`; }
 }
 
 function formatCurrency(val) {
@@ -31,17 +32,17 @@ function formatDate(dateStr) {
 
 function getTypeBadge(type) {
   switch (type) {
-    case 'earned': return { label: 'Tích điểm', color: 'bg-emerald-100 text-emerald-700' };
-    case 'redeemed': return { label: 'Đổi quà', color: 'bg-amber-100 text-amber-700' };
-    case 'expired': return { label: 'Hết hạn', color: 'bg-rose-100 text-rose-700' };
-    case 'adjustment': return { label: 'Điều chỉnh', color: 'bg-purple-100 text-purple-700' };
-    default: return { label: type, color: 'bg-slate-100 text-slate-700' };
+    case 'earned': return { labelKey: 'customer.rewards.typeEarn', color: 'bg-emerald-100 text-emerald-700' };
+    case 'redeemed': return { labelKey: 'customer.rewards.typeRedeemed', color: 'bg-amber-100 text-amber-700' };
+    case 'expired': return { labelKey: 'customer.rewards.typeExpired', color: 'bg-rose-100 text-rose-700' };
+    case 'adjustment': return { labelKey: 'customer.rewards.typeAdjustment', color: 'bg-purple-100 text-purple-700' };
+    default: return { labelKey: null, label: type, color: 'bg-slate-100 text-slate-700' };
   }
 }
 
-function PointHistoryTable({ items, loading, page, pagination, setPage, navigate, emptyMsg, activeTab }) {
-  if (loading) return <div className="text-center py-12 text-slate-400 text-sm">Đang tải...</div>;
-  if (items.length === 0) return <div className="text-center py-12 text-slate-400 text-sm">{emptyMsg || 'Chưa có dữ liệu'}</div>;
+function PointHistoryTable({ items, loading, page, pagination, setPage, navigate, emptyMsg, activeTab, t }) {
+  if (loading) return <div className="text-center py-12 text-slate-400 text-sm">{t('customer.rewards.loading')}</div>;
+  if (items.length === 0) return <div className="text-center py-12 text-slate-400 text-sm">{emptyMsg || t('customer.rewards.emptyData')}</div>;
 
   return (
     <div>
@@ -49,11 +50,11 @@ function PointHistoryTable({ items, loading, page, pagination, setPage, navigate
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
             <tr>
-              <th className="px-4 py-3 text-left">Ngày</th>
-              <th className="px-4 py-3 text-left">Loại</th>
-              <th className="px-4 py-3 text-left">Mô tả</th>
-              <th className="px-4 py-3 text-right">Điểm</th>
-              <th className="px-4 py-3 text-right">Chi tiết</th>
+              <th className="px-4 py-3 text-left">{t('customer.rewards.dateHeader')}</th>
+              <th className="px-4 py-3 text-left">{t('customer.rewards.typeHeader')}</th>
+              <th className="px-4 py-3 text-left">{t('customer.rewards.descriptionHeader')}</th>
+              <th className="px-4 py-3 text-right">{t('customer.rewards.pointsHeader')}</th>
+              <th className="px-4 py-3 text-right">{t('customer.rewards.detailHeader')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -64,7 +65,7 @@ function PointHistoryTable({ items, loading, page, pagination, setPage, navigate
                 <tr key={item._id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${badge.color}`}>{badge.label}</span>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${badge.color}`}>{badge.labelKey ? t(badge.labelKey) : badge.label}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-700 max-w-xs truncate">{item.description}</td>
                   <td className={`px-4 py-3 text-right text-sm font-extrabold ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -76,7 +77,7 @@ function PointHistoryTable({ items, loading, page, pagination, setPage, navigate
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => navigate(`/rewards/history/${item._id}?tab=${activeTab}`)}
                       className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
-                      <Eye size={14} /> Xem
+                      <Eye size={14} /> {t('customer.rewards.view')}
                     </button>
                   </td>
                 </tr>
@@ -88,10 +89,10 @@ function PointHistoryTable({ items, loading, page, pagination, setPage, navigate
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">Trước</button>
-          <span className="text-xs text-slate-500">Trang {page} / {pagination.totalPages}</span>
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">{t('customer.rewards.prev')}</button>
+          <span className="text-xs text-slate-500">{t('customer.rewards.pageInfo', { page, totalPages: pagination.totalPages })}</span>
           <button onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))} disabled={page >= pagination.totalPages}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">Sau</button>
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">{t('customer.rewards.next')}</button>
         </div>
       )}
     </div>
@@ -100,6 +101,7 @@ function PointHistoryTable({ items, loading, page, pagination, setPage, navigate
 
 export default function CustomerRewardsPage({ user, refreshUser }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'reward');
   const [history, setHistory] = useState([]);
@@ -117,10 +119,10 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
   const [loyaltyConfig, setLoyaltyConfig] = useState(null);
 
   const FALLBACK_TIER_MAP = {
-    diamond: { label: 'Kim cương', color: '#0891b2', minPoints: 1000000 },
-    gold: { label: 'Vàng', color: '#b45309', minPoints: 500000 },
-    silver: { label: 'Bạc', color: '#64748b', minPoints: 100000 },
-    bronze: { label: 'Đồng', color: '#b45309', minPoints: 0 },
+    diamond: { label: 'customer.rewards.tierDiamond', color: '#0891b2', minPoints: 1000000 },
+    gold: { label: 'customer.rewards.tierGold', color: '#b45309', minPoints: 500000 },
+    silver: { label: 'customer.rewards.tierSilver', color: '#64748b', minPoints: 100000 },
+    bronze: { label: 'customer.rewards.tierBronze', color: '#b45309', minPoints: 0 },
   };
 
   useEffect(() => {
@@ -185,7 +187,7 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
     } catch (e) { }
   };
 
-  const handleRedeem = async (templateId) => {    if (!(await confirmDialog({ title: 'Đổi điểm lấy voucher', message: 'Bạn có chắc chắn muốn đổi điểm lấy voucher này?', confirmLabel: 'Đổi điểm' }))) return;
+  const handleRedeem = async (templateId) => {    if (!(await confirmDialog({ title: t('customer.rewards.redeemDialogTitle'), message: t('customer.rewards.redeemDialogMessage'), confirmLabel: t('customer.rewards.redeemDialogConfirm') }))) return;
     setRedeemLoading(true);
     try {
       const res = await api('/vouchers/redeem-points', {
@@ -223,12 +225,12 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
           <div className="flex items-center gap-4">
             <TierBadge tier={user?.tier} />
             <div>
-              <p className="text-xs text-slate-500 font-medium">Điểm thưởng khả dụng</p>
+              <p className="text-xs text-slate-500 font-medium">{t('customer.rewards.availablePoints')}</p>
               <p className="text-3xl font-black text-slate-800">{formatCurrency(user?.loyaltyPoints || 0)}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-500">Điểm tích lũy</p>
+            <p className="text-xs text-slate-500">{t('customer.rewards.lifetimePoints')}</p>
             <p className="text-xl font-bold text-emerald-700">{formatCurrency(user?.lifetimePoints || 0)}</p>
           </div>
         </div>
@@ -237,8 +239,8 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
             <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
           </div>
           <div className="flex justify-between mt-1 text-[11px] text-slate-500">
-            <span>Hạng hiện tại: {currentTierObj?.name || user?.tier || 'Bronze'}</span>
-            {nextTierObj && <span>{formatCurrency((nextTierObj.minPoints || 0) - (user?.lifetimePoints || 0))} điểm để lên {nextTierObj.name || nextTierObj.id}</span>}
+            <span>{t('customer.rewards.currentTier', { tier: currentTierObj?.name || user?.tier || 'Bronze' })}</span>
+            {nextTierObj && <span>{t('customer.rewards.pointsToNextTier', { points: formatCurrency((nextTierObj.minPoints || 0) - (user?.lifetimePoints || 0)), tier: nextTierObj.name || nextTierObj.id })}</span>}
           </div>
         </div>
       </div>
@@ -250,7 +252,7 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
             className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
               ? (tab === 'lifetime' ? 'border-blue-600 text-blue-600' : 'border-emerald-600 text-emerald-600')
               : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
-            {tab === 'reward' ? 'Điểm thưởng' : tab === 'lifetime' ? 'Điểm tích lũy' : tab === 'exchange' ? 'Đổi điểm lấy quà' : tab === 'rules' ? 'Cách tính điểm' : 'Quà tặng của tôi'}
+            {tab === 'reward' ? t('customer.rewards.tabReward') : tab === 'lifetime' ? t('customer.rewards.tabLifetime') : tab === 'exchange' ? t('customer.rewards.tabExchange') : tab === 'rules' ? t('customer.rewards.tabRules') : t('customer.rewards.tabMyGifts')}
           </button>
         ))}
       </div>
@@ -260,15 +262,15 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
         <div>
           <div className="flex gap-4 mb-4">
             <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3 flex-1">
-              <p className="text-xs text-slate-500">Tổng tích lũy</p>
+              <p className="text-xs text-slate-500">{t('customer.rewards.totalEarned')}</p>
               <p className="text-lg font-extrabold text-emerald-700">+{formatCurrency(summary.totalEarned)}</p>
             </div>
             <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 flex-1">
-              <p className="text-xs text-slate-500">Tổng đã đổi</p>
+              <p className="text-xs text-slate-500">{t('customer.rewards.totalRedeemed')}</p>
               <p className="text-lg font-extrabold text-amber-700">{summary.totalRedeemed > 0 ? '-' : ''}{formatCurrency(summary.totalRedeemed)}</p>
             </div>
           </div>
-          <PointHistoryTable items={history} loading={loading} page={page} pagination={pagination} setPage={setPage} navigate={navigate} emptyMsg="Chưa có lịch sử điểm thưởng" activeTab={activeTab} />
+          <PointHistoryTable items={history} loading={loading} page={page} pagination={pagination} setPage={setPage} navigate={navigate} emptyMsg={t('customer.rewards.emptyEarnHistory')} activeTab={activeTab} t={t} />
         </div>
       )}
 
@@ -276,10 +278,10 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
       {activeTab === 'lifetime' && (
         <div>
           <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 mb-4">
-            <p className="text-xs text-slate-500">Tổng điểm tích lũy (chỉ bị trừ khi hủy đơn/hoàn tiền)</p>
+            <p className="text-xs text-slate-500">{t('customer.rewards.lifetimeSummaryNote')}</p>
             <p className="text-lg font-extrabold text-blue-700">{formatCurrency(user?.lifetimePoints || 0)}</p>
           </div>
-          <PointHistoryTable items={lifetimeHistory} loading={loading} page={page} pagination={pagination} setPage={setPage} navigate={navigate} emptyMsg="Chưa có lịch sử điểm tích lũy" activeTab={activeTab} />
+          <PointHistoryTable items={lifetimeHistory} loading={loading} page={page} pagination={pagination} setPage={setPage} navigate={navigate} emptyMsg={t('customer.rewards.emptyLifetimeHistory')} activeTab={activeTab} t={t} />
         </div>
       )}
 
@@ -288,33 +290,31 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
         <div className="space-y-6">
           <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white p-6">
             <h3 className="text-base font-extrabold text-slate-800 mb-1 flex items-center gap-2">
-              <Lightbulb weight="fill" className="text-emerald-600" /> Cách tính điểm thưởng
+              <Lightbulb weight="fill" className="text-emerald-600" /> {t('customer.rewards.rulesTitle')}
             </h3>
             <p className="text-sm text-slate-500 mb-4">
-              Mỗi khi đơn hàng được thanh toán thành công, bạn sẽ được cộng điểm thưởng theo công thức:
+              {t('customer.rewards.rulesIntro')}
             </p>
             <div className="bg-white rounded-xl border border-emerald-200 p-4 font-mono text-sm text-slate-700 text-center">
-              Điểm = (Giá trị đơn hàng đã thanh toán ×{' '}
-              <span className="font-bold text-emerald-600">Tỷ lệ cơ bản {loyaltyConfig?.baseEarningRate ?? 5}%</span>) ×{' '}
-              <span className="font-bold text-emerald-600">Hệ số hạng</span>
+              {t('customer.rewards.rulesFormula', { rate: loyaltyConfig?.baseEarningRate ?? 5 })}
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">
               <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                <Medal weight="fill" className="text-amber-500" /> Hạng thành viên & Hệ số nhân điểm
+                <Medal weight="fill" className="text-amber-500" /> {t('customer.rewards.tierHeaderTitle')}
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">Tích đủ điểm (điểm tích lũy trọn đời) sẽ được thăng hạng và hệ số nhân tăng theo hạng</p>
+              <p className="text-xs text-slate-400 mt-0.5">{t('customer.rewards.tierHeaderDesc')}</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   <tr>
-                    <th className="px-6 py-3 text-left">Hạng</th>
-                    <th className="px-6 py-3 text-left">Điểm tích lũy tối thiểu</th>
-                    <th className="px-6 py-3 text-left">Hệ số nhân</th>
-                    <th className="px-6 py-3 text-left">Quyền lợi</th>
+                    <th className="px-6 py-3 text-left">{t('customer.rewards.rankHeader')}</th>
+                    <th className="px-6 py-3 text-left">{t('customer.rewards.minLifetimePointsHeader')}</th>
+                    <th className="px-6 py-3 text-left">{t('customer.rewards.multiplierHeader')}</th>
+                    <th className="px-6 py-3 text-left">{t('customer.rewards.benefitsHeader')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -325,11 +325,11 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
                           <TierBadge tier={t.id} />
                           {t.name}
                           {currentTierId === String(t.id || '').toLowerCase() && (
-                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wide bg-emerald-100 rounded-full px-2 py-0.5">Hạng hiện tại</span>
+                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wide bg-emerald-100 rounded-full px-2 py-0.5">{t('customer.rewards.currentTierBadge')}</span>
                           )}
                         </span>
                       </td>
-                      <td className="px-6 py-3 text-slate-600 whitespace-nowrap">{formatCurrency(t.minPoints || 0)} điểm</td>
+                      <td className="px-6 py-3 text-slate-600 whitespace-nowrap">{t('customer.rewards.minPointsCell', { points: formatCurrency(t.minPoints || 0) })}</td>
                       <td className="px-6 py-3 font-extrabold text-emerald-600 whitespace-nowrap">x{Number(t.multiplier ?? 1).toLocaleString('vi-VN')}</td>
                       <td className="px-6 py-3 text-xs text-slate-500">
                         <ul className="space-y-0.5 list-disc list-inside">
@@ -345,13 +345,13 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
             <h3 className="text-base font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-              <Info weight="fill" className="text-blue-500" /> Quy định điểm thưởng
+              <Info weight="fill" className="text-blue-500" /> {t('customer.rewards.regulationsTitle')}
             </h3>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li className="flex items-start gap-2"><CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} /> Điểm được cộng khi đơn hàng thanh toán thành công và bị trừ khi hủy đơn / hoàn tiền.</li>
-              <li className="flex items-start gap-2"><CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} /> Điểm thưởng có hiệu lực trong {loyaltyConfig?.pointExpirationMonths ?? 6} tháng kể từ lần tích điểm gần nhất.</li>
-              <li className="flex items-start gap-2"><CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} /> Điểm dùng để đổi voucher tại mục "Đổi điểm lấy quà".</li>
-              <li className="flex items-start gap-2"><Warning className="text-amber-500 shrink-0 mt-0.5" size={16} /> Chỉ tính trên phần tiền đã thanh toán, không tính trên phần được giảm giá / voucher.</li>
+              <li className="flex items-start gap-2"><CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} /> {t('customer.rewards.ruleEarnDeduct')}</li>
+              <li className="flex items-start gap-2"><CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} /> {t('customer.rewards.ruleExpiry', { months: loyaltyConfig?.pointExpirationMonths ?? 6 })}</li>
+              <li className="flex items-start gap-2"><CheckCircle className="text-emerald-500 shrink-0 mt-0.5" size={16} /> {t('customer.rewards.ruleRedeem')}</li>
+              <li className="flex items-start gap-2"><Warning className="text-amber-500 shrink-0 mt-0.5" size={16} /> {t('customer.rewards.rulePaidOnly')}</li>
             </ul>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
       {activeTab === 'exchange' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {vouchers.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-slate-400 text-sm">Chưa có voucher nào khả dụng để đổi điểm.</div>
+            <div className="col-span-full text-center py-12 text-slate-400 text-sm">{t('customer.rewards.noVouchersAvailable')}</div>
           ) : (
             vouchers.map(v => (
               <div key={v._id} className="rounded-xl border border-emerald-100 bg-white p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
@@ -377,7 +377,7 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
                 <p className="text-xs text-slate-500 mb-4 line-clamp-2">{v.description}</p>
                 <div className="flex items-center gap-3 text-[11px] text-slate-400 mb-4">
                   {v.applicableTiers?.length > 0 && <span className="flex items-center gap-1"><Star size={12} /> {v.applicableTiers.join(', ')}</span>}
-                  <span className="flex items-center gap-1"><Ticket size={12} /> Còn: {v.remaining}</span>
+                  <span className="flex items-center gap-1"><Ticket size={12} /> {t('customer.rewards.remaining', { count: v.remaining })}</span>
                 </div>
                 <button onClick={() => handleRedeem(v._id)}
                   disabled={redeemLoading || (user?.loyaltyPoints || 0) < v.requiredPoints || v.remaining <= 0}
@@ -386,7 +386,7 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
                       ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                       : 'bg-emerald-600 text-white hover:bg-emerald-700'
                   }`}>
-                  {(user?.loyaltyPoints || 0) < v.requiredPoints ? 'Không đủ điểm' : redeemLoading ? 'Đang xử lý...' : 'Đổi ngay'} <CaretRight weight="bold" size={14} />
+                  {(user?.loyaltyPoints || 0) < v.requiredPoints ? t('customer.rewards.insufficientPoints') : redeemLoading ? t('customer.rewards.processing') : t('customer.rewards.redeemNow')} <CaretRight weight="bold" size={14} />
                 </button>
               </div>
             ))
@@ -400,7 +400,7 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
           {myRewards.length > 0 && (
             <div>
               <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                <Gift weight="fill" className="text-amber-500" /> Phần thưởng đã đổi ({myRewards.length})
+                <Gift weight="fill" className="text-amber-500" /> {t('customer.rewards.redeemedRewards', { count: myRewards.length })}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {myRewards.map(rd => {
@@ -418,27 +418,27 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
                         )}
                         <div className="min-w-0">
                           <p className="font-bold text-slate-800 text-sm line-clamp-2">{snap.name}</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Đổi ngày {formatDate(rd.createdAt)}</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">{t('customer.rewards.redeemedOn', { date: formatDate(rd.createdAt) })}</p>
                         </div>
                       </div>
                       <div className={`rounded-lg px-3 py-2 border flex items-center justify-between mb-3 ${cancelled ? 'bg-slate-50 border-slate-200' : 'bg-emerald-50 border-emerald-100'}`}>
-                        <span className="text-xs font-semibold text-slate-500">Mã đổi thưởng</span>
+                        <span className="text-xs font-semibold text-slate-500">{t('customer.rewards.redeemCode')}</span>
                         <span className={`font-mono font-extrabold tracking-wider ${cancelled ? 'text-slate-400 line-through' : 'text-emerald-700'}`}>{rd.code}</span>
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-slate-400 mb-3">
-                        <span className="flex items-center gap-1"><Coins weight="fill" size={12} /> {formatCurrency(rd.pointsSpent)} điểm</span>
+                        <span className="flex items-center gap-1"><Coins weight="fill" size={12} /> {t('customer.rewards.pointsSpent', { points: formatCurrency(rd.pointsSpent) })}</span>
                         {cancelled
-                          ? <span className="text-rose-500 font-bold">Đã hủy</span>
+                          ? <span className="text-rose-500 font-bold">{t('customer.rewards.statusCancelled')}</span>
                           : received
-                            ? <span className="text-emerald-600 font-bold">Đã nhận quà</span>
+                            ? <span className="text-emerald-600 font-bold">{t('customer.rewards.statusReceived')}</span>
                             : sent
-                              ? <span className="text-blue-600 font-bold">Đã gửi · Chờ xác nhận nhận quà</span>
-                              : <span className="text-emerald-600 font-bold">Chờ gửi quà</span>}
+                              ? <span className="text-blue-600 font-bold">{t('customer.rewards.statusSent')}</span>
+                              : <span className="text-emerald-600 font-bold">{t('customer.rewards.statusPendingSend')}</span>}
                       </div>
                       {!cancelled && !received && (
-                      <button onClick={() => { navigator.clipboard.writeText(rd.code); showToast('Đã copy mã đổi thưởng!', 'success'); }}
+                      <button onClick={() => { navigator.clipboard.writeText(rd.code); showToast(t('customer.rewards.copySuccess'), 'success'); }}
                         className="w-full py-2.5 rounded-lg text-sm font-bold border bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200 transition-all">
-                        Copy mã đổi thưởng
+                        {t('customer.rewards.copyRedeemCode')}
                       </button>
                       )}
                     </div>
@@ -450,11 +450,11 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
 
           <div>
             <h3 className="text-sm font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-              <Ticket weight="fill" className="text-emerald-500" /> Voucher của tôi ({myVouchers.length})
+              <Ticket weight="fill" className="text-emerald-500" /> {t('customer.rewards.myVouchers', { count: myVouchers.length })}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {myVouchers.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-slate-400 text-sm">Bạn chưa có voucher nào.</div>
+                <div className="col-span-full text-center py-12 text-slate-400 text-sm">{t('customer.rewards.noVouchers')}</div>
               ) : (
                 myVouchers.map(uv => {
                   const v = uv.voucherId;
@@ -470,11 +470,11 @@ export default function CustomerRewardsPage({ user, refreshUser }) {
                       </div>
                       <p className="text-xs text-slate-500 mb-4">{v.description}</p>
                       <div className="flex items-center gap-1 text-[11px] text-slate-400 mb-4">
-                        <Tag size={12} /> HSD: {v.endDate ? new Date(v.endDate).toLocaleDateString('vi-VN') : '-'}
+                        <Tag size={12} /> {t('customer.rewards.expiryDate', { date: v.endDate ? new Date(v.endDate).toLocaleDateString('vi-VN') : '-' })}
                       </div>
                       <button onClick={() => { navigator.clipboard.writeText(v.code); }}
                         className="w-full py-2.5 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all">
-                        Copy mã khuyến mãi
+                        {t('customer.rewards.copyPromoCode')}
                       </button>
                     </div>
                   );

@@ -6,39 +6,41 @@ import {
 } from 'lucide-react';
 import useSSE from '@/hooks/useSSE';
 import { showToast as fireToast } from '@/lib/toast';
+import { useTranslation } from 'react-i18next';
 
 function formatCurrency(value) {
   return `${new Intl.NumberFormat('vi-VN').format(value || 0)}đ`;
 }
 
-const ERROR_TRANSLATIONS = {
-  'Validation failed': 'Xác thực dữ liệu thất bại',
-  'Invalid amount': 'Số tiền không hợp lệ',
-  'Amount is required': 'Vui lòng cung cấp số tiền',
-  'Invalid payment method': 'Phương thức thanh toán không hợp lệ',
-  'Invalid payment type': 'Loại thanh toán không hợp lệ',
-  'User not found': 'Không tìm thấy người dùng',
-  'Payment not found': 'Không tìm thấy thông tin giao dịch',
-  'Access denied. No token.': 'Từ chối truy cập. Vui lòng đăng nhập lại.',
-  'Invalid token': 'Phiên đăng nhập không hợp lệ',
-  'Token expired': 'Phiên đăng nhập đã hết hạn',
-  'Failed to fetch': 'Không thể kết nối đến máy chủ',
+const ERROR_KEYS = {
+  'Validation failed': 'customer.wallet.errors.validationFailed',
+  'Invalid amount': 'customer.wallet.errors.invalidAmount',
+  'Amount is required': 'customer.wallet.errors.amountRequired',
+  'Invalid payment method': 'customer.wallet.errors.invalidPaymentMethod',
+  'Invalid payment type': 'customer.wallet.errors.invalidPaymentType',
+  'User not found': 'customer.wallet.errors.userNotFound',
+  'Payment not found': 'customer.wallet.errors.paymentNotFound',
+  'Access denied. No token.': 'customer.wallet.errors.accessDenied',
+  'Invalid token': 'customer.wallet.errors.invalidToken',
+  'Token expired': 'customer.wallet.errors.tokenExpired',
+  'Failed to fetch': 'customer.wallet.errors.failedToFetch',
 };
 
-function translateError(msg) {
+function translateError(msg, t) {
   if (!msg) return '';
   let result = msg;
-  if (ERROR_TRANSLATIONS[msg]) {
-    return ERROR_TRANSLATIONS[msg];
+  if (ERROR_KEYS[msg]) {
+    return t(ERROR_KEYS[msg]);
   }
-  for (const [key, value] of Object.entries(ERROR_TRANSLATIONS)) {
-    result = result.replace(new RegExp(key, 'gi'), value);
+  for (const [key, value] of Object.entries(ERROR_KEYS)) {
+    result = result.replace(new RegExp(key, 'gi'), t(value));
   }
   return result;
 }
 
 export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showTopupModal, setShowTopupModal] = useState(false);
@@ -65,7 +67,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
 
   // Listen to SSE topup success
   useSSE(token, 'wallet_topup_success', (data) => {
-    setMessage(`Nạp tiền thành công: +${formatCurrency(data?.amount)}`);
+    setMessage(t('customer.wallet.topupSuccessMsg', { amount: formatCurrency(data?.amount) }));
     setSepayData(null);
     setShowTopupModal(false);
     refreshUser();
@@ -89,11 +91,11 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
           refreshUser();
           fetchTransactions(1, false);
         } else {
-          setMessage(parsed?.message || 'Thanh toán VNPay thất bại');
+          setMessage(parsed?.message || t('customer.wallet.vnpayFail'));
         }
       } catch (e) {
         console.error('Lỗi phân tích kết quả VNPay:', e);
-        setMessage('Lỗi xử lý kết quả thanh toán VNPay');
+        setMessage(t('customer.wallet.vnpayParseError'));
       }
       
       const url = new URL(window.location);
@@ -104,7 +106,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
 
   const fetchTransactions = async (targetPage = 1, isAppend = false, overrideFrom = fromDate, overrideTo = toDate, overrideType = typeFilter) => {
     if (overrideFrom && overrideTo && overrideFrom > overrideTo) {
-      fireToast.error('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc');
+      fireToast.error(t('customer.wallet.dateRangeError'));
       return;
     }
 
@@ -158,7 +160,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
   const handleFromDateChange = (newFrom) => {
     setFromDate(newFrom);
     if (newFrom && toDate && newFrom > toDate) {
-      fireToast.error('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc');
+      fireToast.error(t('customer.wallet.dateRangeError'));
       return;
     }
     fetchTransactions(1, false, newFrom, toDate, typeFilter);
@@ -167,7 +169,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
   const handleToDateChange = (newTo) => {
     setToDate(newTo);
     if (fromDate && newTo && fromDate > newTo) {
-      fireToast.error('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc');
+      fireToast.error(t('customer.wallet.dateRangeError'));
       return;
     }
     fetchTransactions(1, false, fromDate, newTo, typeFilter);
@@ -187,7 +189,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
   const handleTopup = async () => {
     const amount = customAmount ? parseInt(customAmount.replace(/\D/g, ''), 10) : topupAmount;
     if (!amount || amount < 10000) {
-      setMessage('Số tiền nạp tối thiểu là 10,000đ');
+      setMessage(t('customer.wallet.minAmount'));
       return;
     }
 
@@ -202,7 +204,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
           body: JSON.stringify({ amount, paymentType: 'topup' }),
         });
         const payload = await res.json().catch(() => null);
-        if (!res.ok) throw new Error(payload?.message || 'Tạo QR nạp tiền thất bại');
+        if (!res.ok) throw new Error(payload?.message || t('customer.wallet.qrCreateFail'));
         
         const payObj = payload?.data || payload;
         setSepayData({
@@ -211,7 +213,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
           amount: amount,
         });
       } catch (e) {
-        setMessage(translateError(e.message) || 'Tạo giao dịch thất bại');
+        setMessage(translateError(e.message, t) || t('customer.wallet.transactionCreateFail'));
       } finally {
         setDepositLoading(false);
       }
@@ -224,14 +226,14 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
           body: JSON.stringify({ amount, paymentType: 'topup', origin: window.location.origin }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'Tạo thanh toán VNPay thất bại');
+        if (!res.ok) throw new Error(data?.message || t('customer.wallet.vnpayCreateFail'));
         
         const paymentUrl = data?.data?.paymentUrl;
-        if (!paymentUrl) throw new Error('Không nhận được URL thanh toán');
+        if (!paymentUrl) throw new Error(t('customer.wallet.noPaymentUrl'));
         
         window.location.href = paymentUrl;
       } catch (e) {
-        setMessage(translateError(e.message) || 'Thanh toán VNPay thất bại');
+        setMessage(translateError(e.message, t) || t('customer.wallet.vnpayFail'));
         setVnpayLoading(false);
       }
     }
@@ -247,9 +249,9 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm">
               <Wallet className="w-5 h-5" />
             </div>
-            Ví của tôi
+            {t('customer.wallet.title')}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Quản lý số dư tài khoản, nạp tiền và lịch sử giao dịch ví nội bộ</p>
+          <p className="text-slate-500 text-sm mt-1">{t('customer.wallet.subtitle')}</p>
         </div>
       </div>
 
@@ -265,12 +267,12 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <p className="text-emerald-100 font-medium mb-1.5 text-xs uppercase tracking-wider">Số dư khả dụng</p>
+            <p className="text-emerald-100 font-medium mb-1.5 text-xs uppercase tracking-wider">{t('customer.wallet.balanceLabel')}</p>
             <div className="text-4xl md:text-5xl font-black font-mono tracking-tight">
               {formatCurrency(user?.walletBalance)}
             </div>
             <p className="text-xs text-emerald-200 mt-3 flex items-center gap-1.5 font-medium">
-              <ShieldCheck size={15} /> An toàn, bảo mật & Nạp rút tức thì
+              <ShieldCheck size={15} /> {t('customer.wallet.securityNote')}
             </p>
           </div>
           <button 
@@ -278,7 +280,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
             className="bg-white text-emerald-700 hover:bg-emerald-50 px-6 py-3.5 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
           >
             <PlusCircle size={20} />
-            Nạp tiền vào ví
+            {t('customer.wallet.topup')}
           </button>
         </div>
       </div>
@@ -288,31 +290,31 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
             <Filter size={16} className="text-emerald-600" />
-            <span>Bộ lọc lịch sử giao dịch</span>
+            <span>{t('customer.wallet.filterTitle')}</span>
           </div>
           {(fromDate || toDate || typeFilter) && (
             <button onClick={handleResetFilter} className="text-xs font-semibold text-slate-500 hover:text-emerald-600 flex items-center gap-1 cursor-pointer">
-              <RefreshCw size={12} /> Thiết lập lại
+              <RefreshCw size={12} /> {t('customer.wallet.resetFilter')}
             </button>
           )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Loại giao dịch</label>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">{t('customer.wallet.typeLabel')}</label>
             <select
               value={typeFilter}
               onChange={e => handleTypeChange(e.target.value)}
               className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-700 focus:border-emerald-500 outline-none bg-slate-50/50"
             >
-              <option value="">Tất cả giao dịch</option>
-              <option value="credit">Cộng tiền (+)</option>
-              <option value="debit">Thanh toán (-)</option>
+              <option value="">{t('customer.wallet.allTypes')}</option>
+              <option value="credit">{t('customer.wallet.creditType')}</option>
+              <option value="debit">{t('customer.wallet.debitType')}</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Từ ngày</label>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">{t('customer.wallet.fromDate')}</label>
             <input
               type="date"
               value={fromDate}
@@ -322,7 +324,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Đến ngày</label>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">{t('customer.wallet.toDate')}</label>
             <input
               type="date"
               value={toDate}
@@ -338,20 +340,20 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
         <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
           <h3 className="font-bold text-slate-800 flex items-center gap-2">
             <Receipt size={18} className="text-emerald-600" />
-            Lịch sử giao dịch ({totalCount})
+            {t('customer.wallet.historyTitle')} ({totalCount})
           </h3>
-          <span className="text-xs text-slate-400 font-medium">Bấm vào giao dịch để sang trang chi tiết</span>
+          <span className="text-xs text-slate-400 font-medium">{t('customer.wallet.historyHint')}</span>
         </div>
         
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">Đang tải danh sách giao dịch...</div>
+          <div className="p-12 text-center text-slate-400 text-sm">{t('customer.wallet.loadingList')}</div>
         ) : transactions.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center justify-center">
             <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
               <Receipt size={28} />
             </div>
-            <h3 className="text-slate-700 font-bold mb-1">Chưa tìm thấy giao dịch nào</h3>
-            <p className="text-slate-500 text-xs">Thử thay đổi khoảng thời gian tìm kiếm hoặc bộ lọc.</p>
+            <h3 className="text-slate-700 font-bold mb-1">{t('customer.wallet.emptyTitle')}</h3>
+            <p className="text-slate-500 text-xs">{t('customer.wallet.emptyDesc')}</p>
           </div>
         ) : (
           <>
@@ -385,7 +387,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                           <span>{new Date(tx.createdAt).toLocaleString('vi-VN')}</span>
                           {bookingCode && (
                             <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-700">
-                              Mã đơn: {bookingCode}
+                              {t('customer.wallet.bookingCodeLabel')} {bookingCode}
                             </span>
                           )}
                         </div>
@@ -413,11 +415,11 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                   {loadingMore ? (
                     <>
                       <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-                      Đang tải thêm...
+                      {t('customer.wallet.loadingMore')}
                     </>
                   ) : (
                     <>
-                      Hiển thị thêm ({transactions.length}/{totalCount})
+                      {t('customer.wallet.showMore', { shown: transactions.length, total: totalCount })}
                     </>
                   )}
                 </button>
@@ -433,8 +435,8 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             {sepayData ? (
               <div className="p-6 text-center">
-                <h3 className="text-xl font-black text-slate-900 mb-2">Quét Mã VietQR</h3>
-                <p className="text-sm text-slate-500 mb-6">Sử dụng ứng dụng ngân hàng để thanh toán</p>
+                <h3 className="text-xl font-black text-slate-900 mb-2">{t('customer.wallet.qrTitle')}</h3>
+                <p className="text-sm text-slate-500 mb-6">{t('customer.wallet.qrHint')}</p>
                 
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 inline-block mb-6">
                   <img src={sepayData.qrCodeUrl} alt="QR Code" className="w-56 h-56 rounded-xl object-cover" />
@@ -442,35 +444,35 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                 
                 <div className="space-y-3 mb-6 text-left">
                   <div className="flex justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                    <span className="text-slate-500">Số tiền:</span>
+                    <span className="text-slate-500">{t('customer.wallet.amountLabel')}</span>
                     <strong className="text-emerald-600 text-base">{formatCurrency(sepayData.amount)}</strong>
                   </div>
                   <div className="flex justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                    <span className="text-slate-500">Nội dung CK:</span>
+                    <span className="text-slate-500">{t('customer.wallet.transferContent')}</span>
                     <strong className="text-slate-800 font-mono">{sepayData.transactionId}</strong>
                   </div>
                 </div>
 
                 <div className="text-emerald-600 text-xs font-semibold flex items-center justify-center gap-2 mb-6">
-                  <span className="animate-spin">🔄</span> Đang chờ ngân hàng xác nhận...
+                  <span className="animate-spin">🔄</span> {t('customer.wallet.waitingBank')}
                 </div>
 
                 <button 
                   onClick={() => setSepayData(null)}
                   className="w-full py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors"
                 >
-                  Hủy / Quay lại
+                  {t('customer.wallet.cancelBack')}
                 </button>
               </div>
             ) : (
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-slate-900">Nạp tiền vào ví</h3>
+                  <h3 className="text-xl font-black text-slate-900">{t('customer.wallet.topup')}</h3>
                   <button onClick={() => setShowTopupModal(false)} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Chọn số tiền nạp</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{t('customer.wallet.chooseAmount')}</label>
                   <div className="grid grid-cols-3 gap-2.5 mb-4">
                     {[50000, 100000, 200000, 500000, 1000000, 2000000].map(amt => (
                       <button
@@ -489,7 +491,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                   <div className="relative">
                     <input 
                       type="text" 
-                      placeholder="Nhập số tiền khác..." 
+                      placeholder={t('customer.wallet.customAmountPlaceholder')} 
                       value={customAmount}
                       onChange={(e) => {
                         let val = e.target.value.replace(/\D/g, '');
@@ -504,7 +506,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                 </div>
 
                 <div className="mb-8">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Chọn phương thức thanh toán</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{t('customer.wallet.chooseMethod')}</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setPayMethod('bank')}
@@ -513,7 +515,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                       }`}
                     >
                       <Banknote size={26} className={payMethod === 'bank' ? 'text-emerald-600' : 'text-slate-400'} />
-                      <span className={`text-xs font-bold ${payMethod === 'bank' ? 'text-emerald-700' : 'text-slate-600'}`}>Chuyển khoản QR</span>
+                      <span className={`text-xs font-bold ${payMethod === 'bank' ? 'text-emerald-700' : 'text-slate-600'}`}>{t('customer.wallet.methodQr')}</span>
                     </button>
                     <button
                       onClick={() => setPayMethod('vnpay')}
@@ -532,7 +534,7 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
                   disabled={depositLoading || vnpayLoading}
                   className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-md transition-all disabled:opacity-70 flex justify-center items-center cursor-pointer"
                 >
-                  {depositLoading || vnpayLoading ? <span className="animate-pulse">ĐANG XỬ LÝ...</span> : 'TIẾN HÀNH NẠP TIỀN'}
+                  {depositLoading || vnpayLoading ? <span className="animate-pulse">{t('customer.wallet.processing')}</span> : t('customer.wallet.submitTopup')}
                 </button>
               </div>
             )}
@@ -547,15 +549,15 @@ export default function CustomerWallet({ apiBase, token, user, refreshUser }) {
             <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-8 h-8 text-emerald-600" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">Nạp tiền thành công!</h3>
+            <h3 className="text-xl font-black text-slate-900 mb-2">{t('customer.wallet.successTitle')}</h3>
             <p className="text-sm text-slate-500 mb-6">
-              Bạn đã nạp thành công <span className="font-bold text-emerald-600 text-base">{formatCurrency(successAmount)}</span> vào ví AutoWash.
+              {t('customer.wallet.successDesc', { amount: formatCurrency(successAmount) })}
             </p>
             <button 
               onClick={() => setShowVnpaySuccessModal(false)}
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-md transition-all cursor-pointer"
             >
-              Đồng ý
+              {t('customer.wallet.agree')}
             </button>
           </div>
         </div>

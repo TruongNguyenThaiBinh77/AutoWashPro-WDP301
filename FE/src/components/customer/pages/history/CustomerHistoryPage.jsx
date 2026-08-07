@@ -8,31 +8,32 @@ import CustomerBookingDetail from './CustomerBookingDetail.jsx';
 import QuickBookModal from '../../widgets/QuickBookModal.jsx';
 import VoucherPicker from '../../../VoucherPicker.jsx';
 import { useSystemConfig } from '@/hooks/useSystemConfig';
+import { useTranslation } from 'react-i18next';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const STATUS_MAP = {
-  pending:          { label: 'Chờ xử lý',   cls: 'bg-amber-50 text-amber-600 border-amber-200' },
-  confirmed:        { label: 'Đã xác nhận', cls: 'bg-blue-50 text-blue-600 border-blue-200' },
-  checked_in:       { label: 'Đã check-in', cls: 'bg-sky-50 text-sky-600 border-sky-200' },
-  in_progress:      { label: 'Đang rửa',    cls: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
-  awaiting_payment: { label: 'Chờ thanh toán', cls: 'bg-orange-50 text-orange-600 border-orange-200' },
-  completed:        { label: 'Hoàn thành',  cls: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
-  cancelled:        { label: 'Đã hủy',      cls: 'bg-red-50 text-red-500 border-red-200' },
-  paid:             { label: 'Đã thanh toán', cls: 'bg-green-50 text-green-600 border-green-200' },
+  pending:          { labelKey: 'customer.history.statusPending',   cls: 'bg-amber-50 text-amber-600 border-amber-200' },
+  confirmed:        { labelKey: 'customer.history.statusConfirmed', cls: 'bg-blue-50 text-blue-600 border-blue-200' },
+  checked_in:       { labelKey: 'customer.history.statusCheckedIn', cls: 'bg-sky-50 text-sky-600 border-sky-200' },
+  in_progress:      { labelKey: 'customer.history.statusInProgress',    cls: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
+  awaiting_payment: { labelKey: 'customer.history.statusAwaitingPayment', cls: 'bg-orange-50 text-orange-600 border-orange-200' },
+  completed:        { labelKey: 'customer.history.statusCompleted',  cls: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
+  cancelled:        { labelKey: 'customer.history.statusCancelled',      cls: 'bg-red-50 text-red-500 border-red-200' },
+  paid:             { labelKey: 'customer.history.statusPaid', cls: 'bg-green-50 text-green-600 border-green-200' },
 };
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả trạng thái' },
-  { value: 'pending', label: 'Chờ xử lý' },
-  { value: 'confirmed', label: 'Đã xác nhận' },
-  { value: 'awaiting_payment', label: 'Chờ thanh toán' },
-  { value: 'completed', label: 'Hoàn thành' },
-  { value: 'cancelled', label: 'Đã hủy' },
+  { value: '', labelKey: 'customer.history.filterAllStatuses' },
+  { value: 'pending', labelKey: 'customer.history.statusPending' },
+  { value: 'confirmed', labelKey: 'customer.history.statusConfirmed' },
+  { value: 'awaiting_payment', labelKey: 'customer.history.statusAwaitingPayment' },
+  { value: 'completed', labelKey: 'customer.history.statusCompleted' },
+  { value: 'cancelled', labelKey: 'customer.history.statusCancelled' },
 ];
 
-const DAYS_VN = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-const MONTHS_VN = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+const DAYS_VN = ['customer.history.daySun', 'customer.history.dayMon', 'customer.history.dayTue', 'customer.history.dayWed', 'customer.history.dayThu', 'customer.history.dayFri', 'customer.history.daySat'];
+const MONTHS_VN = ['customer.history.month1', 'customer.history.month2', 'customer.history.month3', 'customer.history.month4', 'customer.history.month5', 'customer.history.month6',
+  'customer.history.month7', 'customer.history.month8', 'customer.history.month9', 'customer.history.month10', 'customer.history.month11', 'customer.history.month12'];
 
 function formatCurrency(v) { return `${new Intl.NumberFormat('vi-VN').format(v || 0)}đ`; }
 function formatDate(d) { return new Date(d).toLocaleDateString('vi-VN'); }
@@ -50,18 +51,21 @@ function localDateKey(d) {
 }
 
 function StatusBadge({ status }) {
-  const s = STATUS_MAP[status] || { label: status, cls: 'bg-slate-50 text-slate-500 border-slate-200' };
-  return <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap ${s.cls}`}>{s.label}</span>;
+  const { t } = useTranslation();
+  const s = STATUS_MAP[status] || { labelKey: null, cls: 'bg-slate-50 text-slate-500 border-slate-200' };
+  const label = s.labelKey ? t(s.labelKey) : status;
+  return <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap ${s.cls}`}>{label}</span>;
 }
 
 function StarRating({ value, onChange }) {
+  const { t } = useTranslation();
   const [hover, setHover] = useState(0);
   const RATING_LABELS = {
-    1: '😞 Chưa hài lòng',
-    2: '😐 Cần cải thiện',
-    3: '🙂 Bình thường',
-    4: '😊 Tốt & Hài lòng',
-    5: '🌟 Xuất sắc & Tuyệt vời!',
+    1: 'customer.history.rating1',
+    2: 'customer.history.rating2',
+    3: 'customer.history.rating3',
+    4: 'customer.history.rating4',
+    5: 'customer.history.rating5',
   };
   const activeRating = hover || value;
 
@@ -88,10 +92,10 @@ function StarRating({ value, onChange }) {
       <div className="h-6 flex items-center justify-center">
         {activeRating > 0 ? (
           <span className="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200/80 animate-in fade-in zoom-in-95 duration-100">
-            {RATING_LABELS[activeRating]}
+            {t(RATING_LABELS[activeRating])}
           </span>
         ) : (
-          <span className="text-xs font-medium text-slate-400">Chọn mức độ hài lòng của bạn</span>
+          <span className="text-xs font-medium text-slate-400">{t('customer.history.selectSatisfactionLevel')}</span>
         )}
       </div>
     </div>
@@ -99,19 +103,20 @@ function StarRating({ value, onChange }) {
 }
 
 const PACK_STATUS_MAP = {
-  active: { label: 'Còn hiệu lực', color: '#10b981', bg: '#ecfdf5' },
-  exhausted: { label: 'Đã dùng hết', color: '#6b7280', bg: '#f9fafb' },
-  expired: { label: 'Hết hạn', color: '#ef4444', bg: '#fef2f2' },
-  cancelled: { label: 'Đã hủy', color: '#94a3b8', bg: '#f1f5f9' },
+  active: { labelKey: 'customer.history.packActive', color: '#10b981', bg: '#ecfdf5' },
+  exhausted: { labelKey: 'customer.history.packExhausted', color: '#6b7280', bg: '#f9fafb' },
+  expired: { labelKey: 'customer.history.packExpired', color: '#ef4444', bg: '#fef2f2' },
+  cancelled: { labelKey: 'customer.history.statusCancelled', color: '#94a3b8', bg: '#f1f5f9' },
 };
 
 function SlotMeter({ total, remaining }) {
+  const { t } = useTranslation();
   const pct = total > 0 ? (remaining / total) * 100 : 0;
   const color = pct > 50 ? 'bg-emerald-500' : pct > 20 ? 'bg-amber-500' : 'bg-red-500';
   return (
     <div className="mt-3">
       <div className="flex justify-between text-xs text-slate-500 mb-1">
-        <span>Còn lại</span>
+        <span>{t('customer.history.slotsRemaining')}</span>
         <span className="font-bold">{remaining}/{total}</span>
       </div>
       <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
@@ -122,7 +127,8 @@ function SlotMeter({ total, remaining }) {
 }
 
 function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
-  const st = PACK_STATUS_MAP[pack.status] || { label: pack.status, color: '#6b7280', bg: '#f9fafb' };
+  const { t } = useTranslation();
+  const st = PACK_STATUS_MAP[pack.status] || { labelKey: null, color: '#6b7280', bg: '#f9fafb' };
   const pkg = pack.packageId;
   const branch = pack.branchId;
   const canQuickBook = pack.status === 'active' && pack.remainingSlots > 0 && pack.paymentStatus === 'paid';
@@ -155,8 +161,8 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
       <div className="flex justify-between items-start mb-3">
         <div>
           <div className="font-mono text-xs font-bold text-slate-900 tracking-wider">{pack.packCode}</div>
-          <div className="text-sm font-bold text-slate-900 mt-1">{pkg?.name || 'Gói dịch vụ'}</div>
-          <div className="text-xs text-slate-400 mt-0.5">📍 {branch?.name || 'Áp dụng toàn hệ thống'}</div>
+          <div className="text-sm font-bold text-slate-900 mt-1">{pkg?.name || t('customer.history.servicePackage')}</div>
+          <div className="text-xs text-slate-400 mt-0.5">📍 {branch?.name || t('customer.history.allBranches')}</div>
         </div>
         <div className="flex items-center gap-2">
           {pack.discountPercent > 0 && (
@@ -165,27 +171,27 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
             </span>
           )}
           <span className="text-[11px] font-bold rounded-full px-2.5 py-0.5" style={{ color: st.color, background: st.bg }}>
-            {st.label}
+            {st.labelKey ? t(st.labelKey) : pack.status}
           </span>
         </div>
       </div>
       <SlotMeter total={pack.totalSlots} remaining={pack.remainingSlots} />
       <div className="grid grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100">
         {[
-          { label: 'Giá gói', value: formatCurrency(pack.finalPriceAfterVoucher ?? pack.finalPrice) },
-          { label: 'Đã dùng', value: `${pack.usedSlots} lần` },
-          { label: 'Hết hạn', value: pack.expiresAt ? new Date(pack.expiresAt).toLocaleDateString('vi-VN') : '—' },
-          { label: 'Thanh toán', value: pack.paymentStatus === 'paid' ? '✓ Đã TT' : '⏳ Chờ TT', highlight: pack.paymentStatus === 'paid' },
+          { labelKey: 'customer.history.packPrice', value: formatCurrency(pack.finalPriceAfterVoucher ?? pack.finalPrice) },
+          { labelKey: 'customer.history.packUsed', value: t('customer.history.packUsedTimes', { count: pack.usedSlots }) },
+          { labelKey: 'customer.history.packExpiry', value: pack.expiresAt ? new Date(pack.expiresAt).toLocaleDateString('vi-VN') : '—' },
+          { labelKey: 'customer.history.packPayment', value: pack.paymentStatus === 'paid' ? t('customer.history.packPaidShort') : t('customer.history.packPendingPayShort'), highlight: pack.paymentStatus === 'paid' },
         ].map(r => (
-          <div key={r.label}>
-            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{r.label}</div>
+          <div key={r.labelKey}>
+            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{t(r.labelKey)}</div>
             <div className={`text-xs font-bold mt-0.5 ${r.highlight ? 'text-emerald-600' : 'text-slate-900'}`}>{r.value}</div>
           </div>
         ))}
       </div>
       {pack.voucherCode && (
         <div className="mt-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
-          🏷 {pack.voucherCode} — tiết kiệm thêm {formatCurrency(pack.voucherDiscount)}
+          {t('customer.history.packVoucherSavings', { code: pack.voucherCode, amount: formatCurrency(pack.voucherDiscount) })}
         </div>
       )}
       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
@@ -196,7 +202,7 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
             className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors flex items-center gap-1.5"
           >
             <Clock size={12} />
-            Lịch sử
+            {t('customer.history.history')}
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -206,7 +212,7 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
               onClick={() => onQuickBook(pack)}
               className="px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition-colors flex items-center gap-1.5"
             >
-              ⚡ Đặt lịch nhanh
+              ⚡ {t('customer.history.quickBook')}
             </button>
           )}
           {canCancel && onCancelPack && (
@@ -215,7 +221,7 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
               onClick={() => onCancelPack(pack)}
               className="px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 text-xs font-semibold transition-colors"
             >
-              Hủy gói
+              {t('customer.history.cancelPack')}
             </button>
           )}
         </div>
@@ -241,8 +247,8 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
                 <Clock size={16} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Lịch sử sử dụng gói lượt</h3>
-                <p className="text-[11px] text-slate-400 font-mono">Mã: {pack.packCode}</p>
+                <h3 className="text-base font-bold text-slate-900">{t('customer.history.packUsageHistory')}</h3>
+                <p className="text-[11px] text-slate-400 font-mono">{t('customer.history.codeLabel', { code: pack.packCode })}</p>
               </div>
             </div>
 
@@ -250,11 +256,11 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
               {historyLoading ? (
                 <div className="text-center py-10 text-xs text-slate-400 flex flex-col items-center gap-2">
                   <RefreshCw size={20} className="animate-spin text-emerald-600" />
-                  Đang tải lịch sử...
+                  {t('customer.history.loadingHistory')}
                 </div>
               ) : history.length === 0 ? (
                 <div className="text-center py-10 text-xs text-slate-400">
-                  Gói lượt này chưa được sử dụng lần nào.
+                  {t('customer.history.packNotUsed')}
                 </div>
               ) : (
                 history.map((h, idx) => {
@@ -265,25 +271,25 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
                     h.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-200' :
                     'bg-blue-50 text-blue-600 border-blue-200';
                   const statusLabel = 
-                    h.status === 'completed' ? 'Hoàn thành' :
-                    h.status === 'cancelled' ? 'Đã hủy' :
-                    h.status === 'pending' ? 'Chờ xử lý' :
-                    'Đã xác nhận';
+                    h.status === 'completed' ? 'customer.history.statusCompleted' :
+                    h.status === 'cancelled' ? 'customer.history.statusCancelled' :
+                    h.status === 'pending' ? 'customer.history.statusPending' :
+                    'customer.history.statusConfirmed';
                   
                   return (
                     <div key={h._id || idx} className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col gap-1.5 text-xs text-slate-700">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-slate-800">{bDate} - {h.startTime}</span>
                         <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${statusCls}`}>
-                          {statusLabel}
+                          {t(statusLabel)}
                         </span>
                       </div>
                       <div className="text-slate-500 flex justify-between">
-                        <span>Chi nhánh:</span>
+                        <span>{t('customer.history.branchLabel')}</span>
                         <span className="font-semibold text-slate-700">{h.branchId?.name}</span>
                       </div>
                       <div className="text-slate-500 flex justify-between">
-                        <span>Xe:</span>
+                        <span>{t('customer.history.vehicleLabel')}</span>
                         <span className="font-semibold text-slate-700">
                           {h.vehicleId?.brand} {h.vehicleId?.model} ({h.vehicleId?.licensePlate})
                         </span>
@@ -299,7 +305,7 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
               onClick={() => setShowHistory(false)}
               className="w-full mt-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition-colors"
             >
-              Đóng
+              {t('customer.history.close')}
             </button>
           </div>
         </div>
@@ -309,6 +315,7 @@ function PackCard({ pack, onQuickBook, onCancelPack, apiBase, token }) {
 }
 
 export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: userVehicles = [], user, onUserUpdate }) {
+  const { t } = useTranslation();
   const configs = useSystemConfig();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -609,10 +616,10 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
       const parsed = JSON.parse(decodeURIComponent(vnpayResult));
       const success = parsed?.success !== false && parsed?.data?.responseCode === '00';
       if (success) {
-        showToastMsg('Thanh toán VNPay thành công!');
+        showToastMsg(t('customer.history.vnpaySuccess'));
         doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));
       } else {
-        showToastMsg(parsed?.message || 'Thanh toán VNPay thất bại', 'error');
+        showToastMsg(parsed?.message || t('customer.history.vnpayFailed'), 'error');
       }
     } catch (e) {
       console.error('Parse vnpay_result error:', e);
@@ -664,7 +671,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
   };
   const openRefundRequest = (b) => { setRefundTarget(b); setRefundReason(''); setShowRefundModal(true); };
   const submitRefundRequest = async () => {
-    if (!refundReason.trim()) return showToastMsg('Vui lòng nhập lý do hoàn tiền', 'error');
+    if (!refundReason.trim()) return showToastMsg(t('customer.history.enterRefundReason'), 'error');
     setRefundLoading(true);
     try {
       const res = await fetch(`${apiBase || API_BASE}/refund-requests`, {
@@ -673,8 +680,8 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
         body: JSON.stringify({ bookingId: refundTarget._id || refundTarget.id, reason: refundReason })
       });
       const payload = await res.json();
-      if (!res.ok) throw new Error(payload.message || 'Lỗi hệ thống');
-      showToastMsg('Gửi yêu cầu hoàn tiền thành công');
+      if (!res.ok) throw new Error(payload.message || t('customer.history.systemError'));
+      showToastMsg(t('customer.history.refundSubmitted'));
       setRefunds(prev => [...prev, payload.data]);
       setShowRefundModal(false);
     } catch (err) {
@@ -789,7 +796,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
 
   const handleDateFromChange = (val) => {
     if (dateTo && val && val > dateTo) {
-      showToast('Ngày bắt đầu không được lớn hơn ngày kết thúc', 'error');
+      showToast(t('customer.history.dateFromInvalid'), 'error');
       setDateFrom(val);
       setDateTo(val);
       setPage(1);
@@ -800,7 +807,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
 
   const handleDateToChange = (val) => {
     if (dateFrom && val && val < dateFrom) {
-      showToast('Ngày kết thúc không được nhỏ hơn ngày bắt đầu', 'error');
+      showToast(t('customer.history.dateToInvalid'), 'error');
       setDateFrom(val);
       setDateTo(val);
       setPage(1);
@@ -837,12 +844,12 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ rating, feedback: feedbackText.trim() || undefined }),
       });
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Gửi đánh giá thất bại'); }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.history.reviewSubmitFailed')); }
       const payload = await res.json();
       const updated = payload?.data || payload;
       setBookings(prev => prev.map(b => ((b._id || b.id) === bId ? { ...b, ...updated } : b)));
       setShowReviewModal(false); setReviewTarget(null);
-      showToastMsg('Đánh giá thành công!');
+      showToastMsg(t('customer.history.reviewSuccess'));
     } catch (e) { showToastMsg(e.message, 'error'); } finally { setSubmitting(false); }
   }
   const handlePayRemaining = (b) => {
@@ -864,8 +871,8 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
           body: JSON.stringify({ bookingId: bId, method: 'wallet', paymentType: 'remaining' }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Thanh toán bằng ví thất bại');
-        showToastMsg('Thanh toán thành công');
+        if (!res.ok) throw new Error(data.message || t('customer.history.walletPayFailed'));
+        showToastMsg(t('customer.history.paymentSuccess'));
         setPayRemainingTarget(null);
         doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));
       } else if (payRemainingMethod === 'bank') {
@@ -875,7 +882,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
           body: JSON.stringify({ bookingId: bId, method: 'bank', paymentType: 'remaining' }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Tạo mã QR thanh toán thất bại');
+        if (!res.ok) throw new Error(data.message || t('customer.history.qrCreateFailed'));
         setPayRemainingBankQR(data?.data || data);
         setQrPollCount(0);
       } else {
@@ -885,12 +892,12 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
           body: JSON.stringify({ bookingId: bId, paymentType: 'remaining', origin: window.location.origin }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Khởi tạo thanh toán thất bại');
+        if (!res.ok) throw new Error(data.message || t('customer.history.payInitFailed'));
         
         if (data?.data?.paymentUrl || data?.data?.url) {
           window.location.href = data?.data?.paymentUrl || data?.data?.url;
         } else {
-          showToastMsg('Khởi tạo thanh toán thành công');
+          showToastMsg(t('customer.history.payInitSuccess'));
           setPayRemainingTarget(null);
           doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));
         }
@@ -913,7 +920,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
       const data = await res.json();
       const p = data?.data || data;
       if (p?.status === 'paid') {
-        showToastMsg('Thanh toán chuyển khoản thành công', 'success');
+        showToastMsg(t('customer.history.bankPaySuccess'), 'success');
         setPayRemainingBankQR(null);
         setPayRemainingTarget(null);
         doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));
@@ -953,7 +960,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
   async function confirmCancel() {
     if (!cancelTarget) return;
     if (!cancelReason.trim()) {
-      setCancelConfirmError('Vui lòng nhập lý do hủy đơn');
+      setCancelConfirmError(t('customer.history.enterCancelReason'));
       return;
     }
     setCancelLoading(true);
@@ -965,14 +972,14 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ cancellationReason: cancelReason.trim() }),
       });
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Không thể hủy đơn'); }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.history.cancelBookingFailed')); }
       const cancelPayload = await res.json().catch(() => ({}));
       
       const refundAmount = cancelPayload?.data?.refundAmount || 0;
       if (refundAmount > 0 && onUserUpdate) {
         onUserUpdate({ walletBalance: (user?.walletBalance || 0) + refundAmount });
       }
-      showToastMsg(refundAmount > 0 ? `Đã hủy đơn thành công, hoàn ${refundAmount.toLocaleString('vi-VN')}đ vào ví` : 'Đã hủy đơn thành công');
+      showToastMsg(refundAmount > 0 ? t('customer.history.cancelSuccessWithRefund', { amount: refundAmount.toLocaleString('vi-VN') }) : t('customer.history.cancelSuccess'));
       setShowCancelConfirm(false); setCancelTarget(null); setCancelReason(''); setCancelOtp(''); setCancelStep(1); setCancelPreview(null);
       refreshUserProfile();
       doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));
@@ -988,7 +995,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
       const res = await fetch(`${apiBase || API_BASE}/bookings/${bId}/qr`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Không thể tạo mã QR');
+      if (!res.ok) throw new Error(t('customer.history.qrCannotCreate'));
       const payload = await res.json();
       setQrData(payload?.data?.qrDataUrl || payload?.qr || '');
     } catch (e) { showToastMsg(e.message, 'error'); setShowQR(false); }
@@ -1006,18 +1013,18 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
     setRebookDraft(null);
     setRebookDepositPayment(null);
     if (rebookPollRef.current) clearInterval(rebookPollRef.current);
-    if (!rebookDate) { setRebookFormError('Vui lòng chọn ngày'); return; }
-    if (!rebookTime) { setRebookFormError('Vui lòng chọn giờ'); return; }
+    if (!rebookDate) { setRebookFormError(t('customer.history.selectDate')); return; }
+    if (!rebookTime) { setRebookFormError(t('customer.history.selectTime')); return; }
     const selected = new Date(rebookDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (selected < today) { setRebookFormError('Ngày phải từ hôm nay trở đi'); return; }
+    if (selected < today) { setRebookFormError(t('customer.history.dateFromToday')); return; }
 
     // Validate slot availability
     if (rebookSlots.length > 0) {
       const slotTimes = rebookSlots.map(s => s.startTime || s.time || s);
       if (!slotTimes.includes(rebookTime)) {
-        setRebookFormError('Khung giờ này không có sẵn. Vui lòng chọn giờ từ danh sách.');
+        setRebookFormError(t('customer.history.slotUnavailable'));
         return;
       }
     }
@@ -1030,7 +1037,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ bookingDate: rebookDate, startTime: rebookTime, voucherCode: rebookVoucherCode || undefined }),
       });
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Đặt lại thất bại'); }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.history.rebookFailed')); }
       const payload = await res.json();
       const newBooking = payload?.data || payload;
       const depositAmt = newBooking.depositAmount || 0;
@@ -1054,8 +1061,8 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ bookingDate: rebookDate, startTime: rebookTime, selectedSubServices: rebookSubServices, voucherCode: vCode }),
         });
-        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Đặt lại thất bại'); }
-        showToastMsg('Đặt lại thành công!');
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.history.rebookFailed')); }
+        showToastMsg(t('customer.history.rebookSuccess'));
         setShowRebookModal(false); setRebookTarget(null);
         doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));
         if (showRecurringGroupModal) loadRecurringGroup();
@@ -1083,7 +1090,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
             }),
           });
           const vnpData = await vnpRes.json();
-          if (!vnpRes.ok) throw new Error(vnpData.message || 'Tạo thanh toán VNPay thất bại');
+          if (!vnpRes.ok) throw new Error(vnpData.message || t('customer.history.vnpayCreateFailed'));
           const vnpUrl = vnpData?.data?.paymentUrl || vnpData?.paymentUrl || vnpData?.url;
           if (vnpUrl) {
             // Lưu draft vào sessionStorage để xử lý sau khi VNPay redirect về
@@ -1203,7 +1210,7 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ bookingDate: d.bookingDate, startTime: d.startTime, selectedSubServices: d.selectedSubServices, voucherCode: d.voucherCode }),
       });
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Đặt lại thất bại'); }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.history.rebookFailed')); }
       showToastMsg('Đặt lại thành công!');
       setShowRebookModal(false); setRebookTarget(null);
       doFetch(keyword, statusFilter, typeFilter, dateFrom, dateTo, page, sort, (viewMode === 'list' || viewMode === 'week'));

@@ -24,34 +24,56 @@ import {
   Sparkles,
   Tag
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const DAYS_VN = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-const MONTHS_VN = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+const DAYS_VN = [
+  'customer.bookingsHistory.day.sun',
+  'customer.bookingsHistory.day.mon',
+  'customer.bookingsHistory.day.tue',
+  'customer.bookingsHistory.day.wed',
+  'customer.bookingsHistory.day.thu',
+  'customer.bookingsHistory.day.fri',
+  'customer.bookingsHistory.day.sat',
+];
+const MONTHS_VN = [
+  'customer.bookingsHistory.month.jan',
+  'customer.bookingsHistory.month.feb',
+  'customer.bookingsHistory.month.mar',
+  'customer.bookingsHistory.month.apr',
+  'customer.bookingsHistory.month.may',
+  'customer.bookingsHistory.month.jun',
+  'customer.bookingsHistory.month.jul',
+  'customer.bookingsHistory.month.aug',
+  'customer.bookingsHistory.month.sep',
+  'customer.bookingsHistory.month.oct',
+  'customer.bookingsHistory.month.nov',
+  'customer.bookingsHistory.month.dec',
+];
 
 const STATUS_MAP = {
-  pending:          { label: 'Chờ xác nhận', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  confirmed:        { label: 'Đã xác nhận',  cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  checked_in:       { label: 'Đã check-in',  cls: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
-  in_progress:      { label: 'Đang rửa',     cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  awaiting_payment: { label: 'Chờ thanh toán', cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  completed:        { label: 'Hoàn thành',   cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  cancelled:        { label: 'Đã hủy',       cls: 'bg-slate-100 text-slate-500 border-slate-200' },
-  paid:             { label: 'Đã thanh toán', cls: 'bg-green-50 text-green-700 border-green-200' },
+  pending:          { labelKey: 'customer.bookingsHistory.status.pending', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  confirmed:        { labelKey: 'customer.bookingsHistory.status.confirmed', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  checked_in:       { labelKey: 'customer.bookingsHistory.status.checkedIn', cls: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+  in_progress:      { labelKey: 'customer.bookingsHistory.status.inProgress', cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  awaiting_payment: { labelKey: 'customer.bookingsHistory.status.awaitingPayment', cls: 'bg-orange-50 text-orange-700 border-orange-200' },
+  completed:        { labelKey: 'customer.bookingsHistory.status.completed', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  cancelled:        { labelKey: 'customer.bookingsHistory.status.cancelled', cls: 'bg-slate-100 text-slate-500 border-slate-200' },
+  paid:             { labelKey: 'customer.bookingsHistory.status.paid', cls: 'bg-green-50 text-green-700 border-green-200' },
 };
 
-function StatusBadge({ status }) {
-  const s = STATUS_MAP[status] ?? { label: status, cls: 'bg-slate-100 text-slate-600 border-slate-200' };
+function StatusBadge({ status, t }) {
+  const s = STATUS_MAP[status] ?? { labelKey: null, cls: 'bg-slate-100 text-slate-600 border-slate-200' };
+  const label = s.labelKey ? t(s.labelKey) : status;
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold shadow-2xs ${s.cls}`}>
       <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-      {s.label}
+      {label}
     </span>
   );
 }
 
 /* ── cảnh báo "sắp bị hủy tự động" + đổi giờ nhanh sang slot gợi ý ── */
-function AtRiskBanner({ booking, apiBase, token, onRescheduled }) {
+function AtRiskBanner({ booking, apiBase, token, onRescheduled, t }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   if (!['pending', 'confirmed'].includes(booking.status) || !booking.lateWarningSentAt) return null;
@@ -65,9 +87,9 @@ function AtRiskBanner({ booking, apiBase, token, onRescheduled }) {
         body: JSON.stringify({ startTime: booking.suggestedSlotStartTime }),
       });
       const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload.message || 'Đổi giờ thất bại');
+      if (!res.ok) throw new Error(payload.message || t('customer.bookingsHistory.rescheduleFail'));
       onRescheduled(payload?.data || payload);
-      showToast(`Đã đổi giờ sang ${booking.suggestedSlotStartTime}`);
+      showToast(t('customer.bookingsHistory.rescheduledToast', { time: booking.suggestedSlotStartTime }));
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -79,19 +101,19 @@ function AtRiskBanner({ booking, apiBase, token, onRescheduled }) {
     <div onClick={(e) => e.stopPropagation()} className="mt-3 p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900">
       <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
         <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
-        <span>Bạn chưa check-in — sắp bị hệ thống tự hủy!</span>
+        <span>{t('customer.bookingsHistory.atRiskWarning')}</span>
       </div>
       {booking.suggestedSlotStartTime && (
         <div className="mt-2 flex items-center gap-2 flex-wrap">
           <span className="text-xs text-amber-700">
-            Khung giờ trống gần nhất hôm nay: <b>{booking.suggestedSlotStartTime}</b>
+            {t('customer.bookingsHistory.suggestedSlot', { time: booking.suggestedSlotStartTime })}
           </span>
           <button
             onClick={rescheduleToSuggested}
             disabled={busy}
             className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
           >
-            {busy ? 'Đang đổi...' : `Đổi sang ${booking.suggestedSlotStartTime}`}
+            {busy ? t('customer.bookingsHistory.switching') : t('customer.bookingsHistory.switchTo', { time: booking.suggestedSlotStartTime })}
           </button>
         </div>
       )}
@@ -124,6 +146,7 @@ function getFirstDayOfMonth(year, month) {
 
 export default function BookingsHistory({ apiBase, token }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -191,12 +214,12 @@ export default function BookingsHistory({ apiBase, token }) {
       const res = await fetch(`${apiBase}/bookings/my`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Không thể tải lịch sử đặt chỗ');
+      if (!res.ok) throw new Error(t('customer.bookingsHistory.loadFail'));
       const payload = await res.json();
       const data = payload?.data || payload;
       setBookings(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || 'Lỗi tải lịch sử');
+      setError(err.message || t('customer.bookingsHistory.loadError'));
     } finally {
       setLoading(false);
     }
@@ -337,11 +360,11 @@ export default function BookingsHistory({ apiBase, token }) {
     setDetailBooking(null);
     try {
       const res = await fetch(`${apiBase}/bookings/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error('Không thể tải chi tiết');
+      if (!res.ok) throw new Error(t('customer.bookingsHistory.detailLoadFail'));
       const payload = await res.json();
       setDetailBooking(payload?.data || payload);
     } catch (err) {
-      setError(err.message || 'Lỗi tải chi tiết');
+      setError(err.message || t('customer.bookingsHistory.detailLoadError'));
     }
   }
 
@@ -354,7 +377,7 @@ export default function BookingsHistory({ apiBase, token }) {
   }
 
   async function submitReview() {
-    if (reviewRating === 0) { setReviewError('Vui lòng chọn số sao'); return; }
+    if (reviewRating === 0) { setReviewError(t('customer.bookingsHistory.reviewRatingRequired')); return; }
     setReviewLoading(true);
     setReviewError('');
     try {
@@ -365,7 +388,7 @@ export default function BookingsHistory({ apiBase, token }) {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Gửi đánh giá thất bại');
+        throw new Error(err.message || t('customer.bookingsHistory.reviewSubmitFail'));
       }
       const payload = await res.json();
       const updated = payload?.data || payload;
@@ -401,7 +424,7 @@ export default function BookingsHistory({ apiBase, token }) {
   async function requestCancelOtp() {
     if (!cancelTarget) return;
     if (!cancelReason.trim()) {
-      setCancelError('Vui lòng nhập lý do hủy đơn');
+      setCancelError(t('customer.bookingsHistory.cancelReasonRequired'));
       return;
     }
     setCancelLoading(true);
@@ -411,7 +434,7 @@ export default function BookingsHistory({ apiBase, token }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
       });
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Không thể yêu cầu OTP'); }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.bookingsHistory.otpRequestFail')); }
       setCancelStep(2);
     } catch (e) {
       setCancelError(e.message);
@@ -423,7 +446,7 @@ export default function BookingsHistory({ apiBase, token }) {
   async function confirmCancel() {
     if (!cancelTarget) return;
     if (cancelStep === 2 && !cancelOtp.trim()) {
-      setCancelError('Vui lòng nhập mã OTP');
+      setCancelError(t('customer.bookingsHistory.otpRequired'));
       return;
     }
     setCancelLoading(true);
@@ -434,7 +457,7 @@ export default function BookingsHistory({ apiBase, token }) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ cancellationReason: cancelReason.trim(), otp: cancelOtp.trim() }),
       });
-      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Không thể hủy đơn'); }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || t('customer.bookingsHistory.cancelFail')); }
       
       const resData = await res.json().catch(() => ({}));
       const updatedBooking = resData.data || resData;
@@ -447,7 +470,7 @@ export default function BookingsHistory({ apiBase, token }) {
       setCancelStep(1);
       setCancelPreview(null);
       const refundAmount = updatedBooking?.refundAmount || 0;
-      showToast(refundAmount > 0 ? `Đã hủy lịch thành công. Hoàn ${refundAmount.toLocaleString('vi-VN')}₫ vào ví.` : 'Đã hủy lịch thành công');
+      showToast(refundAmount > 0 ? t('customer.bookingsHistory.cancelledRefundToast', { amount: refundAmount.toLocaleString('vi-VN') }) : t('customer.bookingsHistory.cancelledToast'));
     } catch (e) {
       setCancelError(e.message);
     } finally {
@@ -464,7 +487,7 @@ export default function BookingsHistory({ apiBase, token }) {
 
   async function submitRefundRequest() {
     if (!refundTarget) return;
-    if (!refundReason.trim()) { setRefundError('Vui lòng nhập lý do hoàn tiền'); return; }
+    if (!refundReason.trim()) { setRefundError(t('customer.bookingsHistory.refundReasonRequired')); return; }
     setRefundLoading(true);
     setRefundError('');
     try {
@@ -474,12 +497,12 @@ export default function BookingsHistory({ apiBase, token }) {
         body: JSON.stringify({ bookingId: refundTarget._id, reason: refundReason.trim() }),
       });
       const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload.message || 'Không thể gửi yêu cầu hoàn tiền');
+      if (!res.ok) throw new Error(payload.message || t('customer.bookingsHistory.refundRequestFail'));
       const created = payload?.data || payload;
       setRefundRequests((prev) => [created, ...prev]);
       setShowRefundModal(false);
       setRefundTarget(null);
-      showToast('Đã gửi yêu cầu hoàn tiền, vui lòng chờ quản lý duyệt.');
+      showToast(t('customer.bookingsHistory.refundRequestedToast'));
     } catch (e) {
       setRefundError(e.message);
     } finally {
@@ -505,7 +528,7 @@ export default function BookingsHistory({ apiBase, token }) {
       const res = await fetch(`${apiBase}/bookings/${id}/qr`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Không thể tạo mã QR');
+      if (!res.ok) throw new Error(t('customer.bookingsHistory.qrCreateFail'));
       const payload = await res.json();
       setQrUrl(payload?.data || payload?.url || '');
     } catch (e) {
@@ -533,10 +556,10 @@ export default function BookingsHistory({ apiBase, token }) {
           <div>
             <div className="flex items-center gap-2 text-emerald-600 font-extrabold text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4" />
-              <span>Quản lý lịch hẹn</span>
+              <span>{t('customer.bookingsHistory.eyebrow')}</span>
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900 mt-1 tracking-tight">Lịch Sử Rửa Xe</h1>
-            <p className="text-slate-500 text-sm mt-0.5">Theo dõi, kiểm tra mã QR và quản lý tất cả các lượt đặt xe của bạn.</p>
+            <h1 className="text-2xl font-extrabold text-slate-900 mt-1 tracking-tight">{t('customer.bookingsHistory.title')}</h1>
+            <p className="text-slate-500 text-sm mt-0.5">{t('customer.bookingsHistory.subtitle')}</p>
           </div>
 
           {/* View toggle */}
@@ -550,7 +573,7 @@ export default function BookingsHistory({ apiBase, token }) {
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>📋 Danh sách</span>
+              <span>{t('customer.bookingsHistory.listView')}</span>
             </button>
             <button
               onClick={() => setViewMode('calendar')}
@@ -561,7 +584,7 @@ export default function BookingsHistory({ apiBase, token }) {
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>📅 Lịch tháng</span>
+              <span>{t('customer.bookingsHistory.calendarView')}</span>
             </button>
           </div>
         </div>
@@ -569,11 +592,11 @@ export default function BookingsHistory({ apiBase, token }) {
         {/* Interactive Quick Filter Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
           {[
-            { id: 'all', label: 'Tất cả đơn', count: stats.total, color: 'border-slate-200 text-slate-900 bg-slate-50' },
-            { id: 'pending', label: 'Chờ xác nhận', count: stats.pending, color: 'border-amber-200 text-amber-700 bg-amber-50/60' },
-            { id: 'confirmed', label: 'Đã xác nhận', count: stats.confirmed, color: 'border-blue-200 text-blue-700 bg-blue-50/60' },
-            { id: 'completed', label: 'Hoàn thành', count: stats.completed, countCls: 'text-emerald-600', color: 'border-emerald-200 text-emerald-700 bg-emerald-50/60' },
-            { id: 'cancelled', label: 'Đã hủy', count: stats.cancelled, color: 'border-slate-200 text-slate-600 bg-slate-100/60' },
+            { id: 'all', labelKey: 'customer.bookingsHistory.filterAll', count: stats.total, color: 'border-slate-200 text-slate-900 bg-slate-50' },
+            { id: 'pending', labelKey: 'customer.bookingsHistory.status.pending', count: stats.pending, color: 'border-amber-200 text-amber-700 bg-amber-50/60' },
+            { id: 'confirmed', labelKey: 'customer.bookingsHistory.status.confirmed', count: stats.confirmed, color: 'border-blue-200 text-blue-700 bg-blue-50/60' },
+            { id: 'completed', labelKey: 'customer.bookingsHistory.status.completed', count: stats.completed, countCls: 'text-emerald-600', color: 'border-emerald-200 text-emerald-700 bg-emerald-50/60' },
+            { id: 'cancelled', labelKey: 'customer.bookingsHistory.status.cancelled', count: stats.cancelled, color: 'border-slate-200 text-slate-600 bg-slate-100/60' },
           ].map((s) => {
             const isActive = statusFilter === s.id;
             return (
@@ -584,7 +607,7 @@ export default function BookingsHistory({ apiBase, token }) {
                   isActive ? 'ring-2 ring-emerald-500 border-transparent shadow-xs font-bold' : 'opacity-80 hover:opacity-100'
                 }`}
               >
-                <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{s.label}</div>
+                <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{t(s.labelKey)}</div>
                 <div className={`text-2xl font-extrabold mt-1 ${s.countCls || ''}`}>{s.count}</div>
               </button>
             );
@@ -601,7 +624,7 @@ export default function BookingsHistory({ apiBase, token }) {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm theo gói, biển số, chi nhánh..."
+              placeholder={t('customer.bookingsHistory.searchPlaceholder')}
               className="w-full pl-9 pr-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
             />
             {searchTerm && (
@@ -633,7 +656,7 @@ export default function BookingsHistory({ apiBase, token }) {
                 className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
               >
                 <RefreshCw className="w-3 h-3" />
-                <span>Đặt lại</span>
+                <span>{t('customer.bookingsHistory.resetFilter')}</span>
               </button>
             )}
           </div>
@@ -644,7 +667,7 @@ export default function BookingsHistory({ apiBase, token }) {
       {loading && (
         <div className="bg-white rounded-2xl p-12 text-center text-slate-400 font-semibold border border-slate-200">
           <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-500" />
-          Đang tải lịch sử đặt xe...
+          {t('customer.bookingsHistory.loading')}
         </div>
       )}
       {error && (
@@ -661,8 +684,8 @@ export default function BookingsHistory({ apiBase, token }) {
               <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
                 <FileText className="w-8 h-8" />
               </div>
-              <h3 className="text-base font-extrabold text-slate-800">Không tìm thấy lịch đặt xe nào</h3>
-              <p className="text-slate-500 text-xs mt-1">Thử thay đổi từ khóa hoặc bộ lọc trạng thái để tìm kiếm.</p>
+              <h3 className="text-base font-extrabold text-slate-800">{t('customer.bookingsHistory.emptyTitle')}</h3>
+              <p className="text-slate-500 text-xs mt-1">{t('customer.bookingsHistory.emptyHint')}</p>
             </div>
           ) : (
             filteredBookings.map((b) => {
@@ -711,7 +734,7 @@ export default function BookingsHistory({ apiBase, token }) {
                       </div>
                       <div>
                         <h3 className="font-extrabold text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
-                          {b.packageName || b.packageId?.name || 'Dịch vụ Rửa Xe'}
+                          {b.packageName || b.packageId?.name || t('customer.bookingsHistory.fallbackPackage')}
                         </h3>
                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 flex-wrap">
                           <span className="flex items-center gap-1 font-semibold text-slate-700">
@@ -740,7 +763,7 @@ export default function BookingsHistory({ apiBase, token }) {
                         </div>
                         {b.depositAmount > 0 && (
                           <div className={`text-[11px] font-bold mt-0.5 ${b.depositPaid ? 'text-emerald-600' : 'text-amber-600'}`}>
-                            {b.depositPaid ? `Đã cọc ${formatCurrency(b.depositAmount)}` : `Cọc ${formatCurrency(b.depositAmount)}`}
+                            {b.depositPaid ? t('customer.bookingsHistory.deposited', { amount: formatCurrency(b.depositAmount) }) : t('customer.bookingsHistory.deposit', { amount: formatCurrency(b.depositAmount) })}
                           </div>
                         )}
                       </div>
@@ -750,7 +773,7 @@ export default function BookingsHistory({ apiBase, token }) {
                   {/* Card Body - License plate & Sub-services */}
                   <div className="py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-500 font-medium">Biển số:</span>
+                      <span className="text-slate-500 font-medium">{t('customer.bookingsHistory.licensePlateLabel')}</span>
                       <span className="bg-slate-900 text-white font-mono font-bold text-xs px-3 py-1 rounded-md tracking-wider shadow-2xs">
                         {b.vehiclePlate || b.vehicleId?.licensePlate || '—'}
                       </span>
@@ -772,7 +795,7 @@ export default function BookingsHistory({ apiBase, token }) {
                     </div>
                   </div>
 
-                  <AtRiskBanner booking={b} apiBase={apiBase} token={token} onRescheduled={handleRescheduled} />
+                  <AtRiskBanner booking={b} apiBase={apiBase} token={token} onRescheduled={handleRescheduled} t={t} />
 
                   {/* Card Footer Actions */}
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
@@ -780,7 +803,7 @@ export default function BookingsHistory({ apiBase, token }) {
                       onClick={() => loadDetail(b._id)}
                       className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all cursor-pointer"
                     >
-                      Chi tiết
+                      {t('customer.bookingsHistory.detailBtn')}
                     </button>
 
                     <div className="flex items-center gap-2 flex-wrap">
@@ -791,7 +814,7 @@ export default function BookingsHistory({ apiBase, token }) {
                           className="px-3.5 py-1.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          <span>Hủy đơn</span>
+                          <span>{t('customer.bookingsHistory.cancelBtn')}</span>
                         </button>
                       )}
 
@@ -801,7 +824,7 @@ export default function BookingsHistory({ apiBase, token }) {
                           className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
                         >
                           <QrCode className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Mã QR Check-in</span>
+                          <span>{t('customer.bookingsHistory.qrBtn')}</span>
                         </button>
                       )}
 
@@ -812,7 +835,7 @@ export default function BookingsHistory({ apiBase, token }) {
                           className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
-                          <span>Đặt lại lượt này</span>
+                          <span>{t('customer.bookingsHistory.rebookBtn')}</span>
                         </button>
                       )}
 
@@ -822,7 +845,7 @@ export default function BookingsHistory({ apiBase, token }) {
                           className="px-3.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                          <span>{b.rating ? 'Sửa đánh giá' : 'Đánh giá'}</span>
+                          <span>{b.rating ? t('customer.bookingsHistory.editReviewBtn') : t('customer.bookingsHistory.reviewBtn')}</span>
                         </button>
                       )}
 
@@ -831,7 +854,7 @@ export default function BookingsHistory({ apiBase, token }) {
                         if (existing?.status === 'pending') {
                           return (
                             <span className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold flex items-center gap-1">
-                              ⏳ Đang chờ hoàn tiền
+                              {t('customer.bookingsHistory.refundPending')}
                             </span>
                           );
                         }
@@ -841,7 +864,7 @@ export default function BookingsHistory({ apiBase, token }) {
                             className="px-3.5 py-1.5 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
                           >
                             <DollarSign className="w-3.5 h-3.5" />
-                            <span>Yêu cầu hoàn tiền</span>
+                            <span>{t('customer.bookingsHistory.refundBtn')}</span>
                           </button>
                         );
                       })()}
@@ -868,13 +891,13 @@ export default function BookingsHistory({ apiBase, token }) {
 
             <div className="text-center">
               <h2 className="text-lg font-extrabold tracking-tight">
-                {MONTHS_VN[viewMonth]} {viewYear}
+                {t(MONTHS_VN[viewMonth])} {viewYear}
               </h2>
               <button
                 onClick={goToday}
                 className="mt-1 px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold hover:bg-emerald-500/30 transition-all cursor-pointer"
               >
-                Hôm nay
+                {t('customer.bookingsHistory.today')}
               </button>
             </div>
 
@@ -889,7 +912,7 @@ export default function BookingsHistory({ apiBase, token }) {
           {/* Days of week header */}
           <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center text-xs font-extrabold text-slate-500 uppercase tracking-wider">
             {DAYS_VN.map((d, i) => (
-              <div key={d} className={`py-3 ${i === 0 ? 'text-red-500' : ''}`}>{d}</div>
+              <div key={d} className={`py-3 ${i === 0 ? 'text-red-500' : ''}`}>{t(d)}</div>
             ))}
           </div>
 
@@ -964,7 +987,7 @@ export default function BookingsHistory({ apiBase, token }) {
                     {selectedDate.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {selectedDateBookings.length > 0 ? `${selectedDateBookings.length} lịch đặt trong ngày` : 'Không có lịch hẹn nào'}
+                    {selectedDateBookings.length > 0 ? t('customer.bookingsHistory.bookingsOnDate', { count: selectedDateBookings.length }) : t('customer.bookingsHistory.noBookingsOnDate')}
                   </p>
                 </div>
                 <button
@@ -977,7 +1000,7 @@ export default function BookingsHistory({ apiBase, token }) {
 
               {selectedDateBookings.length === 0 ? (
                 <div className="text-center py-6 text-slate-400 text-xs font-semibold">
-                  📭 Không có lịch đặt xe trong ngày này.
+                  {t('customer.bookingsHistory.emptyDay')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -988,7 +1011,7 @@ export default function BookingsHistory({ apiBase, token }) {
                       className="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs hover:border-emerald-500 cursor-pointer transition-all flex items-center justify-between"
                     >
                       <div>
-                        <div className="font-extrabold text-slate-900 text-sm">{b.packageName || b.packageId?.name || 'Dịch vụ'}</div>
+                        <div className="font-extrabold text-slate-900 text-sm">{b.packageName || b.packageId?.name || t('customer.bookingsHistory.fallbackPackageShort')}</div>
                         <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
                           <span>📍 {b.branchName || b.branchId?.name || '—'}</span>
                           <span>•</span>
@@ -1021,7 +1044,7 @@ export default function BookingsHistory({ apiBase, token }) {
             {/* Header */}
             <div className="p-5 border-b border-slate-100 bg-slate-900 text-white flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-lg text-white">Chi Tiết Đặt Lịch</h3>
+                <h3 className="font-extrabold text-lg text-white">{t('customer.bookingsHistory.detailTitle')}</h3>
                 <p className="text-xs text-slate-400 font-mono mt-0.5">#{String(detailBooking._id).slice(-8).toUpperCase()}</p>
               </div>
               <button
@@ -1035,9 +1058,9 @@ export default function BookingsHistory({ apiBase, token }) {
             {/* Body */}
             <div className="p-5 overflow-y-auto space-y-4 flex-1">
               <div className="flex items-center justify-between">
-                <StatusBadge status={detailBooking.status} />
+                <StatusBadge status={detailBooking.status} t={t} />
                 <span className="text-xs font-bold text-slate-500">
-                  {detailBooking.bookingType === 'recurring' ? '🔄 Đặt định kỳ' : detailBooking.bookingType === 'slot_pack_usage' ? '🎫 Dùng gói lượt' : '⚡ 1 Lượt rửa'}
+                  {detailBooking.bookingType === 'recurring' ? t('customer.bookingsHistory.type.recurring') : detailBooking.bookingType === 'slot_pack_usage' ? t('customer.bookingsHistory.type.slotPack') : t('customer.bookingsHistory.type.single')}
                 </span>
               </div>
 
@@ -1084,9 +1107,9 @@ export default function BookingsHistory({ apiBase, token }) {
                 }
 
                 return [
-                  ['📦 Dịch vụ', detailBooking.packageName || detailBooking.packageId?.name || '—'],
+                  [t('customer.bookingsHistory.field.service'), detailBooking.packageName || detailBooking.packageId?.name || '—'],
                   ...(includedList.length > 0
-                    ? [['📋 Dịch vụ bao gồm', includedList.map((sub, i) => {
+                    ? [[t('customer.bookingsHistory.field.includedServices'), includedList.map((sub, i) => {
                         const sName = sub.name || sub;
                         const dur = sub.duration || (detailBooking.packageId?.subServices || []).find(x => x.name === sName)?.duration;
                         return (
@@ -1097,7 +1120,7 @@ export default function BookingsHistory({ apiBase, token }) {
                       })]]
                     : []),
                   ...(extraList.length > 0
-                    ? [['➕ Dịch vụ thêm', extraList.map((sub, i) => {
+                    ? [[t('customer.bookingsHistory.field.extraServices'), extraList.map((sub, i) => {
                         const sName = sub.name || sub;
                         const dur = sub.duration || (detailBooking.packageId?.subServices || []).find(x => x.name === sName)?.duration;
                         return (
@@ -1107,13 +1130,13 @@ export default function BookingsHistory({ apiBase, token }) {
                         );
                       })]]
                     : []),
-                  ['📅 Ngày', formatDate(detailBooking.bookingDate)],
-                ['⏰ Giờ', detailBooking.startTime || '—'],
-                ['🏢 Chi nhánh', detailBooking.branchName || detailBooking.branchId?.name || '—'],
-                ['🪪 Biển số', detailBooking.vehiclePlate || detailBooking.vehicleId?.licensePlate || '—'],
-                ['💰 Thành tiền', formatCurrency(detailBooking.totalAmount || detailBooking.finalPrice)],
-                ['💳 Thanh toán', detailBooking.paymentStatus === 'paid' || detailBooking.paymentStatus === 'deposit_paid' ? 'Đã thanh toán' : 'Chưa thanh toán'],
-                ['📍 Loại đặt', detailBooking.bookingType === 'recurring' ? 'Định kỳ' : detailBooking.bookingType === 'slot_pack_usage' ? 'Gói lượt' : '1 lần'],
+                  [t('customer.bookingsHistory.field.date'), formatDate(detailBooking.bookingDate)],
+                [t('customer.bookingsHistory.field.time'), detailBooking.startTime || '—'],
+                [t('customer.bookingsHistory.field.branch'), detailBooking.branchName || detailBooking.branchId?.name || '—'],
+                [t('customer.bookingsHistory.field.plate'), detailBooking.vehiclePlate || detailBooking.vehicleId?.licensePlate || '—'],
+                [t('customer.bookingsHistory.field.total'), formatCurrency(detailBooking.totalAmount || detailBooking.finalPrice)],
+                [t('customer.bookingsHistory.field.payment'), detailBooking.paymentStatus === 'paid' || detailBooking.paymentStatus === 'deposit_paid' ? t('customer.bookingsHistory.paymentPaid') : t('customer.bookingsHistory.paymentUnpaid')],
+                [t('customer.bookingsHistory.field.bookingType'), detailBooking.bookingType === 'recurring' ? t('customer.bookingsHistory.typeRecurring') : detailBooking.bookingType === 'slot_pack_usage' ? t('customer.bookingsHistory.typeSlotPack') : t('customer.bookingsHistory.typeSingle')],
               ].map(([label, value]) => (
                 <div key={label} style={{
                   display: 'flex', justifyContent: 'space-between', padding: '10px 0',
@@ -1130,17 +1153,17 @@ export default function BookingsHistory({ apiBase, token }) {
               {detailBooking.depositAmount > 0 && (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                    <span style={{ fontSize: 13, color: '#d97706', fontWeight: 600 }}>🔒 Đặt cọc {Math.round((detailBooking.depositAmount || 0) / ((detailBooking.totalAmount || detailBooking.finalPrice || 1)) * 100)}%</span>
+                    <span style={{ fontSize: 13, color: '#d97706', fontWeight: 600 }}>{t('customer.bookingsHistory.depositPercent', { percent: Math.round((detailBooking.depositAmount || 0) / ((detailBooking.totalAmount || detailBooking.finalPrice || 1)) * 100) })}</span>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#d97706' }}>{formatCurrency(detailBooking.depositAmount)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                    <span style={{ fontSize: 13, color: '#64748b' }}>📋 Còn lại (thanh toán sau)</span>
+                    <span style={{ fontSize: 13, color: '#64748b' }}>{t('customer.bookingsHistory.remainingPayLater')}</span>
                     <span style={{ fontSize: 13, fontWeight: 600, color: '#64748b' }}>{formatCurrency(Math.max(0, (detailBooking.totalAmount || detailBooking.finalPrice || 0) - (detailBooking.depositAmount || 0)))}</span>
                   </div>
                   {detailBooking.depositPaid && (
                     <div style={{ marginTop: 8, textAlign: 'center' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 12px', borderRadius: 20, background: '#ecfdf5', color: '#059669', fontSize: 12, fontWeight: 700, border: '1px solid #a7f3d0' }}>
-                        ✅ Đã đặt cọc {formatCurrency(detailBooking.depositAmount)}
+                        {t('customer.bookingsHistory.depositPaidBadge', { amount: formatCurrency(detailBooking.depositAmount) })}
                       </span>
                     </div>
                   )}
@@ -1150,30 +1173,30 @@ export default function BookingsHistory({ apiBase, token }) {
               {/* Information list */}
               <div className="bg-slate-50 rounded-xl p-4 space-y-2.5 text-xs">
                 <div className="flex justify-between py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium">📦 Gói rửa xe:</span>
+                  <span className="text-slate-500 font-medium">{t('customer.bookingsHistory.info.package')}</span>
                   <span className="font-extrabold text-slate-900">{detailBooking.packageName || detailBooking.packageId?.name || '—'}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium">🏢 Chi nhánh:</span>
+                  <span className="text-slate-500 font-medium">{t('customer.bookingsHistory.info.branch')}</span>
                   <span className="font-bold text-slate-800">{detailBooking.branchName || detailBooking.branchId?.name || '—'}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium">📅 Ngày rửa:</span>
+                  <span className="text-slate-500 font-medium">{t('customer.bookingsHistory.info.date')}</span>
                   <span className="font-bold text-slate-800">{formatDate(detailBooking.bookingDate)} ({detailBooking.startTime || ''})</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium">🪪 Biển số xe:</span>
+                  <span className="text-slate-500 font-medium">{t('customer.bookingsHistory.info.plate')}</span>
                   <span className="bg-slate-900 text-white font-mono font-bold text-xs px-2 py-0.5 rounded">
                     {detailBooking.vehiclePlate || detailBooking.vehicleId?.licensePlate || '—'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-200/60">
-                  <span className="text-slate-500 font-medium">💰 Thành tiền:</span>
+                  <span className="text-slate-500 font-medium">{t('customer.bookingsHistory.info.total')}</span>
                   <span className="font-extrabold text-emerald-700 text-sm">{formatCurrency(detailBooking.totalAmount || detailBooking.finalPrice)}</span>
                 </div>
                 {detailBooking.depositAmount > 0 && (
                   <div className="flex justify-between py-1 border-b border-slate-200/60">
-                    <span className="text-amber-700 font-bold">🔒 Tiền cọc:</span>
+                    <span className="text-amber-700 font-bold">{t('customer.bookingsHistory.info.deposit')}</span>
                     <span className="font-extrabold text-amber-700">{formatCurrency(detailBooking.depositAmount)}</span>
                   </div>
                 )}
@@ -1186,7 +1209,7 @@ export default function BookingsHistory({ apiBase, token }) {
                 onClick={() => setDetailBooking(null)}
                 className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer"
               >
-                Đóng
+                {t('customer.bookingsHistory.close')}
               </button>
             </div>
           </div>
@@ -1204,7 +1227,7 @@ export default function BookingsHistory({ apiBase, token }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-extrabold text-slate-900 text-base">Đánh Giá Dịch Vụ</h3>
+              <h3 className="font-extrabold text-slate-900 text-base">{t('customer.bookingsHistory.reviewTitle')}</h3>
               <button onClick={() => setShowReview(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-4 h-4" />
               </button>
@@ -1235,7 +1258,7 @@ export default function BookingsHistory({ apiBase, token }) {
                 onChange={(e) => setReviewText(e.target.value)}
                 maxLength={500}
                 rows={4}
-                placeholder="Chia sẻ nhận xét của bạn về chất lượng rửa xe..."
+                placeholder={t('customer.bookingsHistory.reviewPlaceholder')}
                 className="w-full p-3 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-amber-400 bg-slate-50"
               />
             </div>

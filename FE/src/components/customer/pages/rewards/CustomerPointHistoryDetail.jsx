@@ -6,6 +6,7 @@ import {
 } from '@phosphor-icons/react';
 import TierBadge from '@/components/ui/TierBadge';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
+import { useTranslation } from 'react-i18next';
 
 function api(path, opts = {}) {
   return fetch(`${getApiBaseUrl()}${path}`, {
@@ -13,8 +14,8 @@ function api(path, opts = {}) {
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getStoredToken()}`, ...opts.headers },
   });
 }
-async function readErr(res) {
-  try { const j = await res.json(); return j?.message || `Lỗi ${res.status}`; } catch { return `Lỗi ${res.status}`; }
+async function readErr(res, t) {
+  try { const j = await res.json(); return j?.message || t('customer.pointHistory.httpError', { status: res.status }); } catch { return t('customer.pointHistory.httpError', { status: res.status }); }
 }
 function formatCurrency(val) {
   if (!val && val !== 0) return '0';
@@ -24,24 +25,24 @@ function formatDate(dateStr) {
   if (!dateStr) return '-';
   return new Date(dateStr).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
 }
-function getTierDisplayName(tierId, tierName) {
+function getTierDisplayName(tierId, tierName, t) {
   if (tierName && !['thành viên', 'customer', 'user'].includes(String(tierName).toLowerCase())) return tierName;
-  const m = { bronze: 'Đồng', silver: 'Bạc', gold: 'Vàng', diamond: 'Kim Cương' };
-  return m[String(tierId || '').toLowerCase()] || 'Đồng';
+  const m = { bronze: t('customer.pointHistory.tierBronze'), silver: t('customer.pointHistory.tierSilver'), gold: t('customer.pointHistory.tierGold'), diamond: t('customer.pointHistory.tierDiamond') };
+  return m[String(tierId || '').toLowerCase()] || t('customer.pointHistory.tierBronze');
 }
-function getTypeLabel(type) {
+function getTypeLabel(type, t) {
   const m = {
-    earned: { label: 'Tích điểm thưởng (+)', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-    redeemed: { label: 'Đổi quà / Sử dụng điểm (-)', color: 'bg-amber-100 text-amber-800 border-amber-200' },
-    expired: { label: 'Điểm hết hạn (-)', color: 'bg-rose-100 text-rose-800 border-rose-200' },
-    adjustment: { label: 'Truy thu / Điều chỉnh điểm (+/-)', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+    earned: { label: t('customer.pointHistory.typeEarned'), color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+    redeemed: { label: t('customer.pointHistory.typeRedeemed'), color: 'bg-amber-100 text-amber-800 border-amber-200' },
+    expired: { label: t('customer.pointHistory.typeExpired'), color: 'bg-rose-100 text-rose-800 border-rose-200' },
+    adjustment: { label: t('customer.pointHistory.typeAdjustment'), color: 'bg-purple-100 text-purple-800 border-purple-200' },
   };
-  return m[type] || { label: type || 'Giao dịch điểm', color: 'bg-blue-100 text-blue-800 border-blue-200' };
+  return m[type] || { label: type || t('customer.pointHistory.typeDefault'), color: 'bg-blue-100 text-blue-800 border-blue-200' };
 }
-function getBookingTypeLabel(type) {
-  if (type === 'recurring') return { label: 'Đặt lịch định kỳ', color: 'bg-purple-100 text-purple-800 border-purple-200' };
-  if (type === 'slot_pack_usage') return { label: 'Gói lượt rửa xe', color: 'bg-amber-100 text-amber-800 border-amber-200' };
-  return { label: 'Đặt 1 lần (Đơn thường)', color: 'bg-blue-100 text-blue-800 border-blue-200' };
+function getBookingTypeLabel(type, t) {
+  if (type === 'recurring') return { label: t('customer.pointHistory.bookingRecurring'), color: 'bg-purple-100 text-purple-800 border-purple-200' };
+  if (type === 'slot_pack_usage') return { label: t('customer.pointHistory.bookingSlotPack'), color: 'bg-amber-100 text-amber-800 border-amber-200' };
+  return { label: t('customer.pointHistory.bookingSingle'), color: 'bg-blue-100 text-blue-800 border-blue-200' };
 }
 function Spinner({ size = 20 }) {
   return (
@@ -54,6 +55,7 @@ function Spinner({ size = 20 }) {
 
 export default function CustomerPointHistoryDetail() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const returnTab = searchParams.get('tab') || 'reward';
@@ -66,11 +68,11 @@ export default function CustomerPointHistoryDetail() {
     setLoading(true); setError('');
     try {
       const res = await api(`/loyalty/my-history/${id}`);
-      if (!res.ok) throw new Error(await readErr(res));
+      if (!res.ok) throw new Error(await readErr(res, t));
       const json = await res.json();
       setData(json?.data ?? json);
     } catch (err) {
-      setError(err.message || 'Không thể tải chi tiết lịch sử điểm thưởng');
+      setError(err.message || t('customer.pointHistory.loadFail'));
     } finally { setLoading(false); }
   }, [id]);
 
@@ -80,7 +82,7 @@ export default function CustomerPointHistoryDetail() {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-slate-400">
         <Spinner size={30} />
-        <p className="mt-3 text-xs font-semibold text-slate-500">Đang tải chi tiết giao dịch điểm thưởng...</p>
+        <p className="mt-3 text-xs font-semibold text-slate-500">{t('customer.pointHistory.loadingDetail')}</p>
       </div>
     );
   }
@@ -90,11 +92,11 @@ export default function CustomerPointHistoryDetail() {
       <div className="space-y-4 max-w-4xl mx-auto py-8">
         <button onClick={() => navigate(`/rewards?tab=${returnTab}`)}
           className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
-          <ArrowLeft size={16} /> Quay lại
+          <ArrowLeft size={16} /> {t('customer.pointHistory.back')}
         </button>
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
           <Warning size={32} weight="duotone" />
-          <p className="text-sm font-semibold">{error || 'Không tìm thấy dữ liệu giao dịch'}</p>
+          <p className="text-sm font-semibold">{error || t('customer.pointHistory.notFound')}</p>
         </div>
       </div>
     );

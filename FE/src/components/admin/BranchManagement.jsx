@@ -1019,7 +1019,7 @@ function BranchDetailFull({ branch, onBack, onEdit, onChangeManager }) {
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs shadow-2xs">
-                <span className="text-slate-500 font-medium">{t('admin.branches.detail.sort')}:</span>
+                <span className="text-slate-500 font-medium">{t('admin.branches.detail.sort.label')}:</span>
                 <select
                   value={currentSortOrder}
                   onChange={(e) => handleSortOrderChange(e.target.value)}

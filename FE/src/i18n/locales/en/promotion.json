@@ -36,5 +36,6 @@
   "noRedeemable": "No redemption templates available",
   "yourPoints": "Your Points",
   "redeemHint": "Select a template to redeem for a discount code",
-  "saving": "saving"
+  "saving": "saving",
+  "tierExclusive": "{{tier}} exclusive"
 }

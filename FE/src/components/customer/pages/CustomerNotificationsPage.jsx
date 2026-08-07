@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { showToast } from '@/lib/toast';
 import useSSE from '@/hooks/useSSE';
-import { translateNotification, translateText } from '@/utils/notifTranslator';
+import { translateNotification } from '@/utils/notifTranslator';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -31,7 +31,7 @@ function formatDateTime(d) {
 
 export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'vi';
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
         setNotifications(data?.notifications || data || []);
         setPagination(data?.totalPages ? data : null);
       })
-      .catch(() => { setNotifications([]); showToast('Không thể tải thông báo', 'error'); })
+      .catch(() => { setNotifications([]); showToast(t('customer.notifications.loadFail'), 'error'); })
       .finally(() => setLoading(false));
   }
 
@@ -72,7 +72,7 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
       });
       setNotifications(prev => prev.map(n => (n._id === id ? { ...n, isRead: true } : n)));
       window.dispatchEvent(new CustomEvent('unread_notifications_updated'));
-    } catch (e) { showToast('Không thể đánh dấu đã đọc', 'error'); }
+    } catch (e) { showToast(t('customer.notifications.markReadFail'), 'error'); }
   }
 
   const handleItemClick = (n) => {
@@ -100,9 +100,9 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      showToast('Đã đánh dấu tất cả là đã đọc');
+      showToast(t('customer.notifications.markAllDone'));
       window.dispatchEvent(new CustomEvent('unread_notifications_updated'));
-    } catch (e) { showToast('Không thể đánh dấu đã đọc', 'error'); }
+    } catch (e) { showToast(t('customer.notifications.markReadFail'), 'error'); }
   }
 
   async function deleteAll() {
@@ -112,9 +112,9 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotifications([]);
-      showToast('Đã xóa tất cả thông báo');
+      showToast(t('customer.notifications.deleteAllDone'));
       window.dispatchEvent(new CustomEvent('unread_notifications_updated'));
-    } catch (e) { showToast('Không thể xóa thông báo', 'error'); }
+    } catch (e) { showToast(t('customer.notifications.deleteFail'), 'error'); }
   }
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -126,27 +126,27 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
         <div className="flex items-center justify-between mb-6">
           <p className="text-xs text-slate-500">
             {unreadCount > 0
-              ? (currentLang === 'en' ? `${unreadCount} unread notifications` : `${unreadCount} thông báo chưa đọc`)
-              : translateText('Không có thông báo mới', currentLang)}
+              ? t('customer.notifications.unreadCount', { count: unreadCount })
+              : t('customer.notifications.noNew')}
           </p>
           <div className="flex gap-2">
             {unreadCount > 0 && (
               <button onClick={markAllRead}
                 className="px-3.5 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                ✓ {translateText('Đánh dấu đã đọc', currentLang)}
+                ✓ {t('customer.notifications.markAll')}
               </button>
             )}
             {notifications.length > 0 && (
               <button onClick={deleteAll}
                 className="px-3 py-1.5 rounded-lg border border-red-200 bg-white text-xs font-semibold text-red-500 hover:bg-red-50">
-                {translateText('Xóa tất cả', currentLang)}
+                {t('customer.notifications.deleteAll')}
               </button>
             )}
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-slate-400 text-sm">{translateText('Đang tải...', currentLang)}</div>
+          <div className="text-center py-20 text-slate-400 text-sm">{t('customer.notifications.loading')}</div>
         ) : notifications.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
@@ -154,7 +154,7 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
                 <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
               </svg>
             </div>
-            <p className="text-slate-500 font-medium">{translateText('Không có thông báo nào', currentLang)}</p>
+            <p className="text-slate-500 font-medium">{t('customer.notifications.empty')}</p>
           </div>
         ) : (
           <div className="space-y-1">
@@ -192,13 +192,13 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
         {pagination && pagination.totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
             <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">‹ Trước</button>
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">‹ {t('customer.notifications.prev')}</button>
             {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(p => (
               <button key={p} onClick={() => setPage(p)}
                 className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-emerald-600 text-white shadow-sm' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{p}</button>
             ))}
             <button disabled={page >= pagination.totalPages} onClick={() => setPage(p => p + 1)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Sau ›</button>
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">{t('customer.notifications.next')} ›</button>
           </div>
         )}
       </main>
