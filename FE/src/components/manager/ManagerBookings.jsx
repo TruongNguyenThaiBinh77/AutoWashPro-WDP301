@@ -30,7 +30,6 @@ import {
   Package,
   Buildings,
   CreditCard,
-  Tag,
   Lock,
   Wallet,
   Bank,
@@ -1322,6 +1321,14 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
                     <span className="text-slate-800">Tổng giá trị dịch vụ:</span>
                     <span className="text-slate-900">{formatCurrency(totalValue)}</span>
                   </div>
+                  {booking.discountAmount > 0 && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500 font-medium">
+                        Giảm từ voucher{booking.voucherCode ? ` (${booking.voucherCode})` : ''}:
+                      </span>
+                      <span className="font-bold text-emerald-600">-{formatCurrency(booking.discountAmount)}</span>
+                    </div>
+                  )}
                 </>;
               })()}
               {(booking.depositPaid || booking.paymentStatus === 'deposit_paid' || booking.paymentStatus === 'paid') && (
@@ -1431,21 +1438,6 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                <Tag size={14} className="text-slate-400" /> Voucher đã dùng:
-              </span>
-              <span className={`font-mono font-bold ${booking.voucherCode ? 'text-emerald-700' : 'text-slate-400'}`}>
-                {booking.voucherCode || '—'}
-              </span>
-            </div>
-            {(booking.discountAmount || 0) > 0 && (
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-medium">Giảm từ voucher:</span>
-                <span className="font-bold text-emerald-600">-{formatCurrency(booking.discountAmount)}</span>
-              </div>
-            )}
-
             <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-100">
               <span className="text-slate-500 font-medium flex items-center gap-1.5">
                 <Star size={14} className="text-amber-400" /> Điểm tích lũy:
@@ -1478,15 +1470,6 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
                   <Package size={14} className="text-amber-500" /> Gói lượt:
                 </span>
                 <span className="font-mono font-bold text-slate-900">{booking.slotPackId?.packCode || booking.slotPackId?._id || '—'}</span>
-              </div>
-            )}
-
-            {(booking.depositAmount > 0 || booking.depositPaid) && (
-              <div className="flex items-center justify-between text-xs pt-1.5 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Đặt cọc:</span>
-                <span className={`font-bold ${booking.depositPaid ? 'text-amber-600' : 'text-slate-400'}`}>
-                  {formatCurrency(booking.depositAmount || 0)} {booking.depositPaid ? '(Đã cọc)' : '(Chưa cọc)'}
-                </span>
               </div>
             )}
 
