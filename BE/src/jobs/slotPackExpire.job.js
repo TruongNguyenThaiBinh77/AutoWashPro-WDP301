@@ -2,12 +2,18 @@ const cron = require('node-cron');
 const { SlotPack } = require('../models');
 const notificationService = require('../services/notification.service');
 
+const configService = require('../services/config.service');
+
 /**
  * Quét các gói lượt đã quá hạn (expiresAt < now) và cập nhật thành expired.
- * Chạy lúc 00:05 mỗi ngày.
+ * Chạy lúc 00:05 mỗi ngày (hoặc theo cấu hình CRON_EXPIRE_TIME).
  */
-function startSlotPackExpireJob() {
-  cron.schedule('5 0 * * *', async () => {
+async function startSlotPackExpireJob() {
+  const timeStr = await configService.get('CRON_EXPIRE_TIME', {}, '00:05');
+  const [hour, minute] = timeStr.split(':');
+  const cronExpr = `${minute || 5} ${hour || 0} * * *`;
+
+  cron.schedule(cronExpr, async () => {
     try {
       const now = new Date();
       // Tìm các gói còn hạn nhưng đã qua ngày expiresAt
@@ -38,7 +44,7 @@ function startSlotPackExpireJob() {
     }
   });
 
-  console.log('[SlotPackExpireJob] Started — quét gói lượt hết hạn lúc 00:05 mỗi ngày');
+  console.log(`[SlotPackExpireJob] Started — quét gói lượt hết hạn lúc ${timeStr} mỗi ngày`);
 }
 
 module.exports = { startSlotPackExpireJob };

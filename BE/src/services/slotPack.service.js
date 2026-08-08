@@ -3,11 +3,9 @@ const { SlotPack, Package, Branch, Vehicle, User, Booking } = require('../models
 const voucherService = require('./voucher.service');
 const notificationService = require('./notification.service');
 const configService = require('./config.service');
+const loyaltyService = require('./loyalty.service');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/** Ánh xạ tier → priority number */
-const TIER_PRIORITY = { bronze: 1, silver: 2, gold: 3, diamond: 4, Ruby: 5 };
 
 /** Tính % chiết khấu dựa theo số lượng slot từ SystemConfig */
 async function getDiscountPercent(totalSlots) {
@@ -99,8 +97,8 @@ exports.createSlotPack = async (data) => {
       const qtyDiscount = Math.floor(grossTotal * discountPercent / 100);
       let baseTotal = grossTotal - qtyDiscount; // sau chiết khấu số lượng + VIP
 
-      // --- Priority dựa theo tier ---
-      const priority = TIER_PRIORITY[user.tier] || 1;
+      // --- Priority dựa theo tier (Động theo cấu hình minPoints) ---
+      const priority = await loyaltyService.getTierPriority(user.tier);
 
       // --- Voucher (áp trên baseTotal) ---
       let voucherDiscount = 0;

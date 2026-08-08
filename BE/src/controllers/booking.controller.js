@@ -24,9 +24,11 @@ exports.createWalkInBooking = catchAsync(async (req, res) => {
   const { name, phone, email, licensePlate, packageId, branchId } = req.body;
   const User = require('../models/user.schema');
   const Vehicle = require('../models/vehicle.schema');
+  const configService = require('../services/config.service');
 
   let targetUserId = null;
-  let identifier = email || phone;
+  const primaryIdConfig = await configService.get('WALK_IN_PRIMARY_IDENTIFIER', {}, 'email');
+  let identifier = primaryIdConfig === 'phone' ? (phone || email) : (email || phone);
 
   if (!identifier) {
     throw Object.assign(new Error('Vui lòng cung cấp ít nhất Email hoặc Số điện thoại'), { statusCode: 400 });
@@ -39,18 +41,27 @@ exports.createWalkInBooking = catchAsync(async (req, res) => {
     
   let user = await User.findOne(query);
   let isNewUser = false;
+  let generatedPassword = '';
 
   if (!user) {
     isNewUser = true;
-    const newEmail = email || `${phone}@khachvanglai.autowash.vn`;
+    
+    const emailSuffix = await configService.get('WALK_IN_DEFAULT_EMAIL_SUFFIX', {}, '@khachvanglai.autowash.vn');
+    let defaultPwd = await configService.get('WALK_IN_DEFAULT_PASSWORD', {}, '{phone}');
+    
+    if (defaultPwd.includes('{phone}')) {
+      defaultPwd = defaultPwd.replace('{phone}', phone || 'Khach@123');
+    }
+    
+    const newEmail = email || `${phone}${emailSuffix}`;
     const newPhone = phone || undefined;
-    const newPassword = phone || 'Khach@123'; // Mật khẩu mặc định
+    generatedPassword = defaultPwd || phone || 'Khach@123';
 
     user = new User({
       name: name || 'Khách vãng lai',
       email: newEmail,
       phone: newPhone,
-      password: newPassword,
+      password: generatedPassword,
     });
     await user.save();
   }
@@ -94,7 +105,6 @@ exports.createWalkInBooking = catchAsync(async (req, res) => {
   sseService.sendToUser(targetUserId, 'my_bookings_updated', {});
   
   const targetBranchId = booking.branchId?._id || booking.branchId;
-  if (targetBranchId) sseService.broadcastToManagers(targetBranchId, 'customer_checked_in_via_qr', { bookingId: booking._id });
   sseService.broadcastToAll('customer_checked_in_via_qr', { bookingId: booking._id });
 
   let msg = 'Tạo đơn vãng lai thành công';
@@ -102,6 +112,16 @@ exports.createWalkInBooking = catchAsync(async (req, res) => {
     msg = `Tạo đơn thành công. Tuy nhiên hiện tại đang đầy, khách được xếp vào khung giờ trống gần nhất: ${booking.startTime}`;
   } else {
     msg = 'Tạo đơn và Check-in khách vãng lai thành công';
+  }
+
+  // 4. Gửi email nếu có
+  if (email) {
+    const emailService = require('../services/email.service');
+    const sendCredentials = await configService.get('WALK_IN_SEND_CREDENTIALS', {}, true);
+    if (isNewUser && sendCredentials && generatedPassword) {
+      emailService.sendWalkInCredentialsEmail(email, generatedPassword).catch(e => console.error('Lỗi gửi email tài khoản:', e));
+    }
+    emailService.sendBookingConfirmationEmail(email, booking).catch(e => console.error('Lỗi gửi email xác nhận đặt lịch:', e));
   }
 
   success(res, booking, msg, 201);

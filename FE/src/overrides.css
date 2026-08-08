@@ -55,3 +55,25 @@ body {
   from { opacity: 0; transform: translateY(-12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── Google OAuth Button Centering ─────────────────────────── */
+.google-btn-wrapper,
+.google-btn-wrapper > div,
+.google-btn-wrapper iframe,
+div[id^="credential_picker_container"],
+div[id^="gsi_"] {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}
+
+.google-btn-wrapper > div {
+  width: 100% !important;
+  max-width: 380px !important;
+  min-height: 44px !important;
+  justify-content: center !important;
+}
+

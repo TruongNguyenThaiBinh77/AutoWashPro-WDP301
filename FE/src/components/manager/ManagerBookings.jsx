@@ -1077,10 +1077,16 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+            <p className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
               <span>Khung giờ: <strong className="text-slate-800 font-semibold">{booking.startTime}{booking.endTime ? ` - ${booking.endTime}` : ''}</strong></span>
               <span>•</span>
-              <span>Ngày: <strong className="text-slate-800 font-semibold">{new Date(booking.bookingDate).toLocaleDateString('vi-VN')}</strong></span>
+              <span>Ngày hẹn: <strong className="text-slate-800 font-semibold">{new Date(booking.bookingDate).toLocaleDateString('vi-VN')}</strong></span>
+              {booking.createdAt && (
+                <>
+                  <span>•</span>
+                  <span>Ngày tạo đơn: <strong className="text-blue-700 font-semibold">{new Date(booking.createdAt).toLocaleString('vi-VN')}</strong></span>
+                </>
+              )}
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -1656,7 +1662,7 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
           })()}
 
           {/* Deposit summary */}
-          {booking.depositAmount > 0 && (
+          {(booking.depositAmount > 0 && (!booking.isWalkIn || booking.depositPaid || booking.paymentStatus === 'paid')) && (
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
               {booking.paymentStatus === 'paid' ? (
                 <span className="text-emerald-700 font-bold">
@@ -2806,8 +2812,13 @@ export default function ManagerBookings() {
                               </div>
                             </td>
                             <td className="px-4 py-3">
-                              <p className="text-slate-700">{new Date(child.bookingDate).toLocaleDateString('vi-VN')}</p>
-                              <p className="text-[11px] text-slate-400">{child.startTime}</p>
+                              <p className="font-semibold text-slate-800">{new Date(child.bookingDate).toLocaleDateString('vi-VN')}</p>
+                              <p className="text-[11px] text-slate-500 font-medium">{child.startTime}</p>
+                              {child.createdAt && (
+                                <p className="text-[10px] text-slate-400 font-medium mt-0.5" title="Thời gian khách đặt đơn">
+                                  Đặt: {new Date(child.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                </p>
+                              )}
                             </td>
                             <td className="px-4 py-3">
                               <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${child.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' :
@@ -2885,8 +2896,13 @@ export default function ManagerBookings() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-slate-700">{new Date(b.bookingDate).toLocaleDateString('vi-VN')}</p>
-                        <p className="text-[11px] text-slate-400">{b.startTime}</p>
+                        <p className="font-semibold text-slate-800">{new Date(b.bookingDate).toLocaleDateString('vi-VN')}</p>
+                        <p className="text-[11px] text-slate-500 font-medium">{b.startTime}</p>
+                        {b.createdAt && (
+                          <p className="text-[10px] text-slate-400 font-medium mt-0.5" title="Thời gian khách đặt đơn">
+                            Đặt: {new Date(b.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                          </p>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${b.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' :

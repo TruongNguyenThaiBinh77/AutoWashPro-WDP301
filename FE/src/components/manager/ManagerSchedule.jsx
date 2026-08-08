@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
 import { CaretLeft, CaretRight, ArrowClockwise, CalendarBlank, Clock, User, Car, XCircle } from '@phosphor-icons/react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, useOutletContext } from 'react-router-dom';
 
 function api(path, opts = {}) {
   return fetch(`${getApiBaseUrl()}${path}`, {
@@ -33,17 +33,44 @@ const STATUS_LABEL = {
 import { useSystemConfig } from '@/hooks/useSystemConfig';
 import useSSE from '@/hooks/useSSE';
 
-// Generate half-hour slots from 06:00 to 21:00
-function generateTimeSlots() {
+// Generate time slots based on config
+function generateTimeSlots(config) {
   const slots = [];
-  for (let h = 6; h <= 21; h++) {
-    slots.push(`${String(h).padStart(2, '0')}:00`);
-    if (h < 21) slots.push(`${String(h).padStart(2, '0')}:30`);
+  const interval = config?.slotInterval || 30;
+  
+  const parseTime = (t) => {
+    if (!t) return null;
+    const [h, m] = t.split(':');
+    return parseInt(h, 10) * 60 + parseInt(m, 10);
+  };
+
+  const addSlots = (start, end) => {
+    const open = parseTime(start);
+    const close = parseTime(end);
+    if (open === null || close === null) return;
+    for (let current = open; current < close; current += interval) {
+      const h = Math.floor(current / 60);
+      const m = current % 60;
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  };
+
+  if (config && (config.morning || config.afternoon)) {
+    if (config.morning?.start && config.morning?.end) {
+      addSlots(config.morning.start, config.morning.end);
+    }
+    if (config.afternoon?.start && config.afternoon?.end) {
+      addSlots(config.afternoon.start, config.afternoon.end);
+    }
+  } else {
+    for (let current = 6 * 60; current <= 21 * 60; current += interval) {
+      const h = Math.floor(current / 60);
+      const m = current % 60;
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
   }
   return slots;
 }
-
-const TIME_SLOTS = generateTimeSlots();
 
 function isNewBooking(b) {
   return b?.status === 'pending';
@@ -109,6 +136,10 @@ export default function ManagerSchedule() {
   const configs = useSystemConfig();
   const maxSlotCapacity = Number(configs?.DEFAULT_BRANCH_CAPACITY) || 4;
 
+  const { user } = useOutletContext();
+  const branchId = user?.branchId;
+  const [scheduleConfig, setScheduleConfig] = useState(null);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const dateParam = searchParams.get('date');
@@ -122,6 +153,17 @@ export default function ManagerSchedule() {
     setLoading(true); setError('');
     try {
       const dateStr = toDateStr(d);
+      
+      let currentConfig = scheduleConfig;
+      if (branchId && !currentConfig) {
+        const bRes = await api(`/branches/${branchId}`);
+        if (bRes.ok) {
+          const bData = await bRes.json();
+          currentConfig = bData.data?.scheduleConfig || {};
+          setScheduleConfig(currentConfig);
+        }
+      }
+
       const res = await api(`/bookings?dateFrom=${dateStr}&dateTo=${dateStr}&limit=200&page=1`);
       if (!res.ok) throw new Error('Không thể tải lịch');
       const data = await res.json();
@@ -148,8 +190,11 @@ export default function ManagerSchedule() {
   function nextDay() { const d = new Date(date); d.setDate(d.getDate() + 1); handleDateChange(d); }
   function goToday() { handleDateChange(new Date()); }
 
-  // Helper to round time to nearest 30 mins
-  const roundToNearest30Min = (timeStr) => {
+  const interval = scheduleConfig?.slotInterval || 30;
+  const TIME_SLOTS = generateTimeSlots(scheduleConfig);
+
+  // Helper to round time to nearest interval
+  const roundToNearestInterval = (timeStr) => {
     if (!timeStr) return timeStr;
     const [hStr, mStr] = timeStr.split(':');
     const h = parseInt(hStr, 10);
@@ -157,7 +202,7 @@ export default function ManagerSchedule() {
     if (isNaN(h) || isNaN(m)) return timeStr;
     
     const totalMinutes = h * 60 + m;
-    const roundedMinutes = Math.round(totalMinutes / 30) * 30;
+    const roundedMinutes = Math.round(totalMinutes / interval) * interval;
     
     const newH = Math.floor(roundedMinutes / 60) % 24;
     const newM = roundedMinutes % 60;
@@ -170,9 +215,9 @@ export default function ManagerSchedule() {
   TIME_SLOTS.forEach(slot => { bookingsBySlot[slot] = []; });
 
   bookings.forEach(b => {
-    // Làm tròn thời gian về khung giờ 30 phút gần nhất để gom nhóm trên UI
+    // Làm tròn thời gian về khung giờ gần nhất để gom nhóm trên UI
     const originalTime = b.startTime;
-    const t = originalTime ? roundToNearest30Min(originalTime) : originalTime;
+    const t = originalTime ? roundToNearestInterval(originalTime) : originalTime;
     
     if (bookingsBySlot[t]) {
       bookingsBySlot[t].push(b);
@@ -275,15 +320,28 @@ export default function ManagerSchedule() {
             // Only show slots that have items OR are within standard hours
             if (!hasItems && !TIME_SLOTS.includes(slot)) return null;
 
+            let isPast = false;
+            let isFullyPast = false;
+            if (isToday) {
+              const now = new Date();
+              const currentMinutes = now.getHours() * 60 + now.getMinutes();
+              const slotMinutes = parseInt(slot.split(':')[0], 10) * 60 + parseInt(slot.split(':')[1], 10);
+              if (slotMinutes <= currentMinutes) {
+                isPast = true;
+                if (activeCount === 0) isFullyPast = true;
+              }
+            }
+
             return (
-              <div key={slot} className={`flex flex-col rounded-2xl border ${isFull ? 'border-red-200 bg-red-50/20' : 'border-slate-200 bg-slate-50/50'} overflow-hidden shadow-sm transition-all hover:border-blue-200`}>
-                <div className={`px-4 py-3 flex items-center justify-between border-b ${isFull ? 'border-red-100 bg-red-50' : 'border-slate-100 bg-white'}`}>
+              <div key={slot} className={`flex flex-col rounded-2xl border ${isFull ? 'border-red-200 bg-red-50/20' : isFullyPast ? 'border-slate-200 bg-slate-100/50 opacity-75' : 'border-slate-200 bg-slate-50/50'} overflow-hidden shadow-sm transition-all hover:border-blue-200`}>
+                <div className={`px-4 py-3 flex items-center justify-between border-b ${isFull ? 'border-red-100 bg-red-50' : isFullyPast ? 'border-slate-200 bg-slate-100' : 'border-slate-100 bg-white'}`}>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-800 text-lg tracking-tight">{slot}</span>
+                    {isPast && <span className="text-[10px] font-semibold bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded-sm">Đã qua</span>}
                     {activeCount > 0 && !isFull && <span className="flex h-2 w-2 rounded-full bg-emerald-500 shadow-sm" title="Đang có lịch" />}
                     {isFull && <span className="flex h-2 w-2 rounded-full bg-red-500 shadow-sm animate-pulse" title="Đã đầy" />}
                   </div>
-                  <div className={`text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${isFull ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600'}`}>
+                  <div className={`text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${isFull ? 'bg-red-100 text-red-700' : isFullyPast ? 'bg-slate-200 text-slate-500' : 'bg-slate-100 text-slate-600'}`}>
                     {activeCount}/{maxSlotCapacity} LƯỢT
                   </div>
                 </div>

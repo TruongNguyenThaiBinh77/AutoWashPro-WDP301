@@ -2102,8 +2102,14 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
 
   const slots = buildSlots(duration, branch.openingTime || '07:00', branch.closingTime || '20:00', branch.scheduleConfig);
   const capacity = await resolveBranchCapacity(branch);
+  const minAdvanceMinutes = await configService.get('MIN_ADVANCE_BOOKING_MINUTES', {}, 30);
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  
+  // Lấy ngày hiện tại theo múi giờ địa phương (local time) để tránh lỗi lệch ngày với UTC
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
 
   return slots.map((s) => {
     const overlappingBookings = existing.filter((b) => {
@@ -2123,16 +2129,24 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
     //   2. VÀ đang có VIP thực sự giữ chỗ trong slot đó
     // → Không giữ chỗ vô nghĩa khi không có VIP nào đặt → tránh mất doanh thu
     let vipOnly = capacity > 1 && overlappingCount >= capacity - 1 && overlappingCount < capacity && vipBooked;
+    
+    let reason = null;
 
     if (dateStr === todayStr) {
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
       const slotStartMinutes = parseTime(s.startTime);
-      if (slotStartMinutes !== null && slotStartMinutes <= currentMinutes + 30) {
-        // Quá muộn để đặt (cần ít nhất 30 phút chuẩn bị)
+      
+      if (slotStartMinutes !== null && slotStartMinutes <= currentMinutes) {
         available = false;
         vipOnly = false;
-      } else if (slotStartMinutes !== null && slotStartMinutes - currentMinutes <= 30 * 2) {
-        // Anti-waste: Còn ≤ 60 phút mà chỗ cuối chưa có VIP nào đặt → mở cho tất cả
+        reason = 'Đã qua giờ';
+      } else if (slotStartMinutes !== null && slotStartMinutes <= currentMinutes + minAdvanceMinutes) {
+        // Quá muộn để đặt (cần thời gian chuẩn bị)
+        available = false;
+        vipOnly = false;
+        reason = `Sát giờ (<${minAdvanceMinutes}p)`;
+      } else if (slotStartMinutes !== null && slotStartMinutes - currentMinutes <= minAdvanceMinutes * 2) {
+        // Anti-waste: Còn sát giờ mà chỗ cuối chưa có VIP nào đặt → mở cho tất cả
         if (!vipBooked) vipOnly = false;
       }
     }
@@ -2140,7 +2154,6 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
     // Check blocked slots
     const ns = parseTime(s.startTime);
     const ne = parseTime(s.endTime);
-    let reason = null;
     const isBlocked = branch.scheduleConfig?.blockedSlots?.some(bs => {
       if (bs.date !== dateStr) return false;
       const bStart = parseTime(bs.startTime);
@@ -2162,7 +2175,7 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
 };
 
 // ─── Tier → Priority mapping ─────────────────────────────────────────────────
-const TIER_PRIORITY = { bronze: 1, silver: 2, gold: 3, diamond: 4, Ruby: 5 };
+// Sử dụng hàm động loyaltyService.getTierPriority(user?.tier) dựa theo minPoints của từng hạng
 
 // ─── Recurring Booking ────────────────────────────────────────────────────────
 
@@ -2248,8 +2261,8 @@ exports.createRecurringBooking = async (data) => {
     throw Object.assign(new Error('Giờ kết thúc vượt quá giờ đóng cửa của chi nhánh'), { statusCode: 400, code: 'OUTSIDE_HOURS' });
   }
 
-  // --- Priority ---
-  const priority = TIER_PRIORITY[user?.tier] || 1;
+  // --- Priority (Động theo cấu hình hạng) ---
+  const priority = await loyaltyService.getTierPriority(user?.tier);
 
   // --- Validate voucher (1 lần, áp cho toàn bộ series) ---
   let computedDiscountAmount = 0;
@@ -3018,7 +3031,7 @@ exports.rebookBooking = async (bookingId, userId, userRole, { bookingDate, start
 
   // Get user for priority
   const user = await User.findById(src.userId);
-  const priority = TIER_PRIORITY[user?.tier] || 1;
+  const priority = await loyaltyService.getTierPriority(user?.tier);
 
   // ── Price re-computation ─────────────────────────────────────────────
   // Base: package price (fallback to src.finalPrice)

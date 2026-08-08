@@ -53,6 +53,7 @@ const PERCENT_KEYS = new Set([
   'SLOT_PACK_VIP_BONUS_DISCOUNTS',
   'BIRTHDAY_VOUCHER_PERCENT',
   'SLOT_PACK_DISCOUNTS',
+  'SLOT_PACK_REFUND_FEE_PERCENT',
 ]);
 
 function clampPercent(key, rawValue) {

@@ -2,10 +2,11 @@ const nodemailer = require('nodemailer');
 
 const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
 const SMTP_PORT = parseInt(process.env.SMTP_PORT, 10) || 587;
-const SMTP_USER = process.env.SMTP_USER || 'dinhanh200304@gmail.com';
-const SMTP_PASS = process.env.SMTP_PASS || 'meblixxhmxoxpuou';
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASS = process.env.SMTP_PASS || '';
 
 const transporter = nodemailer.createTransport({
+  service: 'gmail',
   host: SMTP_HOST,
   port: SMTP_PORT,
   secure: SMTP_PORT === 465, // true for 465, false for other ports
@@ -13,16 +14,25 @@ const transporter = nodemailer.createTransport({
     user: SMTP_USER,
     pass: SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
+
 
 exports.sendPasswordResetEmail = async (email, otp) => {
   if (process.env.NODE_ENV === 'test') {
     console.log(`[EmailService - TEST MODE] Skipped sending Password Reset OTP to ${email}`);
     return Promise.resolve();
   }
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.log(`[EmailService] SMTP credentials not set in .env, skipping Password Reset OTP email to ${email}`);
+    return Promise.resolve();
+  }
   console.log(`[EmailService] Sending Password Reset OTP to ${email}`);
   return transporter.sendMail({
-    from: `"AutoWashPro" <${SMTP_USER}>`,
+    from: `"AutoWashPro" <${SMTP_USER || 'no-reply@autowashpro.com'}>`,
     to: email,
     subject: 'Mã xác nhận khôi phục mật khẩu - AutoWashPro',
     html: `
@@ -46,6 +56,11 @@ exports.sendBookingConfirmationEmail = async (email, bookingInfo) => {
     console.log(`[EmailService - TEST MODE] Skipped sending Booking Confirmation to ${email}`);
     return Promise.resolve();
   }
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.log(`[EmailService] SMTP credentials not set in .env, skipping Booking Confirmation email to ${email}`);
+    return Promise.resolve();
+  }
   console.log(`[EmailService] Sending Booking Confirmation Email to ${email} (Code: ${bookingInfo?.bookingCode || 'N/A'})`);
   const isRecurring = bookingInfo.bookingType === 'recurring';
   const isSlotPack = bookingInfo.bookingType === 'slot_pack_usage';
@@ -57,7 +72,7 @@ exports.sendBookingConfirmationEmail = async (email, bookingInfo) => {
   const packageName = bookingInfo.packageName || (bookingInfo.packageId && bookingInfo.packageId.name) || 'Gói dịch vụ rửa xe';
 
   return transporter.sendMail({
-    from: `"AutoWashPro" <${SMTP_USER}>`,
+    from: `"AutoWashPro" <${SMTP_USER || 'no-reply@autowashpro.com'}>`,
     to: email,
     subject: `Xác nhận đặt lịch thành công - AutoWashPro (${bookingInfo.bookingCode || ''})`,
     html: `
@@ -86,9 +101,14 @@ exports.sendCancellationOtpEmail = async (email, otp) => {
     console.log(`[EmailService - TEST MODE] Skipped sending Cancellation OTP to ${email}`);
     return Promise.resolve();
   }
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.log(`[EmailService] SMTP credentials not set in .env, skipping Cancellation OTP email to ${email}`);
+    return Promise.resolve();
+  }
   console.log(`[EmailService] Sending Cancellation OTP (${otp}) to ${email}`);
   return transporter.sendMail({
-    from: `"AutoWashPro" <${SMTP_USER}>`,
+    from: `"AutoWashPro" <${SMTP_USER || 'no-reply@autowashpro.com'}>`,
     to: email,
     subject: `Mã OTP xác nhận hủy lịch - AutoWashPro`,
     html: `
@@ -112,9 +132,14 @@ exports.sendSlotPackConfirmationEmail = async (email, slotPack) => {
     console.log(`[EmailService - TEST MODE] Skipped sending SlotPack Confirmation to ${email}`);
     return Promise.resolve();
   }
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.log(`[EmailService] SMTP credentials not set in .env, skipping SlotPack Confirmation email to ${email}`);
+    return Promise.resolve();
+  }
   console.log(`[EmailService] Sending SlotPack Confirmation Email to ${email} (Code: ${slotPack?.packCode || 'N/A'})`);
   return transporter.sendMail({
-    from: `"AutoWashPro" <${SMTP_USER}>`,
+    from: `"AutoWashPro" <${SMTP_USER || 'no-reply@autowashpro.com'}>`,
     to: email,
     subject: `Xác nhận mua gói lượt thành công - AutoWashPro`,
     html: `
@@ -159,6 +184,33 @@ exports.sendCancellationSuccessEmail = async (email, info, refundAmount) => {
           }
         </div>
         <p style="color: #64748b; font-size: 14px;">Cảm ơn bạn đã sử dụng dịch vụ của AutoWashPro. Hẹn gặp lại bạn lần sau!</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #94a3b8;">Hệ thống chăm sóc xe AutoWashPro</p>
+      </div>
+    `
+  });
+};
+
+exports.sendWalkInCredentialsEmail = async (email, password) => {
+  if (process.env.NODE_ENV === 'test') {
+    console.log(`[EmailService - TEST MODE] Skipped sending Walk-In Credentials to ${email}`);
+    return Promise.resolve();
+  }
+  console.log(`[EmailService] Sending Walk-In Credentials Email to ${email}`);
+  return transporter.sendMail({
+    from: `"AutoWashPro" <${SMTP_USER}>`,
+    to: email,
+    subject: `Tài khoản khách hàng AutoWashPro của bạn`,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <h2 style="color: #2563eb;">Chào mừng bạn đến với AutoWashPro!</h2>
+        <p>Xin chào,</p>
+        <p>Hệ thống vừa tự động tạo tài khoản cho bạn sau khi bạn sử dụng dịch vụ tại cửa hàng của chúng tôi. Dưới đây là thông tin đăng nhập của bạn:</p>
+        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px dashed #cbd5e1;">
+          <p><strong>Tài khoản (Email hoặc SĐT):</strong> ${email}</p>
+          <p><strong>Mật khẩu mặc định:</strong> <span style="font-weight: bold; color: #dc2626;">${password}</span></p>
+        </div>
+        <p style="color: #64748b; font-size: 14px;">Vui lòng đăng nhập vào ứng dụng AutoWashPro và đổi mật khẩu để bảo vệ tài khoản của bạn. Đăng nhập để theo dõi lịch sử dịch vụ và hạng thành viên!</p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
         <p style="font-size: 12px; color: #94a3b8;">Hệ thống chăm sóc xe AutoWashPro</p>
       </div>

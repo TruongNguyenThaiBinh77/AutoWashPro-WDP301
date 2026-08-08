@@ -699,8 +699,8 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                   <div className="h-px bg-slate-200 flex-1" />
                 </div>
 
-                <div className="mt-5 flex justify-center w-full">
-                  <div className="w-full shadow-xs rounded-2xl overflow-hidden">
+                <div className="mt-5 flex items-center justify-center w-full">
+                  <div className="google-btn-wrapper w-full flex items-center justify-center overflow-hidden [&>div]:!mx-auto [&>div]:!flex [&>div]:!justify-center [&>div]:!items-center [&_iframe]:!mx-auto">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={() => {
@@ -709,6 +709,9 @@ export default function AuthScreen({ authLoading, onLogin, onRegister, onBack, o
                       theme="outline"
                       size="large"
                       shape="pill"
+                      width="380"
+                      text="continue_with"
+                      locale="vi"
                     />
                   </div>
                 </div>

@@ -14,6 +14,54 @@ const INITIAL_CONFIGS = [
     description: 'Giới hạn thời gian đặt lịch trước theo hạng thành viên (ngày)'
   },
   {
+    key: 'WALK_IN_DEFAULT_PASSWORD',
+    value: '{phone}',
+    type: 'string',
+    category: 'general',
+    isPublic: false,
+    description: 'Mật khẩu mặc định khi tạo tài khoản khách vãng lai (có thể dùng {phone} để lấy SĐT)'
+  },
+  {
+    key: 'WALK_IN_DEFAULT_EMAIL_SUFFIX',
+    value: '@khachvanglai.autowash.vn',
+    type: 'string',
+    category: 'general',
+    isPublic: false,
+    description: 'Đuôi email ảo khi tạo tài khoản khách vãng lai không có email'
+  },
+  {
+    key: 'WALK_IN_PRIMARY_IDENTIFIER',
+    value: 'email',
+    type: 'string',
+    category: 'general',
+    isPublic: false,
+    description: 'Ưu tiên lấy thông tin làm tài khoản khi khách vãng lai cung cấp cả hai (email/phone)'
+  },
+  {
+    key: 'WALK_IN_SEND_CREDENTIALS',
+    value: true,
+    type: 'boolean',
+    category: 'general',
+    isPublic: false,
+    description: 'Tự động gửi SMS/Email thông báo tài khoản & mật khẩu khi tạo khách vãng lai'
+  },
+  {
+    key: 'CRON_BIRTHDAY_TIME',
+    value: '08:00',
+    type: 'string',
+    category: 'general',
+    isPublic: false,
+    description: 'Giờ hệ thống chạy tự động phát voucher sinh nhật (VD: 08:00)'
+  },
+  {
+    key: 'CRON_EXPIRE_TIME',
+    value: '00:05',
+    type: 'string',
+    category: 'general',
+    isPublic: false,
+    description: 'Giờ hệ thống chạy dọn dẹp các gói lượt hết hạn (VD: 00:05)'
+  },
+  {
     key: 'DEPOSIT_RATE',
     value: 30,
     type: 'number',
@@ -112,6 +160,38 @@ const INITIAL_CONFIGS = [
     description: 'Số điểm đền bù khi hệ thống tự động hủy đơn gói lượt'
   },
   {
+    key: 'MAX_SLOT_PACK_QUANTITY',
+    value: 50,
+    type: 'number',
+    category: 'booking',
+    isPublic: true,
+    description: 'Số lượng slot tối đa khách hàng có thể mua trong một gói lượt'
+  },
+  {
+    key: 'SLOT_PACK_REFUND_FEE_PERCENT',
+    value: 10,
+    type: 'number',
+    category: 'payment',
+    isPublic: true,
+    description: 'Phần trăm phí quản lý khi khách yêu cầu hoàn tiền gói lượt chưa dùng hết (%)'
+  },
+  {
+    key: 'SLOT_PACK_REFUND_MAX_DAYS',
+    value: 30,
+    type: 'number',
+    category: 'payment',
+    isPublic: true,
+    description: 'Thời hạn tối đa được yêu cầu hoàn tiền gói lượt (ngày kể từ lúc mua)'
+  },
+  {
+    key: 'NO_SHOW_STRIKE_LIMIT',
+    value: 5,
+    type: 'number',
+    category: 'booking',
+    isPublic: true,
+    description: 'Số lần hủy/vắng mặt trong tháng tối đa trước khi bị yêu cầu cọc 100%'
+  },
+  {
     key: 'SLOT_PACK_DISCOUNTS',
     value: [
       { minSlots: 5, discountPercent: 5 },
@@ -124,7 +204,7 @@ const INITIAL_CONFIGS = [
   },
   {
     key: 'SLOT_PACK_VIP_BONUS_DISCOUNTS',
-    value: { gold: 5, diamond: 10 },
+    value: { gold: 2, diamond: 5, Ruby: 5 },
     type: 'json',
     isPublic: true,
     description: 'Cấu hình chiết khấu cộng thêm khi VIP mua Gói Lượt'

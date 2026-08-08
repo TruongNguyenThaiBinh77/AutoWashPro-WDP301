@@ -795,7 +795,12 @@ export default function AdminBookings() {
                       <p className="font-semibold text-slate-800">
                         {b.bookingDate ? new Date(b.bookingDate).toLocaleDateString('vi-VN') : '—'}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-medium">{b.startTime}–{b.endTime}</p>
+                      <p className="text-[11px] text-slate-500 font-medium">{b.startTime}–{b.endTime}</p>
+                      {b.createdAt && (
+                        <p className="text-[10px] text-slate-400 font-medium mt-0.5" title="Thời gian khách đặt đơn">
+                          Đặt: {new Date(b.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        </p>
+                      )}
                     </td>
 
                     {/* Payment Status */}

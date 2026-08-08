@@ -4,12 +4,16 @@ const notificationService = require('../services/notification.service');
 const configService = require('../services/config.service');
 
 /**
- * Run every day at 08:00 AM.
+ * Run every day based on CRON_BIRTHDAY_TIME config.
  * Find users whose birthday is today and who don't already have a birthday voucher this year.
  * Create a personal voucher valid for 7 days.
  */
-function startBirthdayJob() {
-  cron.schedule('0 8 * * *', async () => {
+async function startBirthdayJob() {
+  const timeStr = await configService.get('CRON_BIRTHDAY_TIME', {}, '08:00');
+  const [hour, minute] = timeStr.split(':');
+  const cronExpr = `${minute || 0} ${hour || 8} * * *`;
+
+  cron.schedule(cronExpr, async () => {
     try {
       const now = new Date();
       const month = now.getMonth() + 1; // 1-12
@@ -76,7 +80,7 @@ function startBirthdayJob() {
     }
   });
 
-  console.log('[BirthdayJob] Started — runs daily at 08:00');
+  console.log(`[BirthdayJob] Started — runs daily at ${timeStr}`);
 }
 
 module.exports = { startBirthdayJob };

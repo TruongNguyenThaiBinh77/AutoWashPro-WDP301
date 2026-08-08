@@ -533,14 +533,29 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
 
   // Fetch available slots
   const currentDate = useMemo(() => selectedDate ? getDateObj(selectedDate) : null, [selectedDate, getDateObj]);
+  
+  const fetchDate = useMemo(() => {
+    if (tab === 'regular') return currentDate?.iso;
+    // Đối với lịch định kỳ, tìm 1 ngày trong tương lai gần nhất mà KHÔNG phải là ngày nghỉ của chi nhánh
+    // Để gọi API lấy danh sách khung giờ cố định của chi nhánh đó
+    const daysOff = selectedBranch?.scheduleConfig?.daysOff || [];
+    let d = new Date();
+    for (let i = 0; i < 30; i++) {
+      const iso = d.toLocaleDateString('en-CA');
+      if (!daysOff.includes(iso)) return iso;
+      d.setDate(d.getDate() + 1);
+    }
+    return new Date().toLocaleDateString('en-CA');
+  }, [tab, currentDate?.iso, selectedBranch?.scheduleConfig?.daysOff]);
+
   useEffect(() => {
-    if (!selectedBranch || !selectedPackage || !currentDate?.iso) return;
+    if (!selectedBranch || !selectedPackage || !fetchDate) return;
     async function fetchSlots() {
       setSlotsLoading(true);
       try {
         const branchId = selectedBranch._id || selectedBranch.id;
         const pkgId = selectedPackage._id || selectedPackage.id;
-        const url = `${API_BASE}/bookings/slots?branchId=${branchId}&date=${currentDate.iso}&packageId=${pkgId}`;
+        const url = `${API_BASE}/bookings/slots?branchId=${branchId}&date=${fetchDate}&packageId=${pkgId}`;
         const res = await fetch(url);
         const payload = await res.json();
         if (res.ok) setAvailableSlots(payload.data || []);
@@ -549,7 +564,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
       finally { setSlotsLoading(false); }
     }
     fetchSlots();
-  }, [selectedBranch, selectedPackage, currentDate?.iso, isLoggedIn, apiBase, token, slotsUpdateTick]);
+  }, [selectedBranch, selectedPackage, fetchDate, isLoggedIn, apiBase, token, slotsUpdateTick]);
 
   // Restore pending booking selections after login, show step 5 for review
   useEffect(() => {
@@ -2385,7 +2400,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                           <RefreshCw className="w-6 h-6 animate-spin text-slate-300" />
                           <span className="text-sm">Đang tìm lịch trống...</span>
                         </div>
-                      ) : availableSlots.filter(s => s.available).length === 0 ? (
+                      ) : (tab === 'regular' && availableSlots.filter(s => s.available).length === 0) || (tab === 'recurring' && availableSlots.length === 0) ? (
                         (() => {
                           // Distinguish: store closed today vs. genuinely fully booked
                           const today = new Date();
@@ -2394,7 +2409,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                           const hasSlots = availableSlots.length > 0;
                           const allPast = hasSlots && availableSlots.every(s => !s.available);
                           const isTodayClosed = isToday && allPast;
-                          const isConfiguredDayOff = selectedBranch?.scheduleConfig?.daysOff?.includes(currentDate?.iso);
+                          const isConfiguredDayOff = selectedBranch?.scheduleConfig?.daysOff?.includes(tab === 'regular' ? currentDate?.iso : fetchDate);
                           
                           return (
                             <div className={`flex items-center gap-3 p-5 rounded-2xl border ${

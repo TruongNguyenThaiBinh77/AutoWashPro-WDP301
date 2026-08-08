@@ -90,15 +90,42 @@ function getOpenAI() {
 }
 
 // ─── System prompt composer ──────────────────────────────────────────────────────
-const ROLE_INSTRUCTIONS = {
-  customer: CUSTOMER_INSTRUCTION,
-  manager: MANAGER_INSTRUCTION,
-  admin: ADMIN_INSTRUCTION,
-};
-
-function composeSystemPrompt(role) {
+async function composeSystemPrompt(role) {
   const roleInstruction = ROLE_INSTRUCTIONS[role] || CUSTOMER_INSTRUCTION;
-  return `${BASE_INSTRUCTION}\n\n${roleInstruction}`;
+  
+  let dynamicContext = '';
+  try {
+    const loyaltyService = require('./loyalty.service');
+    const configService = require('./config.service');
+    const loyaltyConfig = await loyaltyService.getLoyaltyConfig();
+    const depositRate = await configService.get('DEPOSIT_RATE', {}, 30);
+    const vatRate = await configService.get('VAT_PERCENT', {}, 10);
+    const slotDiscounts = await configService.get('SLOT_PACK_DISCOUNTS', {}, []);
+    const vipSlotDiscounts = await configService.get('SLOT_PACK_VIP_BONUS_DISCOUNTS', {}, {});
+
+    const tierInfo = (loyaltyConfig.tiers || []).map(t => 
+      `  + ${t.name}: Điểm tối thiểu ${Number(t.minPoints || 0).toLocaleString('vi-VN')}đ, Nhân điểm x${t.multiplier}, Đặt trước tối đa ${t.advanceDays || 14} ngày, Quyền lợi: ${(t.benefits || []).join(', ')}`
+    ).join('\n');
+
+    const slotDiscInfo = (slotDiscounts || []).map(d => `Từ ${d.minSlots} slot: giảm ${d.discountPercent}%`).join('; ');
+    const vipSlotInfo = Object.entries(vipSlotDiscounts || {}).map(([k, v]) => `${k}: +${v}%`).join(', ');
+
+    dynamicContext = `
+=== THÔNG TIN CẤU HÌNH THỜI GIAN THỰC CỦA HỆ THỐNG (ADMIN ĐÃ THIẾT LẬP) ===
+- Tỉ lệ đặt cọc mặc định: ${depositRate}%
+- Thuế VAT áp dụng: ${vatRate}%
+- Tỷ lệ tích điểm: ${loyaltyConfig.baseEarningRate || 5} điểm cho mỗi 100.000đ thanh toán
+- Thời hạn điểm thưởng: ${loyaltyConfig.pointExpirationMonths || 6} tháng
+- Các hạng thành viên & quyền lợi thực tế:
+${tierInfo}
+- Chiết khấu số lượng Gói Lượt: ${slotDiscInfo || '5 slot: 5%, 10 slot: 10%, 20 slot: 15%'}
+- Chiết khấu VIP mua Gói Lượt: ${vipSlotInfo || 'Vàng: +2%, Kim Cương/Ruby: +5%'}
+========================================================================`;
+  } catch (err) {
+    console.warn('[Chatbot] Failed to load dynamic configs for prompt:', err.message);
+  }
+
+  return `${BASE_INSTRUCTION}\n\n${dynamicContext}\n\n${roleInstruction}`;
 }
 
 // ─── Session management ──────────────────────────────────────────────────────────
@@ -769,7 +796,7 @@ function classifyError(err) {
 
 // ─── Resolve tool calls (shared between chat & stream) ────────────────────────
 async function resolveToolCalls(openai, modelName, session, userId, role) {
-  const systemPrompt = composeSystemPrompt(role);
+  const systemPrompt = await composeSystemPrompt(role);
   const tools = getToolsForRole(role);
   for (let i = 0; i < 5; i++) {
     const messages = [{ role: 'system', content: systemPrompt }, ...session.history];
@@ -829,7 +856,7 @@ exports.chat = async (sessionId, message, userId, role = 'customer') => {
 exports.streamChat = async (sessionId, message, userId, role, res) => {
   const { openai, modelName } = getOpenAI();
   const session = getSession(sessionId);
-  const systemPrompt = composeSystemPrompt(role);
+  const systemPrompt = await composeSystemPrompt(role);
   const tools = getToolsForRole(role);
 
   const todayDate = new Date().toISOString().split('T')[0];

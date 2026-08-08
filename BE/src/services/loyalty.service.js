@@ -109,6 +109,18 @@ exports.getLoyaltyConfig = async () => {
 };
 
 /**
+ * Tính thứ tự ưu tiên động của hạng thành viên (Dựa vào minPoints)
+ */
+exports.getTierPriority = async (tierId) => {
+  if (!tierId) return 1;
+  const config = await exports.getLoyaltyConfig();
+  const tiers = config?.tiers || DEFAULT_TIERS;
+  const sorted = [...tiers].sort((a, b) => (a.minPoints || 0) - (b.minPoints || 0));
+  const idx = sorted.findIndex(t => String(t.id).toLowerCase() === String(tierId).toLowerCase());
+  return idx >= 0 ? idx + 1 : 1;
+};
+
+/**
  * Cập nhật cấu hình điểm thưởng (Admin)
  * NOTE: Cần chuyển sang dùng API config.controller.js
  */
