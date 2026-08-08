@@ -2362,7 +2362,7 @@ export default function ManagerBookings() {
       if (sf) params.set('status', sf);
       if (tf) params.set('bookingType', tf);
       if (q.trim()) params.set('search', q.trim());
-      if (today) { const d = getTodayStr(); params.set('dateFrom', d); params.set('dateTo', d); }
+      if (today) { const d = getTodayStr(); params.set('createdFrom', d); params.set('createdTo', d); }
       else if (df) { params.set('dateFrom', df); if (dt) params.set('dateTo', dt); }
       const res = await api(`/bookings?${params}`);
       if (!res.ok) throw new Error(await readErr(res));

@@ -523,6 +523,13 @@ exports.getAllBookings = async (filters = {}, userRole, userId) => {
     query.bookingDate = { $gte: gte, $lte: lte };
   }
 
+  // created date range (createdFrom/createdTo): filter by booking creation time
+  if (filters.createdFrom || filters.createdTo) {
+    query.createdAt = {};
+    if (filters.createdFrom) query.createdAt.$gte = getDayBounds(filters.createdFrom).gte;
+    if (filters.createdTo)   query.createdAt.$lte = getDayBounds(filters.createdTo).lte;
+  }
+
   // search: match by customer name/phone, license plate, or booking code
   if (filters.search && filters.search.trim()) {
     const searchStr = filters.search.trim();
