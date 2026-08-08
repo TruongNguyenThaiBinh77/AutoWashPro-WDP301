@@ -15,6 +15,11 @@ exports.getAllVouchers = catchAsync(async (req, res) => {
   success(res, result.data, 'Đã lấy danh sách mã giảm giá', 200, result.pagination);
 });
 
+exports.getVoucherStats = catchAsync(async (req, res) => {
+  const stats = await voucherService.getVoucherStats(req.user.role, req.userId, req.user.branchId);
+  success(res, stats, 'Đã lấy thống kê mã giảm giá');
+});
+
 exports.getVoucherById = catchAsync(async (req, res) => {
   const voucher = await voucherService.getVoucherById(req.params.id, req.user.role, req.userId, req.user.branchId);
   success(res, voucher, 'Đã lấy thông tin mã giảm giá');

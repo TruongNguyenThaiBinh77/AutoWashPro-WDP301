@@ -504,6 +504,7 @@ exports.getAllBookings = async (filters = {}, userRole, userId) => {
   } else {
     if (filters.userId) query.userId = filters.userId;
     if (filters.branchId) query.branchId = filters.branchId;
+    if (filters.branchIds) query.branchId = { $in: String(filters.branchIds).split(',').map(s => s.trim()).filter(Boolean) };
   }
   if (filters.status) query.status = filters.status;
   if (filters.bookingType) query.bookingType = filters.bookingType;
@@ -521,6 +522,13 @@ exports.getAllBookings = async (filters = {}, userRole, userId) => {
       : filters.bookingDate;
     const { gte, lte } = getDayBounds(dateStr);
     query.bookingDate = { $gte: gte, $lte: lte };
+  }
+
+  // created date range (createdFrom/createdTo): filter by booking creation time
+  if (filters.createdFrom || filters.createdTo) {
+    query.createdAt = {};
+    if (filters.createdFrom) query.createdAt.$gte = getDayBounds(filters.createdFrom).gte;
+    if (filters.createdTo)   query.createdAt.$lte = getDayBounds(filters.createdTo).lte;
   }
 
   // search: match by customer name/phone, license plate, or booking code
@@ -2797,11 +2805,8 @@ exports.getFeedbacks = async (user, filters = {}) => {
   const endDateStr = filters.endDate || filters.dateTo;
 
   if (startDateStr && endDateStr) {
-    const fromDate = new Date(startDateStr);
-    fromDate.setHours(0, 0, 0, 0);
-
-    const toDate = new Date(endDateStr);
-    toDate.setHours(23, 59, 59, 999);
+    const fromDate = getDayBounds(startDateStr).gte;
+    const toDate = getDayBounds(endDateStr).lte;
 
     if (fromDate > toDate) {
       throw Object.assign(new Error('Ngày bắt đầu không được vượt quá ngày kết thúc'), {
@@ -2825,22 +2830,31 @@ exports.getFeedbacks = async (user, filters = {}) => {
     listQuery.userId = { $in: userIds };
   }
 
+  // Date range lọc theo ngày đánh giá (feedbackAt), fallback createdAt cho đánh giá cũ
+  // thiếu feedbackAt. Giữ guard "có rating/feedback" của query gốc bằng $and thay vì ghi đè $or.
   if (startOfPeriod && endOfPeriod) {
-    listQuery.$or = [
-      { feedbackAt: { $gte: startOfPeriod, $lte: endOfPeriod } },
-      { createdAt: { $gte: startOfPeriod, $lte: endOfPeriod } },
-    ];
+    const dateCond = {
+      $or: [
+        { feedbackAt: { $gte: startOfPeriod, $lte: endOfPeriod } },
+        { feedbackAt: null, createdAt: { $gte: startOfPeriod, $lte: endOfPeriod } },
+      ],
+    };
+    listQuery.$and = [...(listQuery.$and || []), dateCond];
     if (startOfPrev && endOfPrev) {
-      prevQuery.$or = [
-        { feedbackAt: { $gte: startOfPrev, $lte: endOfPrev } },
-        { createdAt: { $gte: startOfPrev, $lte: endOfPrev } },
-      ];
+      prevQuery.$and = [...(prevQuery.$and || []), {
+        $or: [
+          { feedbackAt: { $gte: startOfPrev, $lte: endOfPrev } },
+          { feedbackAt: null, createdAt: { $gte: startOfPrev, $lte: endOfPrev } },
+        ],
+      }];
     }
   }
 
   if (filters.rating) {
     const r = parseInt(filters.rating);
-    listQuery.rating = r <= 2 ? { $lte: 2 } : r;
+    if (r >= 1 && r <= 5) {
+      listQuery.rating = r <= 2 ? { $lte: 2 } : r;
+    }
   }
   if (filters.replied === 'true')  listQuery.managerReply = { $exists: true, $ne: '' };
   if (filters.replied === 'false') listQuery.$and = [...(listQuery.$and || []), { $or: [{ managerReply: { $exists: false } }, { managerReply: '' }] }];
@@ -3180,11 +3194,8 @@ exports.deleteFeedbacksByDateRange = async (dateFrom, dateTo, all = false) => {
     if (!dateFrom || !dateTo) {
       throw Object.assign(new Error('Vui lòng chọn đầy đủ từ ngày và đến ngày'), { statusCode: 400 });
     }
-    const fromDate = new Date(dateFrom);
-    fromDate.setHours(0, 0, 0, 0);
-
-    const toDate = new Date(dateTo);
-    toDate.setHours(23, 59, 59, 999);
+    const fromDate = getDayBounds(dateFrom).gte;
+    const toDate = getDayBounds(dateTo).lte;
 
     if (fromDate > toDate) {
       throw Object.assign(new Error('Ngày bắt đầu không được vượt quá ngày kết thúc'), { statusCode: 400 });

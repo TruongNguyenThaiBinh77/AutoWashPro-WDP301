@@ -113,6 +113,7 @@ router.post('/', authenticate, authorize(ROLES.ADMIN, ROLES.MANAGER), voucherVal
  *                       type: boolean
  */
 router.get('/', authenticate, authorize(ROLES.ADMIN, ROLES.MANAGER), voucherController.getAllVouchers);
+router.get('/stats', authenticate, authorize(ROLES.ADMIN, ROLES.MANAGER), voucherController.getVoucherStats);
 router.get('/public', voucherController.getPublicVouchersByBranch);
 
 /**
