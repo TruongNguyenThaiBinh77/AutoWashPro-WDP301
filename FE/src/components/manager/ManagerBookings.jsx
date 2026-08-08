@@ -2264,7 +2264,26 @@ export default function ManagerBookings() {
   const [confirmingAll, setConfirmingAll] = useState(false);
   const [qrBooking, setQrBooking] = useState(null);
   const [expandedGroups, setExpandedGroups] = useState({});
+  const [groupChildren, setGroupChildren] = useState({});
+  const groupChildrenLoadingRef = useRef({});
   const debounce = useRef(null);
+
+  const loadGroupChildren = useCallback(async (groupId) => {
+    if (groupChildrenLoadingRef.current[groupId]) return;
+    groupChildrenLoadingRef.current[groupId] = true;
+    try {
+      const res = await api(`/bookings?recurringGroupId=${encodeURIComponent(groupId)}&limit=200`);
+      if (!res.ok) throw new Error(await readErr(res));
+      const p = await res.json();
+      const list = p?.data?.bookings ?? (Array.isArray(p?.data) ? p.data : []);
+      const sorted = [...list].sort((a, b) => new Date(a.bookingDate) - new Date(b.bookingDate));
+      setGroupChildren(prev => ({ ...prev, [groupId]: sorted }));
+    } catch {
+      // giữ nguyên state -> lần expand sau sẽ thử lại
+    } finally {
+      groupChildrenLoadingRef.current[groupId] = false;
+    }
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -2283,7 +2302,9 @@ export default function ManagerBookings() {
   }, [search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, page, viewMode, setSearchParams]);
 
   const toggleGroup = (groupId) => {
+    const willExpand = !expandedGroups[groupId];
     setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
+    if (willExpand && !groupChildren[groupId]) loadGroupChildren(groupId);
   };
 
   const [viewedBookings, setViewedBookings] = useState(() => {
@@ -2307,50 +2328,39 @@ export default function ManagerBookings() {
   };
 
   const tableData = useMemo(() => {
-    const groups = {};
-    const result = [];
-    bookings.forEach(b => {
-      if (b.bookingType === 'recurring' && b.recurringGroupId) {
-        if (!groups[b.recurringGroupId]) {
-          const groupItem = {
-            isGroup: true,
-            groupId: b.recurringGroupId,
-            children: [],
-          };
-          groups[b.recurringGroupId] = groupItem;
-          result.push(groupItem);
-        }
-        groups[b.recurringGroupId].children.push(b);
-      } else {
-        result.push(b);
+    // BE đã gom groupByRecurring trước phân trang; mỗi group là 1 hàng có isGroup=true.
+    // Children được lazy-load khi expand (groupChildren[groupId]).
+    return bookings.map(b => {
+      if (b.isGroup) {
+        return {
+          isGroup: true,
+          groupId: b.recurringGroupId,
+          children: groupChildren[b.recurringGroupId] || [],
+          groupCount: b.groupCount || 0,
+          userId: b.userId,
+          packageId: b.packageId,
+          bookingType: 'recurring_group',
+          bookingDate: b.bookingDate,
+          startTime: b.startTime,
+          bookingCode: b.bookingCode,
+          _id: `group_${b.recurringGroupId}`,
+        };
       }
+      return b;
     });
-
-    result.forEach(item => {
-      if (item.isGroup) {
-        item.children.sort((a, b) => new Date(a.bookingDate) - new Date(b.bookingDate));
-        const first = item.children[0];
-        item.userId = first.userId;
-        item.packageId = first.packageId;
-        item.bookingType = 'recurring_group';
-        item.bookingDate = first.bookingDate;
-        item.startTime = first.startTime;
-        item._id = `group_${item.groupId}`;
-      }
-    });
-    return result;
-  }, [bookings]);
+  }, [bookings, groupChildren]);
 
   const notify = showToast;
-  const [sortFilter, setSortFilter] = useState('time_asc');
+  const [sortFilter, setSortFilter] = useState('newest');
 
   const fetch_ = useCallback(async (q = search, sf = statusFilter, tf = typeFilter, today = todayOnly, df = dateFrom, dt = dateTo, pg = page, sort = sortFilter) => {
     setLoading(true); setError('');
     try {
       const params = new URLSearchParams({ page: pg, limit: PAGE_SIZE });
+      params.set('groupByRecurring', 'true');
+      if (sort) params.set('sort', sort);
       if (sf) params.set('status', sf);
       if (tf) params.set('bookingType', tf);
-      if (sort) params.set('sort', sort);
       if (q.trim()) params.set('search', q.trim());
       if (today) { const d = getTodayStr(); params.set('dateFrom', d); params.set('dateTo', d); }
       else if (df) { params.set('dateFrom', df); if (dt) params.set('dateTo', dt); }
@@ -2406,16 +2416,25 @@ export default function ManagerBookings() {
   const handlePageChange = (pg) => { setPage(pg); fetch_(search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, pg, sortFilter); };
 
   const handleUpdated = (updated) => {
-    setBookings((p) => p.map((b) => {
-      if (b._id !== updated._id) return b;
-      // updated từ các API (extend-grace, đổi trạng thái…) không populate dân/xe/gói =>
-      // giữ lại các ref đã populate trong list để không mất tên khách/dịch vụ.
+    const mergeOne = (b) => {
       const merged = { ...b, ...updated };
       ['userId', 'packageId', 'vehicleId', 'branchId'].forEach((k) => {
         if (typeof updated[k] === 'string' || updated[k] == null) merged[k] = b[k];
       });
       return merged;
-    }));
+    };
+    setBookings((p) => p.map((b) => (b._id !== updated._id ? b : mergeOne(b))));
+    setGroupChildren((prev) => {
+      let touched = false;
+      const next = {};
+      Object.keys(prev).forEach((gid) => {
+        const list = prev[gid];
+        if (!Array.isArray(list) || !list.some((c) => c._id === updated._id)) { next[gid] = list; return; }
+        touched = true;
+        next[gid] = list.map((c) => (c._id !== updated._id ? c : mergeOne(c)));
+      });
+      return touched ? next : prev;
+    });
     notify('Đã cập nhật trạng thái đặt lịch');
   };
 
@@ -2428,19 +2447,40 @@ export default function ManagerBookings() {
       if (!res.ok) throw new Error(await readErr(res));
       const p = await res.json();
       const updated = p?.data ?? p;
-      setBookings((prev) => prev.map((b) => {
-        if (b._id !== updated._id) return b;
+      const mergeOne = (b) => {
         const merged = { ...b, ...updated };
         ['userId', 'packageId', 'vehicleId', 'branchId'].forEach((k) => {
           if (typeof updated[k] === 'string' || updated[k] == null) merged[k] = b[k];
         });
         return merged;
-      }));
+      };
+      setBookings((prev) => prev.map((b) => (b._id !== updated._id ? b : mergeOne(b))));
+      setGroupChildren((prev) => {
+        let touched = false;
+        const next = {};
+        Object.keys(prev).forEach((gid) => {
+          const list = prev[gid];
+          if (!Array.isArray(list) || !list.some((c) => c._id === updated._id)) { next[gid] = list; return; }
+          touched = true;
+          next[gid] = list.map((c) => (c._id !== updated._id ? c : mergeOne(c)));
+        });
+        return touched ? next : prev;
+      });
       notify('Đã hủy lịch');
     } catch (err) { notify(err.message || 'Hủy thất bại', 'error'); }
   };
 
-  const pendingInView = bookings.filter((b) => b.status === 'pending');
+  const pendingInView = (() => {
+    const list = [];
+    tableData.forEach((item) => {
+      if (item.isGroup) {
+        item.children.forEach((c) => { if (c.status === 'pending') list.push(c); });
+      } else if (item.status === 'pending') {
+        list.push(item);
+      }
+    });
+    return list;
+  })();
 
   // Xác nhận hàng loạt; nếu truyền ids dùng ids, ngược lại xác nhận các đơn pending đang hiển thị.
   const confirmAll = async (ids, after) => {
@@ -2483,9 +2523,9 @@ export default function ManagerBookings() {
     setTodayOnly(false);
     setBookingTypeTab('all');
     setTypeFilter('');
-    setSortFilter('time_asc');
+    setSortFilter('newest');
     setPage(1);
-    fetch_('', '', '', false, '', '', 1, 'time_asc');
+    fetch_('', '', '', false, '', '', 1, 'newest');
   };
 
   return (
@@ -2721,7 +2761,7 @@ export default function ManagerBookings() {
                             <span className="text-slate-600">{b.packageId?.name ?? '—'}</span>
                             <div className="mt-1">
                               <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700">
-                                Nhóm định kỳ ({b.children.length} đơn)
+                                Nhóm định kỳ ({b.groupCount || (b.children || []).length} đơn)
                               </span>
                             </div>
                           </td>
@@ -2729,7 +2769,9 @@ export default function ManagerBookings() {
                             <p className="text-slate-700">
                               {b.children.length > 0
                                 ? `${new Date(b.children[0].bookingDate).toLocaleDateString('vi-VN')} → ${new Date(b.children[b.children.length - 1].bookingDate).toLocaleDateString('vi-VN')}`
-                                : ''}
+                                : b.bookingDate
+                                  ? new Date(b.bookingDate).toLocaleDateString('vi-VN')
+                                  : ''}
                             </p>
                           </td>
                           <td className="px-4 py-3">
@@ -2740,6 +2782,13 @@ export default function ManagerBookings() {
                           </td>
                           <td className="px-4 py-3 text-right"></td>
                         </tr>
+                        {isExpanded && b.children.length === 0 && (
+                          <tr className="bg-slate-50/50">
+                            <td colSpan={8} className="px-4 py-6 text-center text-sm text-slate-400">
+                              <span className="inline-flex items-center gap-2"><Spinner /> Đang tải các đơn trong nhóm…</span>
+                            </td>
+                          </tr>
+                        )}
                         {isExpanded && b.children.map(child => (
                           <tr key={child._id} className="hover:bg-slate-50 transition-colors bg-slate-50/50">
                             <td className="px-4 py-3 pl-10 relative">
