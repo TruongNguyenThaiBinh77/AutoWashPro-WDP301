@@ -2223,8 +2223,9 @@ exports.createRecurringBooking = async (data) => {
   if (!Array.isArray(weekdays) || weekdays.length === 0) {
     throw Object.assign(new Error('At least one weekday must be selected'), { statusCode: 400, code: 'INVALID_WEEKDAYS' });
   }
-  if (!Number.isInteger(weeks) || weeks < 1 || weeks > 52) {
-    throw Object.assign(new Error('Weeks must be between 1 and 52'), { statusCode: 400, code: 'INVALID_WEEKS' });
+  const maxWeeks = await configService.get('MAX_RECURRING_WEEKS', {}, 24);
+  if (!Number.isInteger(weeks) || weeks < 1 || weeks > maxWeeks) {
+    throw Object.assign(new Error(`Số tuần đặt lịch định kỳ phải từ 1 đến ${maxWeeks} tuần`), { statusCode: 400, code: 'INVALID_WEEKS', maxWeeks });
   }
 
   // --- Sub-services ---

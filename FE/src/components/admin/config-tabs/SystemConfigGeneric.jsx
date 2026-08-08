@@ -83,6 +83,10 @@ function getConfigUnit(key, description = '') {
   if (k === 'DEFAULT_BRANCH_CAPACITY') return 'xe';
   if (k === 'DEPOSIT_RATE') return '% (tỉ lệ)';
   if (k === 'SYSTEM_CANCEL_BONUS_POINTS') return 'điểm';
+  if (k === 'MAX_RECURRING_WEEKS' || k === 'RECURRING_WEEKS_OPTIONS') return 'tuần';
+  if (k === 'SLOT_PACK_REFUND_FEE_PERCENT') return '%';
+  if (k === 'SLOT_PACK_REFUND_MAX_DAYS') return 'ngày';
+  if (k === 'NO_SHOW_STRIKE_LIMIT') return 'lần';
 
   if (k.includes('MINUTES') || d.includes('(phút)') || d.includes('số phút') || d.includes('thời gian')) return 'phút';
   if (k.includes('PERCENT') || d.includes('phần trăm') || d.includes('tỷ lệ') || d.includes('tỉ lệ')) return '%';

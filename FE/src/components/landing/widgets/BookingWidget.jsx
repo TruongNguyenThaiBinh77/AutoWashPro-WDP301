@@ -65,6 +65,10 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
   const configs = useSystemConfig();
   const depositPercent = Math.round(configs?.DEPOSIT_RATE ?? 0);
   const vatRate = Math.round(configs?.VAT_PERCENT ?? 10);
+  const maxRecurringWeeks = Number(configs?.MAX_RECURRING_WEEKS) || 24;
+  const activeWeeksOptions = (Array.isArray(configs?.RECURRING_WEEKS_OPTIONS) && configs.RECURRING_WEEKS_OPTIONS.length > 0)
+    ? configs.RECURRING_WEEKS_OPTIONS
+    : WEEKS_OPTIONS;
   const isLoggedIn = !!user && !!token;
   const bookingDates = useMemo(() => buildBookingDates(), []);
 
@@ -1390,6 +1394,11 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
       setWeeks(n);
       return;
     }
+    if (n > maxRecurringWeeks) {
+      setWeeksError(`Số tuần tối đa được phép đặt là ${maxRecurringWeeks} tuần`);
+      setWeeks(n);
+      return;
+    }
     setWeeksError('');
     setWeeks(n);
     setConflictCheck({ status: 'idle', results: [], totalConflicts: 0 });
@@ -1408,7 +1417,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
     }
     if (step === 4) {
       if (tab === 'regular') return selectedDate && selectedTime;
-      const basicOk = selectedDays.length > 0 && selectedTime && Number.isInteger(weeks) && weeks >= 2;
+      const basicOk = selectedDays.length > 0 && selectedTime && Number.isInteger(weeks) && weeks >= 2 && weeks <= maxRecurringWeeks;
       if (!basicOk) return false;
       if (conflictCheck.status === 'done') return actualRecurringSessions > 0;
       return true;
@@ -2538,9 +2547,14 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
 
                   {tab === 'recurring' && (
                     <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                      <label className="text-xs text-slate-400 font-bold uppercase tracking-wide block mb-3">Số tuần lặp lại</label>
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-xs text-slate-500 font-bold uppercase tracking-wide">Số tuần lặp lại</label>
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          Tối đa {maxRecurringWeeks} tuần
+                        </span>
+                      </div>
                       <div className="flex gap-2 flex-wrap mb-4">
-                        {WEEKS_OPTIONS.map(w => (
+                        {activeWeeksOptions.map(w => (
                           <button 
                             key={w} 
                             type="button"
@@ -2556,19 +2570,22 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                           </button>
                         ))}
                       </div>
-                      <div className="flex items-center gap-3 mb-4">
+                      <div className="flex items-center gap-3 flex-wrap mb-4">
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Hoặc nhập số tuần:</span>
                         <input
                           type="text"
                           inputMode="numeric"
                           value={weeksInput}
                           onChange={handleWeeksInput}
-                          placeholder="> 1"
-                          className={`w-20 px-3 py-2.5 rounded-xl border text-sm font-semibold outline-none transition-colors focus:border-emerald-500 ${
+                          placeholder={`2 - ${maxRecurringWeeks}`}
+                          className={`w-28 px-3 py-2.5 rounded-xl border text-sm font-semibold outline-none transition-colors focus:border-emerald-500 ${
                             weeksError ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'
                           }`}
                         />
-                        {weeksError && <span className="text-xs font-semibold text-red-500">{weeksError}</span>}
+                        <span className="text-xs text-slate-400 font-medium">
+                          (Được phép nhập tối đa <strong className="text-slate-600 font-bold">{maxRecurringWeeks}</strong> tuần)
+                        </span>
+                        {weeksError && <span className="text-xs font-semibold text-red-500 w-full">{weeksError}</span>}
                       </div>
                       {previewDates.length > 0 && (
                         <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">

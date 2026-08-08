@@ -19,7 +19,8 @@ const WEEKDAYS = [
   { value: 6, label: 'T7', full: 'Thứ 7' },
   { value: 0, label: 'CN', full: 'Chủ Nhật' },
 ];
-const WEEKS_OPTIONS = [2, 4, 8, 12, 16, 20, 24];
+const DEFAULT_WEEKS_OPTIONS = [2, 4, 8, 12, 16, 20, 24];
+const WEEKS_OPTIONS = DEFAULT_WEEKS_OPTIONS;
 const TIME_SLOTS = [
   '07:00','07:30','08:00','08:30','09:00','09:30',
   '10:00','10:30','11:00','11:30','13:00','13:30',
@@ -204,6 +205,11 @@ export default function RecurringBookingFlow({ user, vehicles: userVehicles = []
     : (configs?.LOYALTY_BASE_EARNING_RATE ? (configs.LOYALTY_BASE_EARNING_RATE / 100) : 0.05);
   const pointsPerSession = Math.floor(pricePerSession * baseRate * pointMultiplier);
 
+  const maxRecurringWeeks = Number(configs?.MAX_RECURRING_WEEKS) || 24;
+  const activeWeeksOptions = (Array.isArray(configs?.RECURRING_WEEKS_OPTIONS) && configs.RECURRING_WEEKS_OPTIONS.length > 0)
+    ? configs.RECURRING_WEEKS_OPTIONS
+    : DEFAULT_WEEKS_OPTIONS;
+
   function toggleWeekday(v) {
     setSelectedWeekdays(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   }
@@ -214,6 +220,11 @@ export default function RecurringBookingFlow({ user, vehicles: userVehicles = []
     const n = raw === '' ? 0 : parseInt(raw, 10);
     if (raw === '' || !Number.isInteger(n) || n < 2) {
       setWeeksError('Số tuần phải là số nguyên dương lớn hơn 1');
+      setWeeks(n);
+      return;
+    }
+    if (n > maxRecurringWeeks) {
+      setWeeksError(`Số tuần tối đa được phép đặt là ${maxRecurringWeeks} tuần`);
       setWeeks(n);
       return;
     }
@@ -232,8 +243,8 @@ export default function RecurringBookingFlow({ user, vehicles: userVehicles = []
       setError('Vui lòng điền đầy đủ thông tin (chi nhánh, xe, gói, ngày trong tuần, giờ).');
       return;
     }
-    if (!Number.isInteger(weeks) || weeks < 2) {
-      setError('Số tuần lặp lại phải là số nguyên dương lớn hơn 1.');
+    if (!Number.isInteger(weeks) || weeks < 2 || weeks > maxRecurringWeeks) {
+      setError(`Số tuần lặp lại phải từ 2 đến ${maxRecurringWeeks} tuần.`);
       return;
     }
     setLoading(true);
@@ -514,9 +525,14 @@ export default function RecurringBookingFlow({ user, vehicles: userVehicles = []
                   </button>
                 ))}
               </div>
-              <div className="aw-slot-title">SỐ TUẦN LẶP LẠI</div>
+              <div className="flex items-center justify-between mt-4 mb-2">
+                <div className="aw-slot-title mb-0">SỐ TUẦN LẶP LẠI</div>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Tối đa {maxRecurringWeeks} tuần
+                </span>
+              </div>
               <div className="rb-weeks-grid">
-                {WEEKS_OPTIONS.map(w => (
+                {activeWeeksOptions.map(w => (
                   <button key={w} type="button"
                     className={w === weeks ? 'rb-week-btn active' : 'rb-week-btn'}
                     onClick={() => selectWeek(w)}>
@@ -524,7 +540,7 @@ export default function RecurringBookingFlow({ user, vehicles: userVehicles = []
                   </button>
                 ))}
               </div>
-              <div className="rb-weeks-manual">
+              <div className="rb-weeks-manual flex-wrap">
                 <span className="rb-weeks-manual-label">HOẶC NHẬP SỐ TUẦN:</span>
                 <input
                   type="text"
@@ -532,10 +548,13 @@ export default function RecurringBookingFlow({ user, vehicles: userVehicles = []
                   className={weeksError ? 'rb-weeks-manual-input error' : 'rb-weeks-manual-input'}
                   value={weeksInput}
                   onChange={handleWeeksInput}
-                  placeholder="Nhập số tuần (> 1)"
+                  placeholder={`2 - ${maxRecurringWeeks}`}
                   aria-label="Số tuần lặp lại"
                 />
-                {weeksError && <span className="rb-weeks-manual-error">{weeksError}</span>}
+                <span className="text-xs text-slate-400 font-medium">
+                  (Được phép nhập tối đa <strong className="text-slate-600 font-bold">{maxRecurringWeeks}</strong> tuần)
+                </span>
+                {weeksError && <span className="rb-weeks-manual-error w-full">{weeksError}</span>}
               </div>
             </article>
 

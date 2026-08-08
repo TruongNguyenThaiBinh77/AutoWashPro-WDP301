@@ -168,6 +168,22 @@ const INITIAL_CONFIGS = [
     description: 'Số lượng slot tối đa khách hàng có thể mua trong một gói lượt'
   },
   {
+    key: 'MAX_RECURRING_WEEKS',
+    value: 24,
+    type: 'number',
+    category: 'booking',
+    isPublic: true,
+    description: 'Số tuần tối đa được phép đặt lịch định kỳ lặp lại'
+  },
+  {
+    key: 'RECURRING_WEEKS_OPTIONS',
+    value: [2, 4, 8, 12, 16, 20, 24],
+    type: 'json',
+    category: 'booking',
+    isPublic: true,
+    description: 'Danh sách các mốc tuần gợi ý chọn nhanh khi đặt lịch định kỳ'
+  },
+  {
     key: 'SLOT_PACK_REFUND_FEE_PERCENT',
     value: 10,
     type: 'number',
