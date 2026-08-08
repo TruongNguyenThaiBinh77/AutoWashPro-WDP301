@@ -720,12 +720,8 @@ function WheelGiftModal({ initial, onSave, onClose, saving }) {
   );
 }
 
-function DashboardOverview({ vouchers }) {
-  const now = new Date();
-  const total = vouchers.length;
-  const active = vouchers.filter(v => v.status === 'active' && new Date(v.endDate) >= now).length;
-  const expired = vouchers.filter(v => new Date(v.endDate) < now).length;
-  const totalRemaining = vouchers.reduce((sum, v) => sum + (v.remaining || 0), 0);
+function DashboardOverview({ stats }) {
+  const { total = 0, active = 0, expired = 0, totalRemaining = 0 } = stats;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1774,6 +1770,7 @@ export default function AdminRewards() {
   }, [searchParams]);
 
   const [vouchers, setVouchers] = useState([]);
+  const [voucherStats, setVoucherStats] = useState({ total: 0, active: 0, expired: 0, totalRemaining: 0 });
   const [branches, setBranches] = useState([]);
   const [loyaltyConfig, setLoyaltyConfig] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1811,6 +1808,24 @@ export default function AdminRewards() {
       setBranches(Array.isArray(list) ? list : []);
     }).catch(() => {});
   }, []);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await api('/vouchers/stats');
+      if (res.ok) {
+        const json = await res.json();
+        const s = json?.data ?? json;
+        setVoucherStats({
+          total: s?.total ?? 0,
+          active: s?.active ?? 0,
+          expired: s?.expired ?? 0,
+          totalRemaining: s?.totalRemaining ?? 0,
+        });
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => { fetchStats(); }, [fetchStats]);
 
   const fetch_ = useCallback(async () => {
     setLoading(true); setError('');
@@ -2061,7 +2076,7 @@ export default function AdminRewards() {
         <VoucherUsageReportTab />
       ) : activeTab === 'list' && (
         <div className="space-y-5">
-          <DashboardOverview vouchers={vouchers} />
+          <DashboardOverview stats={voucherStats} />
 
           {/* Toolbar */}
           <div className="space-y-3">

@@ -10,6 +10,16 @@ const loyaltyService = require('./loyalty.service');
 const generateTransactionId = () => `TXN${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 const VALID_METHODS = ['cash', 'bank', 'vnpay', 'momo', 'wallet'];
 
+// ── Helper: day bounds cố định theo múi giờ +07:00 ─────────────────────
+const getDayBounds = (dateStr) => ({
+  gte: new Date(`${dateStr}T00:00:00.000+07:00`),
+  lte: new Date(`${dateStr}T23:59:59.999+07:00`),
+});
+const getTodayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 // ── Helper: phạm vi chi nhánh cho manager ──────────────────────────────
 // Manager chỉ được xem/xử lý thanh toán thuộc chi nhánh mình quản lý.
 const getManagerBranch = async (userId) =>
@@ -819,30 +829,15 @@ const buildStatsQuery = async (filters = {}, userRole, userId) => {
   if (filters.method) query.method = filters.method;
   if (filters.dateFrom || filters.dateTo) {
     const dateQuery = {};
-    if (filters.dateFrom) {
-      const from = new Date(filters.dateFrom);
-      from.setHours(0, 0, 0, 0);
-      if (!isNaN(from.getTime())) dateQuery.$gte = from;
-    }
-    if (filters.dateTo) {
-      const to = new Date(filters.dateTo);
-      to.setHours(23, 59, 59, 999);
-      if (!isNaN(to.getTime())) dateQuery.$lte = to;
-    }
+    if (filters.dateFrom) dateQuery.$gte = getDayBounds(filters.dateFrom).gte;
+    if (filters.dateTo) dateQuery.$lte = getDayBounds(filters.dateTo).lte;
     if (Object.keys(dateQuery).length) query.createdAt = dateQuery;
   } else if (filters.today === 'true' || filters.today === true) {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-    query.createdAt = { $gte: start, $lte: end };
+    const today = getTodayStr();
+    query.createdAt = { $gte: getDayBounds(today).gte, $lte: getDayBounds(today).lte };
   } else if (filters.date) {
-    const day = new Date(filters.date);
-    const start = new Date(day);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(day);
-    end.setHours(23, 59, 59, 999);
-    query.createdAt = { $gte: start, $lte: end };
+    const d = getDayBounds(filters.date);
+    query.createdAt = { $gte: d.gte, $lte: d.lte };
   }
   return query;
 };
@@ -890,30 +885,15 @@ exports.getAllPayments = async (filters = {}, userRole, userId) => {
     if (filters.method) query.method = filters.method;
     if (filters.dateFrom || filters.dateTo) {
       const dateQuery = {};
-      if (filters.dateFrom) {
-        const from = new Date(filters.dateFrom);
-        from.setHours(0, 0, 0, 0);
-        if (!isNaN(from.getTime())) dateQuery.$gte = from;
-      }
-      if (filters.dateTo) {
-        const to = new Date(filters.dateTo);
-        to.setHours(23, 59, 59, 999);
-        if (!isNaN(to.getTime())) dateQuery.$lte = to;
-      }
+      if (filters.dateFrom) dateQuery.$gte = getDayBounds(filters.dateFrom).gte;
+      if (filters.dateTo) dateQuery.$lte = getDayBounds(filters.dateTo).lte;
       if (Object.keys(dateQuery).length) query.createdAt = dateQuery;
     } else if (filters.today === 'true' || filters.today === true) {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
-      query.createdAt = { $gte: start, $lte: end };
+      const today = getTodayStr();
+      query.createdAt = { $gte: getDayBounds(today).gte, $lte: getDayBounds(today).lte };
     } else if (filters.date) {
-      const day = new Date(filters.date);
-      const start = new Date(day);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(day);
-      end.setHours(23, 59, 59, 999);
-      query.createdAt = { $gte: start, $lte: end };
+      const d = getDayBounds(filters.date);
+      query.createdAt = { $gte: d.gte, $lte: d.lte };
     }
   }
   // Auto-mark payments older than 24h as viewed
@@ -993,12 +973,8 @@ exports.getMyPaymentHistory = async (userId, filters = {}) => {
   
   if (filters.dateFrom || filters.dateTo) {
     const dateFilter = {};
-    if (filters.dateFrom) dateFilter.$gte = new Date(filters.dateFrom);
-    if (filters.dateTo) {
-      const end = new Date(filters.dateTo);
-      end.setDate(end.getDate() + 1);
-      dateFilter.$lt = end;
-    }
+    if (filters.dateFrom) dateFilter.$gte = getDayBounds(filters.dateFrom).gte;
+    if (filters.dateTo) dateFilter.$lte = getDayBounds(filters.dateTo).lte;
     query.createdAt = { ...query.createdAt, ...dateFilter };
   }
 
@@ -1230,10 +1206,8 @@ exports.refundPayment = async (bookingId, userRole, userId) => {
 };
 
 exports.deletePaymentsByDateRange = async (dateFrom, dateTo) => {
-  const from = new Date(dateFrom);
-  from.setHours(0, 0, 0, 0);
-  const to = new Date(dateTo);
-  to.setHours(23, 59, 59, 999);
+  const from = getDayBounds(dateFrom).gte;
+  const to = getDayBounds(dateTo).lte;
   if (isNaN(from.getTime()) || isNaN(to.getTime())) {
     throw Object.assign(new Error('Ngày không hợp lệ'), { statusCode: 400 });
   }

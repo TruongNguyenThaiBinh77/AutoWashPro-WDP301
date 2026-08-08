@@ -4,6 +4,16 @@ const loyaltyService = require('./loyalty.service');
 const notificationService = require('./notification.service');
 const sseService = require('./sse.service');
 
+// ── Helper: day bounds cố định theo múi giờ +07:00 ─────────────────────
+const getDayBounds = (dateStr) => ({
+  gte: new Date(`${dateStr}T00:00:00.000+07:00`),
+  lte: new Date(`${dateStr}T23:59:59.999+07:00`),
+});
+const getTodayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 exports.createRequest = async (bookingId, userId, userRole, reason) => {
   const booking = await Booking.findById(bookingId);
   if (!booking) throw Object.assign(new Error('Booking not found'), { statusCode: 404, code: 'BOOKING_NOT_FOUND' });
@@ -100,11 +110,8 @@ exports.getAll = async (filters = {}, userRole, userId) => {
   const endDateStr = filters.endDate || filters.dateTo;
 
   if (startDateStr && endDateStr) {
-    const fromDate = new Date(startDateStr);
-    fromDate.setHours(0, 0, 0, 0);
-
-    const toDate = new Date(endDateStr);
-    toDate.setHours(23, 59, 59, 999);
+    const fromDate = getDayBounds(startDateStr).gte;
+    const toDate = getDayBounds(endDateStr).lte;
 
     if (fromDate > toDate) {
       throw Object.assign(new Error('Ngày bắt đầu không được vượt quá ngày kết thúc'), {
@@ -115,21 +122,15 @@ exports.getAll = async (filters = {}, userRole, userId) => {
 
     query.createdAt = { $gte: fromDate, $lte: toDate };
   } else if (startDateStr) {
-    const fromDate = new Date(startDateStr);
-    fromDate.setHours(0, 0, 0, 0);
-    query.createdAt = { $gte: fromDate };
+    query.createdAt = { $gte: getDayBounds(startDateStr).gte };
   } else if (endDateStr) {
-    const toDate = new Date(endDateStr);
-    toDate.setHours(23, 59, 59, 999);
-    query.createdAt = { $lte: toDate };
+    query.createdAt = { $lte: getDayBounds(endDateStr).lte };
   }
 
   // Unviewed Today Count Mode (Fast return for badges)
   if (filters.unviewedToday === 'true' || filters.unviewedCount === 'true') {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
+    const today = getTodayStr();
+    const { gte: todayStart, lte: todayEnd } = getDayBounds(today);
 
     const countQuery = { ...query, createdAt: { $gte: todayStart, $lte: todayEnd } };
     const count = await RefundRequest.countDocuments(countQuery);
@@ -294,11 +295,8 @@ exports.deleteRequestsByDateRange = async (dateFrom, dateTo, deleteAll = false) 
     throw Object.assign(new Error('Vui lòng chọn từ ngày và đến ngày'), { statusCode: 400, code: 'INVALID_RANGE' });
   }
 
-  const fromDate = new Date(dateFrom);
-  fromDate.setHours(0, 0, 0, 0);
-
-  const toDate = new Date(dateTo);
-  toDate.setHours(23, 59, 59, 999);
+  const fromDate = getDayBounds(dateFrom).gte;
+  const toDate = getDayBounds(dateTo).lte;
 
   // H-5 SAFETY: log + warn. Hard delete refund request cần approval.
   const result = await RefundRequest.deleteMany({

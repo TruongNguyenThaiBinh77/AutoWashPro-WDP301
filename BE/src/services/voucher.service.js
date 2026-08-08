@@ -100,6 +100,25 @@ exports.getAllVouchers = async (filters = {}, userRole, userId, userBranchId) =>
   };
 };
 
+exports.getVoucherStats = async (userRole, userId, userBranchId) => {
+  const query = { isDeleted: { $ne: true } };
+  if (userRole === 'manager') {
+    if (!userBranchId) {
+      return { total: 0, active: 0, expired: 0, totalRemaining: 0 };
+    }
+    query.branchId = userBranchId;
+  }
+  const now = new Date();
+  const [total, active, expired, remainingDocs] = await Promise.all([
+    Voucher.countDocuments(query),
+    Voucher.countDocuments({ ...query, status: 'active', endDate: { $gte: now } }),
+    Voucher.countDocuments({ ...query, endDate: { $lt: now } }),
+    Voucher.find(query).select('remaining'),
+  ]);
+  const totalRemaining = remainingDocs.reduce((sum, v) => sum + (v.remaining || 0), 0);
+  return { total, active, expired, totalRemaining };
+};
+
 exports.getVoucherById = async (id, userRole, userId, userBranchId) => {
   const voucher = await Voucher.findOne({ _id: id, isDeleted: { $ne: true } });
   if (!voucher) throw Object.assign(new Error('Voucher not found'), { statusCode: 404, code: 'VOUCHER_NOT_FOUND' });

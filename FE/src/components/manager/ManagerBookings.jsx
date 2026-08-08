@@ -49,7 +49,6 @@ import TierBadge from '@/components/ui/TierBadge';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { showToast } from '@/lib/toast';
 import { getApiBaseUrl, getStoredToken } from '@/lib/authStorage';
-import ManagerQuickCheckin from '@/components/manager/ManagerQuickCheckin';
 import ManagerGenericQRDisplay from '@/components/manager/ManagerGenericQRDisplay';
 import ManagerWalkInBookingModal from '@/components/manager/ManagerWalkInBookingModal';
 
@@ -2247,7 +2246,6 @@ export default function ManagerBookings() {
   const [todayOnly, setTodayOnly] = useState(() => getInitialValue('today', 'false') === 'true');
   const [dateFrom, setDateFrom] = useState(() => getInitialValue('dateFrom', ''));
   const [dateTo, setDateTo] = useState(() => getInitialValue('dateTo', ''));
-  const [showCheckin, setShowCheckin] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showWalkInModal, setShowWalkInModal] = useState(false);
   const [confirmCancelId, setConfirmCancelId] = useState(null);
@@ -2617,11 +2615,7 @@ export default function ManagerBookings() {
           </>
         )}
 
-        <button onClick={() => setShowCheckin(true)}
-          className="ml-auto flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors">
-          <Lightning size={14} /> Check-in nhanh
-        </button>
-      </div>
+        </div>
 
       {/* Booking type tabs — only shown in table mode */}
       {viewMode === 'table' && (
@@ -2962,16 +2956,6 @@ export default function ManagerBookings() {
         <ManagerGenericQRDisplay
           branchId={user?.branchId}
           onClose={() => setShowQRScanner(false)}
-        />
-      )}
-
-      {showCheckin && (
-        <ManagerQuickCheckin
-          onClose={() => setShowCheckin(false)}
-          onCheckedIn={(b) => {
-            showToast(`Check-in thành công: ${b?.userId?.name || 'khách hàng'}`);
-            fetch_(search, statusFilter, typeFilter, todayOnly);
-          }}
         />
       )}
 
