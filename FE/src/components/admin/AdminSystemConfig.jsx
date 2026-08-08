@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LoyaltyConfigTab from './config-tabs/LoyaltyConfigTab';
 import SystemConfigGeneric from './config-tabs/SystemConfigGeneric';
-import { Gear, Money, Gift, Tag } from '@phosphor-icons/react';
+import AdminScheduleConfigTab from './config-tabs/AdminScheduleConfigTab';
+import { Gear, Money, Gift, Tag, Calendar } from '@phosphor-icons/react';
 
 const PROMOTION_KEYS = [
   'SLOT_PACK_DISCOUNTS',
@@ -31,8 +32,9 @@ export default function AdminSystemConfig({ readOnly = false }) {
     { id: 'operations', label: 'Vận hành & Booking', icon: Gear, categories: OPERATIONS_CATEGORIES },
     { id: 'payments', label: 'Thanh toán & Huỷ', icon: Money, categories: PAYMENT_CATEGORIES },
     { id: 'promotion', label: 'Khuyến mãi & Ưu đãi', icon: Tag, keys: PROMOTION_KEYS },
-    { id: 'loyalty', label: 'Hạng thành viên & Điểm', icon: Gift }
-  ];
+    { id: 'loyalty', label: 'Hạng thành viên & Điểm', icon: Gift },
+    (!readOnly && { id: 'schedule', label: 'Lịch hoạt động Chi nhánh', icon: Calendar })
+  ].filter(Boolean);
 
   return (
     <div className="flex h-full w-full flex-col bg-slate-50">
@@ -70,6 +72,7 @@ export default function AdminSystemConfig({ readOnly = false }) {
         {activeTab === 'payments' && <SystemConfigGeneric categories={PAYMENT_CATEGORIES} readOnly={readOnly} />}
         {activeTab === 'promotion' && <SystemConfigGeneric categories={PROMOTION_CATEGORIES} keys={PROMOTION_KEYS} readOnly={readOnly} />}
         {activeTab === 'loyalty' && <LoyaltyConfigTab readOnly={readOnly} />}
+        {activeTab === 'schedule' && <AdminScheduleConfigTab />}
       </div>
     </div>
   );

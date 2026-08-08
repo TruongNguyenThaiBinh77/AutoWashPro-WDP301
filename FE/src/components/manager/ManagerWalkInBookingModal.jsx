@@ -92,7 +92,7 @@ export default function ManagerWalkInBookingModal({ onClose, onSuccess, user }) 
       const bookingData = await bookingRes.json();
       if (!bookingRes.ok) throw new Error(bookingData.message || 'Lỗi khi tạo đơn đặt lịch');
       const newBooking = bookingData.data;
-      toast.success('Tạo đơn thành công!');
+      toast.success(bookingData.message || 'Tạo đơn thành công!', { duration: 5000 });
       onSuccess?.(newBooking);
       onClose();
       

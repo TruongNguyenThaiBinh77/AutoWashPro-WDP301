@@ -64,6 +64,7 @@ function authHeader(token) {
 export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles = [], apiBase, token, onGoToHistory, pendingBooking, onSetPendingBooking, onVehicleCreated, onUserUpdate, initialBranchId, initialTab, rebookData }) {
   const configs = useSystemConfig();
   const depositPercent = Math.round(configs?.DEPOSIT_RATE ?? 0);
+  const vatRate = Math.round(configs?.VAT_PERCENT ?? 10);
   const isLoggedIn = !!user && !!token;
   const bookingDates = useMemo(() => buildBookingDates(), []);
 
@@ -102,7 +103,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
   const [selectedVehicle, setSelectedVehicle] = useState(() => initialBookingState?.selectedVehicle || '');
   const [selectedPackage, setSelectedPackage] = useState(() => initialBookingState?.selectedPackage || null);
   const [selectedSubServices, setSelectedSubServices] = useState(() => (initialBookingState?.selectedSubServices && Object.keys(initialBookingState.selectedSubServices).length) ? initialBookingState.selectedSubServices : {});
-  const [selectedDate, setSelectedDate] = useState(() => initialBookingState?.selectedDate || bookingDates[1]?.id || bookingDates[0]?.id);
+  const [selectedDate, setSelectedDate] = useState(() => initialBookingState?.selectedDate || null);
   const [selectedTime, setSelectedTime] = useState(() => initialBookingState?.selectedTime || '');
   const [selectedDays, setSelectedDays] = useState(() => initialBookingState?.selectedDays || []);
   const [weeks, setWeeks] = useState(() => initialBookingState?.weeks || 2);
@@ -254,20 +255,28 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
 
   const [loyaltyConfig, setLoyaltyConfig] = useState(null);
 
-  // Load loyalty config (public)
-  useEffect(() => {
-    async function loadLoyaltyConfig() {
-      try {
-        const res = await fetch(`${API_BASE}/loyalty/config`);
-        const payload = await res.json();
-        if (payload?.data) setLoyaltyConfig(payload.data);
-        else if (payload?.tiers) setLoyaltyConfig(payload);
-      } catch (e) {
-        console.error('Failed to load loyalty config', e);
-      }
+  // Load loyalty config (public) with real-time SSE sync
+  const loadLoyaltyConfig = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/loyalty/config`);
+      const payload = await res.json();
+      if (payload?.data) setLoyaltyConfig(payload.data);
+      else if (payload?.tiers) setLoyaltyConfig(payload);
+    } catch (e) {
+      console.error('Failed to load loyalty config', e);
     }
-    loadLoyaltyConfig();
   }, []);
+
+  useEffect(() => {
+    loadLoyaltyConfig();
+  }, [loadLoyaltyConfig]);
+
+  useSSE(token, 'config_updated', loadLoyaltyConfig);
+  useSSE(token, 'loyalty_config_updated', (data) => {
+    if (data) setLoyaltyConfig(data);
+    else loadLoyaltyConfig();
+  });
+  useSSE(token, 'rewards_updated', loadLoyaltyConfig);
 
   // Load branches (public)
   useEffect(() => {
@@ -463,8 +472,67 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
     return time ? `${dateLabel} · ${time}` : dateLabel;
   }, []);
 
+  // Calculate max advance booking days based on user's tier
+  const userTierKey = (user?.tier || user?.membershipTier || 'bronze').toLowerCase();
+  const userTierObj = useMemo(() => {
+    return (loyaltyConfig?.tiers || []).find(t => (t.id || '').toLowerCase() === userTierKey);
+  }, [loyaltyConfig?.tiers, userTierKey]);
+
+  const maxAdvanceDays = useMemo(() => {
+    const tierDays = Number(userTierObj?.advanceDays);
+    if (!isNaN(tierDays) && tierDays > 0) return tierDays;
+    const configDays = Number(configs?.ADVANCE_BOOKING_LIMITS?.[userTierKey]);
+    if (!isNaN(configDays) && configDays > 0) return configDays;
+    return userTierKey === 'diamond' ? 60 : userTierKey === 'gold' ? 30 : 14;
+  }, [userTierObj, configs?.ADVANCE_BOOKING_LIMITS, userTierKey]);
+
+  const tierDisplayName = useMemo(() => {
+    return userTierObj?.name || (userTierKey === 'diamond' ? 'Kim Cương' : userTierKey === 'gold' ? 'Vàng' : userTierKey === 'silver' ? 'Bạc' : 'Đồng');
+  }, [userTierObj, userTierKey]);
+
+  const maxAdvanceDateObj = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + maxAdvanceDays);
+    return d;
+  }, [maxAdvanceDays]);
+
+  const maxAdvanceDateIso = useMemo(() => {
+    return maxAdvanceDateObj.toLocaleDateString('en-CA');
+  }, [maxAdvanceDateObj]);
+
+  const maxAdvanceDateFormatted = useMemo(() => {
+    const day = String(maxAdvanceDateObj.getDate()).padStart(2, '0');
+    const month = String(maxAdvanceDateObj.getMonth() + 1).padStart(2, '0');
+    const year = maxAdvanceDateObj.getFullYear();
+    return `${day}/${month}/${year}`;
+  }, [maxAdvanceDateObj]);
+
+  const higherTiersLabel = useMemo(() => {
+    const allTiers = loyaltyConfig?.tiers || [];
+    const higher = allTiers.filter(t => {
+      const days = Number(t.advanceDays) || Number(configs?.ADVANCE_BOOKING_LIMITS?.[t.id?.toLowerCase()]) || 0;
+      return days > maxAdvanceDays;
+    });
+    if (higher.length === 0) return null;
+    const tierNames = higher.map(t => t.name);
+    let names = '';
+    if (tierNames.length === 1) {
+      names = `hạng ${tierNames[0]}`;
+    } else if (tierNames.length === 2) {
+      names = `hạng ${tierNames[0]} hoặc ${tierNames[1]}`;
+    } else {
+      const head = tierNames.slice(0, -1).join(', ');
+      const tail = tierNames[tierNames.length - 1];
+      names = `hạng ${head} hoặc ${tail}`;
+    }
+    const daysArr = higher.map(t => Number(t.advanceDays) || Number(configs?.ADVANCE_BOOKING_LIMITS?.[t.id?.toLowerCase()]));
+    const days = daysArr.length > 1 ? `${Math.min(...daysArr)} - ${Math.max(...daysArr)} ngày` : `${daysArr[0]} ngày`;
+    return { names, days };
+  }, [loyaltyConfig?.tiers, configs?.ADVANCE_BOOKING_LIMITS, maxAdvanceDays]);
+
   // Fetch available slots
-  const currentDate = useMemo(() => getDateObj(selectedDate), [selectedDate, getDateObj]);
+  const currentDate = useMemo(() => selectedDate ? getDateObj(selectedDate) : null, [selectedDate, getDateObj]);
   useEffect(() => {
     if (!selectedBranch || !selectedPackage || !currentDate?.iso) return;
     async function fetchSlots() {
@@ -616,12 +684,17 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
         sessionCount = Math.max(1, actualRecurringSessions || previewDates.length || 1);
       }
       const estimatedTotal = perSession * sessionCount;
+      const origEstimatedTotal = (perSessionBase || perSession) * sessionCount;
+      const discEstimatedTotal = (pb.appliedDiscount || pb.discount || discount || 0) * sessionCount;
       const calculatedDeposit = Math.round((estimatedTotal * (configs?.DEPOSIT_RATE ?? 0) / 100) / 1000) * 1000;
 
       if (estimatedTotal > 0) {
         setPendingDeposit({
           isDraft: true,
           tab: pb.tab || 'regular',
+          originalPrice: origEstimatedTotal,
+          discount: discEstimatedTotal,
+          voucherCode: pb.appliedVoucher?.code || pb.voucherCode || appliedVoucher?.code || '',
           finalPrice: estimatedTotal,
           totalAmount: estimatedTotal,
           depositAmount: calculatedDeposit,
@@ -651,7 +724,11 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
           vehicle: { licensePlate: gv?.licensePlate || '', name: gv?.brand || '' },
           pkg: pkg || { name: '' },
           currentDate: pb.selectedDate ? getDateObj(pb.selectedDate) : null,
-          selectedTime: pb.selectedTime, total: estimatedTotal, discount: 0, points: 0, isPayingWithPack: false, bookingCode: code,
+          selectedTime: pb.selectedTime,
+          total: estimatedTotal,
+          discount: pb.appliedDiscount || pb.discount || discount || 0,
+          voucherCode: pb.appliedVoucher?.code || pb.voucherCode || appliedVoucher?.code || '',
+          points: 0, isPayingWithPack: false, bookingCode: code,
           subServices: (pb.selectedSubServices || []).map(n => { const s = pkg?.subServices?.find(x => x.name === n); return s ? { name: s.name, price: s.price } : { name: n, price: 0 }; }),
           recurringCount: isRec ? bk?.totalCreated || 0 : undefined,
           recurringBookings: isRec ? (bk?.created || []).map(c => ({ date: c.bookingDate, time: c.startTime })) : undefined,
@@ -846,7 +923,9 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
           currentDate,
           selectedTime,
           total: fullPrice,
-          discount: 0, points: 0, isPayingWithPack: false,
+          discount: discount || draft.discountAmount || 0,
+          voucherCode: appliedVoucher?.code || draft.voucherCode || '',
+          points: 0, isPayingWithPack: false,
           bookingCode: '',
           subServices: (currentSubServices || []).map(n => {
             const s = pkg?.subServices?.find(x => x.name === n);
@@ -885,7 +964,9 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
           currentDate,
           selectedTime,
           total: fullPrice,
-          discount: 0, points: 0, isPayingWithPack: false,
+          discount: discount || pendingDeposit?.discount || 0,
+          voucherCode: appliedVoucher?.code || pendingDeposit?.voucherCode || '',
+          points: 0, isPayingWithPack: false,
           bookingCode: '',
           subServices: (currentSubServices || []).map(n => {
             const s = pkg?.subServices?.find(x => x.name === n);
@@ -933,7 +1014,9 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
           _id: bkId,
           branch: selectedBranch, vehicle, pkg, currentDate, selectedTime,
           total: pendingDeposit.finalPrice || pendingDeposit.totalAmount || 0,
-          discount: 0, points: 0, isPayingWithPack: false,
+          discount: discount || pendingDeposit?.discount || 0,
+          voucherCode: appliedVoucher?.code || pendingDeposit?.voucherCode || '',
+          points: 0, isPayingWithPack: false,
           bookingCode: (pendingDeposit.tab === 'recurring' ? bk?.recurringGroupId : (bk?.bookingCode || bk?.code)) || '',
           subServices: (currentSubServices || []).map(n => {
             const s = pkg?.subServices?.find(x => x.name === n);
@@ -1044,17 +1127,25 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
       // Link provisional payment (VNPay return) vào booking
       const provisionalData = JSON.parse(sessionStorage.getItem('aw_provisionalPayment') || '{}');
       const provisionalTxn = provisionalData?.transactionId;
+      let paymentSuccess = false;
+
       if (provisionalTxn) {
-        const linkRes = await fetch(`${apiBase}/payments/link-provisional`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: ah },
-          body: JSON.stringify({ transactionId: provisionalTxn, bookingId: bkId, paymentType: draft.paymentMode }),
-        });
-        const linkData = await linkRes.json();
-        if (!linkRes.ok) throw new Error(linkData.message || 'Liên kết thanh toán thất bại');
-        const payment = linkData?.data || linkData;
-      } else {
-        // Fallback: create new payment + simulate (for bank flow or no provisional)
+        try {
+          const linkRes = await fetch(`${apiBase}/payments/link-provisional`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: ah },
+            body: JSON.stringify({ transactionId: provisionalTxn, bookingId: bkId, paymentType: draft.paymentMode }),
+          });
+          if (linkRes.ok) {
+            paymentSuccess = true;
+          }
+        } catch (e) {
+          console.warn('Link provisional payment failed, executing fallback:', e);
+        }
+      }
+
+      if (!paymentSuccess) {
+        // Fallback: create new payment + simulate (for bank flow, no provisional, or older backend deployment)
         const actualAmount = draft.paymentMode === 'full' ? draft.finalPrice : draft.depositAmount;
         const method = isBank ? 'bank' : 'vnpay';
         const payRes = await fetch(`${apiBase}/payments`, {
@@ -1213,7 +1304,6 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
     }
   }, [validPacks, selectedSlotPack]);
 
-  const userTierObj = (loyaltyConfig?.tiers || []).find(t => (t.id || '').toLowerCase() === (user?.tier || 'bronze').toLowerCase());
   const pointMultiplier = userTierObj?.multiplier ?? 1.0;
   const baseEarningRate = (loyaltyConfig?.baseEarningRate ?? 5) / 100;
 
@@ -1341,7 +1431,15 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
       const calculatedDeposit = Math.round((total * (configs?.DEPOSIT_RATE ?? 0) / 100) / 1000) * 1000;
       if (total > 0) {
         setPendingDeposit({
-          isDraft: true, tab: 'regular', finalPrice: total, totalAmount: total, depositAmount: calculatedDeposit, depositPaid: false
+          isDraft: true,
+          tab: 'regular',
+          originalPrice: totalBase,
+          discount: discount || 0,
+          voucherCode: appliedVoucher?.code || '',
+          finalPrice: total,
+          totalAmount: total,
+          depositAmount: calculatedDeposit,
+          depositPaid: false,
         });
         setDepositQrStep('select');
         setDepositPayment(null);
@@ -1433,6 +1531,9 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
         setPendingDeposit({
           isDraft: true,
           tab: 'recurring',
+          originalPrice: totalBase * totalValid,
+          discount: (discount || 0) * totalValid,
+          voucherCode: appliedVoucher?.code || '',
           finalPrice: totalPrice,
           totalAmount: totalPrice,
           depositAmount: totalDeposit,
@@ -1545,7 +1646,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
     setSelectedVehicle('');
     setSelectedPackage(null);
     setSelectedSubServices({});
-    setSelectedDate(bookingDates[1]?.id || bookingDates[0]?.id);
+    setSelectedDate(null);
     setSelectedTime('');
     setSelectedDays([]);
     setWeeks(2);
@@ -2160,8 +2261,13 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                             <button 
                               key={d.id} 
                               type="button"
-                              onClick={() => setSelectedDate(d.id)}
-                              className={`flex flex-col items-center justify-between min-w-[76px] p-4 rounded-2xl border-2 transition-all duration-300 ${
+                              onClick={() => {
+                                if (selectedDate !== d.id) {
+                                  setSelectedDate(d.id);
+                                  setSelectedTime('');
+                                }
+                              }}
+                              className={`flex flex-col items-center justify-between min-w-[76px] p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
                                 isSelected 
                                   ? 'border-emerald-500 bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 scale-105' 
                                   : 'border-slate-100 bg-white hover:border-slate-200 text-slate-600'
@@ -2179,14 +2285,15 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                         })}
 
                         {/* Extended Custom Date Selector */}
-                        <div className="flex flex-col items-center justify-between min-w-[130px] p-3 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 hover:border-emerald-500 transition-all shrink-0">
+                        <div className="flex flex-col items-center justify-between min-w-[140px] p-3 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 hover:border-emerald-500 transition-all shrink-0">
                           <span className="text-[10px] uppercase font-bold text-emerald-800 flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5 text-emerald-600" /> Chọn ngày khác
                           </span>
                           <input
                             type="date"
                             min={new Date().toLocaleDateString('en-CA')}
-                            value={bookingDates.some(d => d.id === selectedDate) ? '' : selectedDate}
+                            max={maxAdvanceDateIso}
+                            value={bookingDates.some(d => d.id === selectedDate) ? '' : (selectedDate || '')}
                             onChange={(e) => {
                               const val = e.target.value;
                               if (!val) return;
@@ -2195,7 +2302,12 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                                 showToast('Chỉ được chọn ngày từ hiện tại trở đi vào tương lai!', 'error');
                                 return;
                               }
+                              if (val > maxAdvanceDateIso) {
+                                showToast(`Hạng ${tierDisplayName} chỉ được đặt trước tối đa ${maxAdvanceDays} ngày (đến ngày ${maxAdvanceDateFormatted}).`, 'warning');
+                                return;
+                              }
                               setSelectedDate(val);
+                              setSelectedTime('');
                             }}
                             className="w-full text-xs font-bold text-emerald-900 bg-white border border-emerald-200 rounded-xl px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 text-center cursor-pointer shadow-sm mt-1"
                           />
@@ -2206,6 +2318,27 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                                 return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : selectedDate;
                               })()}
                             </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Informative Tier Advance Booking Rule Note */}
+                      <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 text-xs text-blue-950 shadow-2xs">
+                        <Info size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-slate-800">Quy định đặt lịch trước:</span>
+                            <span className="inline-flex items-center gap-1 rounded-md bg-blue-100 text-blue-800 px-2 py-0.5 font-extrabold text-[11px] border border-blue-200">
+                              Hạng {tierDisplayName}: Tối đa {maxAdvanceDays} ngày
+                            </span>
+                          </div>
+                          <p className="text-[11.5px] text-slate-600 leading-relaxed">
+                            Quý khách thuộc <strong>Hạng {tierDisplayName}</strong> được đặt lịch trước tối đa <strong>{maxAdvanceDays} ngày</strong> (hạn chót đến ngày <strong>{maxAdvanceDateFormatted}</strong>). Quy định này nhằm đảm bảo hệ thống chuẩn bị chu đáo cơ sở vật chất và ưu tiên phân bổ kỹ thuật viên chuyên nghiệp nhất cho xe của quý khách.
+                          </p>
+                          {higherTiersLabel && (
+                            <p className="text-[11px] text-blue-700 font-semibold pt-0.5">
+                              💡 <em>Mẹo: Nâng cấp lên hạng {higherTiersLabel.names} để mở rộng thời gian đặt trước lên tới {higherTiersLabel.days}!</em>
+                            </p>
                           )}
                         </div>
                       </div>
@@ -2235,7 +2368,19 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                   <div className="mb-6">
                     <label className="text-xs text-slate-400 font-bold uppercase tracking-wide block mb-3">Chọn khung giờ{tab === 'recurring' ? ' cố định' : ''}</label>
                     <div className="space-y-6">
-                      {slotsLoading ? (
+                      {tab === 'regular' && !selectedDate ? (
+                        <div className="flex flex-col items-center justify-center py-12 px-6 rounded-3xl border-2 border-dashed border-emerald-200/80 bg-emerald-50/30 text-center">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 mb-3 shadow-2xs">
+                            <Calendar className="w-6 h-6" />
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-800 mb-1">
+                            Vui lòng chọn ngày bạn muốn đặt lịch
+                          </h4>
+                          <p className="text-xs text-slate-500 max-w-sm">
+                            Hãy ấn chọn 1 trong 7 ngày ở trên hoặc chọn ngày khác để xem các khung giờ còn trống tại chi nhánh.
+                          </p>
+                        </div>
+                      ) : slotsLoading ? (
                         <div className="flex flex-col items-center justify-center py-12 gap-2 text-slate-400">
                           <RefreshCw className="w-6 h-6 animate-spin text-slate-300" />
                           <span className="text-sm">Đang tìm lịch trống...</span>
@@ -2249,29 +2394,39 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                           const hasSlots = availableSlots.length > 0;
                           const allPast = hasSlots && availableSlots.every(s => !s.available);
                           const isTodayClosed = isToday && allPast;
+                          const isConfiguredDayOff = selectedBranch?.scheduleConfig?.daysOff?.includes(currentDate?.iso);
+                          
                           return (
                             <div className={`flex items-center gap-3 p-5 rounded-2xl border ${
-                              isTodayClosed 
-                                ? 'bg-slate-50 border-slate-200' 
-                                : 'bg-amber-50 border-amber-200'
+                              isConfiguredDayOff 
+                                ? 'bg-red-50 border-red-200'
+                                : isTodayClosed 
+                                  ? 'bg-slate-50 border-slate-200' 
+                                  : 'bg-amber-50 border-amber-200'
                             }`}>
                               <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 ${
-                                isTodayClosed ? 'bg-slate-100' : 'bg-amber-100'
+                                isConfiguredDayOff ? 'bg-red-100' : isTodayClosed ? 'bg-slate-100' : 'bg-amber-100'
                               }`}>
-                                {isTodayClosed ? '🔒' : '📅'}
+                                {isConfiguredDayOff ? '⛔' : isTodayClosed ? '🔒' : '📅'}
                               </div>
                               <div>
                                 <p className={`text-sm font-bold ${
-                                  isTodayClosed ? 'text-slate-700' : 'text-amber-800'
+                                  isConfiguredDayOff ? 'text-red-800' : isTodayClosed ? 'text-slate-700' : 'text-amber-800'
                                 }`}>
-                                  {isTodayClosed ? 'Cửa hàng hôm nay đã đóng cửa' : 'Hết lịch trống'}
+                                  {isConfiguredDayOff 
+                                    ? 'Chi nhánh tạm nghỉ ngày này' 
+                                    : isTodayClosed 
+                                      ? 'Cửa hàng hôm nay đã đóng cửa' 
+                                      : 'Hết lịch trống'}
                                 </p>
                                 <p className={`text-xs mt-0.5 ${
-                                  isTodayClosed ? 'text-slate-500' : 'text-amber-600'
+                                  isConfiguredDayOff ? 'text-red-600' : isTodayClosed ? 'text-slate-500' : 'text-amber-600'
                                 }`}>
-                                  {isTodayClosed 
-                                    ? 'Đã hết giờ tiếp nhận cho hôm nay. Vui lòng chọn ngày khác từ ngày mai.'
-                                    : 'Ngày này đã hết chỗ. Vui lòng chọn ngày khác.'
+                                  {isConfiguredDayOff
+                                    ? 'Cửa hàng không nhận khách trong ngày này. Vui lòng chọn ngày khác.'
+                                    : isTodayClosed 
+                                      ? 'Đã hết giờ tiếp nhận cho hôm nay. Vui lòng chọn ngày khác từ ngày mai.'
+                                      : 'Ngày này đã hết chỗ. Vui lòng chọn ngày khác.'
                                   }
                                 </p>
                               </div>
@@ -2309,7 +2464,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                                     }`}
                                   >
                                     <span className={isDisabled ? 'line-through text-slate-300 text-sm' : 'text-sm'}>{timeLabel}</span>
-                                    {isDisabled && <span className="text-[10px] leading-none mt-1 font-medium text-red-400">Đã kín</span>}
+                                    {isDisabled && <span className="text-[10px] leading-none mt-1 font-medium text-red-400 text-center px-1 w-full truncate" title={s.reason || 'Đã kín'}>{s.reason || 'Đã kín'}</span>}
                                     {isVipBooked && (
                                       <span className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-full p-0.5 shadow-sm" title="Khách VIP đã đặt giờ này">
                                         <Sparkles className="w-3 h-3" />
@@ -2350,7 +2505,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                                     }`}
                                   >
                                     <span className={isDisabled ? 'line-through text-slate-300 text-sm' : 'text-sm'}>{timeLabel}</span>
-                                    {isDisabled && <span className="text-[10px] leading-none mt-1 font-medium text-red-400">Đã kín</span>}
+                                    {isDisabled && <span className="text-[10px] leading-none mt-1 font-medium text-red-400 text-center px-1 w-full truncate" title={s.reason || 'Đã kín'}>{s.reason || 'Đã kín'}</span>}
                                     {isVipBooked && (
                                       <span className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-full p-0.5 shadow-sm" title="Khách VIP đã đặt giờ này">
                                         <Sparkles className="w-3 h-3" />
@@ -2799,7 +2954,7 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                               <span className="text-base font-bold text-slate-800">Thành tiền tổng cộng</span>
                               <span className="text-2xl font-extrabold text-emerald-600">{formatCurrency(total)}</span>
                             </div>
-                            <p className="text-[11px] font-medium text-slate-400 text-right mt-1">* Giá đã bao gồm VAT 10%</p>
+                            <p className="text-[11px] font-medium text-slate-400 text-right mt-1">* Giá đã bao gồm VAT {vatRate}%</p>
                           </div>
                         )}
                       </div>
@@ -3091,18 +3246,24 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                       );
                     })}
 
-                    {lastBooking.discount > 0 && (
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                          <span>Mã giảm giá</span>
-                          {lastBooking.voucherCode && <span className="font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] font-bold">({lastBooking.voucherCode})</span>}
+                    {(lastBooking.discount > 0 || lastBooking.voucherCode) && (
+                      <div className="flex justify-between items-center text-xs py-1.5 px-3 rounded-xl bg-emerald-50/90 border border-emerald-200/80">
+                        <span className="text-emerald-800 font-bold flex items-center gap-1.5">
+                          <span>🏷️ Ưu đãi Voucher</span>
+                          {lastBooking.voucherCode && (
+                            <span className="font-mono bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded text-[10px] font-black tracking-wider">
+                              ({lastBooking.voucherCode})
+                            </span>
+                          )}
                         </span>
-                        <span className="font-bold text-emerald-600">-{formatCurrency(lastBooking.discount)}</span>
+                        <span className="font-black text-emerald-700">
+                          {lastBooking.discount > 0 ? `-${formatCurrency(lastBooking.discount)}` : 'Đã áp dụng'}
+                        </span>
                       </div>
                     )}
 
                     <div className="!mt-3 pt-3 border-t border-slate-200 flex justify-between items-center">
-                      <span className="font-bold text-sm text-slate-700">Tổng dịch vụ</span>
+                      <span className="font-bold text-sm text-slate-700">Tổng thanh toán</span>
                       <span className="font-extrabold text-base text-emerald-600">{formatCurrency(lastBooking.total || 0)}</span>
                     </div>
 
@@ -3308,41 +3469,78 @@ export default function BookingWidget({ onOpenAuth, user, vehicles: userVehicles
                   <div className="p-4 space-y-2">
                     <div>
                       <div className="bg-slate-50 border border-slate-100/60 p-2.5 rounded-xl space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-400 font-semibold">Tổng dịch vụ</span>
-                          <span className="font-bold text-slate-700">{formatCurrency(pendingDeposit.finalPrice || pendingDeposit.totalAmount || 0)}</span>
-                        </div>
-                        {paymentMode === 'deposit' ? (
-                          <>
-                            <div className="flex justify-between items-end">
-                              <div>
-                                <span className="text-amber-600 font-semibold text-sm">Đặt cọc ({depositPercent}%)</span>
-                                <div className="text-[11px] text-slate-400 mt-0.5">{depositPercent}% × {formatCurrency(pendingDeposit.finalPrice || pendingDeposit.totalAmount || 0)}</div>
-                              </div>
-                              <span className="font-black text-xl text-amber-600">{formatCurrency(pendingDeposit.depositAmount || 0)}</span>
-                            </div>
-                            <div className="h-px bg-slate-200" />
-                            <div className="flex justify-between text-sm">
-                              <span className="text-slate-400 font-semibold">Còn lại (thanh toán sau)</span>
-                              <span className="font-bold text-slate-500">{formatCurrency(Math.max(0, (pendingDeposit.finalPrice || pendingDeposit.totalAmount || 0) - (pendingDeposit.depositAmount || 0)))}</span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex justify-between items-end">
-                              <div>
-                                <span className="text-emerald-600 font-semibold text-sm">Thanh toán (100%)</span>
-                                <div className="text-[11px] text-slate-400 mt-0.5">Thanh toán toàn bộ hóa đơn</div>
-                              </div>
-                              <span className="font-black text-xl text-emerald-600">{formatCurrency(pendingDeposit.finalPrice || pendingDeposit.totalAmount || 0)}</span>
-                            </div>
-                            <div className="h-px bg-slate-200" />
-                            <div className="flex justify-between text-sm">
-                              <span className="text-slate-400 font-semibold">Còn lại (thanh toán sau)</span>
-                              <span className="font-bold text-slate-500">0đ</span>
-                            </div>
-                          </>
-                        )}
+                        {(() => {
+                          const finalAmt = pendingDeposit.finalPrice || pendingDeposit.totalAmount || 0;
+                          const discAmt = pendingDeposit.discount || (appliedVoucher ? discount : 0);
+                          const origAmt = pendingDeposit.originalPrice || (finalAmt + discAmt);
+                          const code = pendingDeposit.voucherCode || appliedVoucher?.code;
+                          const hasVoucher = discAmt > 0 || !!code;
+
+                          return (
+                            <>
+                              {hasVoucher ? (
+                                <>
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400 font-semibold">Tổng dịch vụ</span>
+                                    <span className="font-semibold text-slate-400 line-through">{formatCurrency(origAmt)}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center bg-emerald-50/80 -mx-1 px-2 py-1 rounded-lg border border-emerald-100/60 text-xs">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-emerald-700 font-bold">🏷️ Ưu đãi Voucher</span>
+                                      {code && (
+                                        <span className="bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
+                                          ({code})
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="font-black text-emerald-600">-{formatCurrency(discAmt)}</span>
+                                  </div>
+                                  <div className="flex justify-between text-sm pt-0.5 border-t border-slate-200">
+                                    <span className="text-slate-600 font-bold">Tổng sau giảm</span>
+                                    <span className="font-bold text-slate-800">{formatCurrency(finalAmt)}</span>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-400 font-semibold">Tổng dịch vụ</span>
+                                  <span className="font-bold text-slate-700">{formatCurrency(finalAmt)}</span>
+                                </div>
+                              )}
+
+                              {paymentMode === 'deposit' ? (
+                                <>
+                                  <div className="flex justify-between items-end">
+                                    <div>
+                                      <span className="text-amber-600 font-semibold text-sm">Đặt cọc ({depositPercent}%)</span>
+                                      <div className="text-[11px] text-slate-400 mt-0.5">{depositPercent}% × {formatCurrency(finalAmt)}</div>
+                                    </div>
+                                    <span className="font-black text-xl text-amber-600">{formatCurrency(pendingDeposit.depositAmount || 0)}</span>
+                                  </div>
+                                  <div className="h-px bg-slate-200" />
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400 font-semibold">Còn lại (thanh toán sau)</span>
+                                    <span className="font-bold text-slate-500">{formatCurrency(Math.max(0, finalAmt - (pendingDeposit.depositAmount || 0)))}</span>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="flex justify-between items-end">
+                                    <div>
+                                      <span className="text-emerald-600 font-semibold text-sm">Thanh toán (100%)</span>
+                                      <div className="text-[11px] text-slate-400 mt-0.5">Thanh toán toàn bộ hóa đơn</div>
+                                    </div>
+                                    <span className="font-black text-xl text-emerald-600">{formatCurrency(finalAmt)}</span>
+                                  </div>
+                                  <div className="h-px bg-slate-200" />
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400 font-semibold">Còn lại (thanh toán sau)</span>
+                                    <span className="font-bold text-slate-500">0đ</span>
+                                  </div>
+                                </>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
 

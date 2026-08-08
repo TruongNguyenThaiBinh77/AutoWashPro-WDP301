@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CustomerPagination from '@/components/ui/CustomerPagination';
 import { showToast } from '@/lib/toast';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CurrencyCircleDollar, TrendUp, TrendDown } from '@phosphor-icons/react';
@@ -250,36 +251,16 @@ export default function CustomerPaymentHistoryPage({ onBack, apiBase, token }) {
           </div>
         )}
 
-        {!loading && totalPages > 0 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage(p => p - 1)}
-              className="w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-10 h-10 rounded-full text-sm font-bold flex items-center justify-center transition-colors ${
-                    page === p ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage(p => p + 1)}
-              className="w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 5l7 7-7 7"/></svg>
-            </button>
-          </div>
+        {!loading && (
+          <CustomerPagination
+            page={page}
+            totalPages={totalPages}
+            total={payments.length}
+            limit={10}
+            setPage={setPage}
+            itemName="giao dịch thanh toán"
+            showTotal={false}
+          />
         )}
       </main>
 

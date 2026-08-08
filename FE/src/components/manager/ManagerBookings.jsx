@@ -258,12 +258,12 @@ function WaitingSlotNotice({ booking }) {
     const todayStr = new Date().toLocaleDateString('en-CA');
     const bookingDateStr = new Date(booking.bookingDate).toLocaleDateString('en-CA');
     if (bookingDateStr !== todayStr) return null;
-    
+
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     const [bh, bm] = booking.startTime.split(':').map(Number);
     const bookingMinutes = (bh || 0) * 60 + (bm || 0);
-    
+
     if (bookingMinutes > currentMinutes) {
       return (
         <div className="mt-1.5 flex items-center">
@@ -273,7 +273,7 @@ function WaitingSlotNotice({ booking }) {
         </div>
       );
     }
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -654,7 +654,7 @@ function PrintReceiptModal({ booking, onClose }) {
                           : (Array.isArray(detailBooking.packageSnapshot?.subServices)
                             ? detailBooking.packageSnapshot.subServices.filter(s => s.isOptional === false)
                             : (Array.isArray(detailBooking.packageId?.subServices) ? detailBooking.packageId.subServices.filter(s => s.isOptional === false) : []));
-                        
+
                         if (included.length > 0) {
                           return `(${included.map(s => s.name).join(', ')})`;
                         }
@@ -1113,10 +1113,10 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
                     <div key={stage.id} className="flex flex-col items-center group">
                       <div
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 z-10 ${isPast
-                            ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200 ring-4 ring-white'
-                            : isCurrent
-                              ? 'bg-blue-600 text-white shadow-lg shadow-blue-300 ring-4 ring-blue-100 animate-pulse'
-                              : 'bg-white text-slate-300 border-2 border-slate-200'
+                          ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200 ring-4 ring-white'
+                          : isCurrent
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-300 ring-4 ring-blue-100 animate-pulse'
+                            : 'bg-white text-slate-300 border-2 border-slate-200'
                           }`}
                       >
                         <Icon size={22} weight={isPast ? 'fill' : isCurrent ? 'duotone' : 'regular'} />
@@ -1535,8 +1535,8 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
                     <button key={m.id} type="button"
                       onClick={() => setManagerPayMethod(prev => prev === m.id ? null : m.id)}
                       className={`flex flex-col items-center justify-center text-center gap-1 rounded-lg border py-2 px-1 text-[11px] font-semibold transition-colors ${managerPayMethod === m.id
-                          ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                        ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                         }`}>
                       {m.icon}{m.label}
                     </button>
@@ -1600,8 +1600,8 @@ export function BookingDetailsTab({ booking, onBack, onUpdated, notify }) {
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-medium">Thanh toán:</span>
               <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${booking.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                  booking.paymentStatus === 'deposit_paid' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                    'bg-slate-100 text-slate-600 border border-slate-200'
+                booking.paymentStatus === 'deposit_paid' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                  'bg-slate-100 text-slate-600 border border-slate-200'
                 }`}>
                 {booking.paymentStatus === 'paid' ? 'Đã thanh toán' : booking.paymentStatus === 'deposit_paid' ? 'Đã đặt cọc' : 'Chưa thanh toán'}
               </span>
@@ -2342,13 +2342,15 @@ export default function ManagerBookings() {
   }, [bookings]);
 
   const notify = showToast;
+  const [sortFilter, setSortFilter] = useState('time_asc');
 
-  const fetch_ = useCallback(async (q = search, sf = statusFilter, tf = typeFilter, today = todayOnly, df = dateFrom, dt = dateTo, pg = page) => {
+  const fetch_ = useCallback(async (q = search, sf = statusFilter, tf = typeFilter, today = todayOnly, df = dateFrom, dt = dateTo, pg = page, sort = sortFilter) => {
     setLoading(true); setError('');
     try {
       const params = new URLSearchParams({ page: pg, limit: PAGE_SIZE });
       if (sf) params.set('status', sf);
       if (tf) params.set('bookingType', tf);
+      if (sort) params.set('sort', sort);
       if (q.trim()) params.set('search', q.trim());
       if (today) { const d = getTodayStr(); params.set('dateFrom', d); params.set('dateTo', d); }
       else if (df) { params.set('dateFrom', df); if (dt) params.set('dateTo', dt); }
@@ -2363,7 +2365,7 @@ export default function ManagerBookings() {
       setTotalPages(pagination?.totalPages ?? data?.totalPages ?? 1);
     } catch (err) { setError(err.message || 'Không thể tải dữ liệu'); }
     finally { setLoading(false); }
-  }, [search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, page]);
+  }, [search, statusFilter, typeFilter, sortFilter, todayOnly, dateFrom, dateTo, page]);
 
   useEffect(() => { fetch_(); }, []); // eslint-disable-line
 
@@ -2373,9 +2375,19 @@ export default function ManagerBookings() {
     fetch_();
     setRefreshSignal(s => s + 1);
   }, [fetch_]);
+
   useSSE(token, 'slots_updated', triggerRefresh);
   useSSE(token, 'payment_new', triggerRefresh);
+  useSSE(token, 'booking_new', () => {
+    notify('🔔 Có đơn đặt lịch mới tại chi nhánh!', 'info');
+    triggerRefresh();
+  });
+  useSSE(token, 'customer_checkin_request', () => {
+    notify('⚡ Khách hàng vừa gửi yêu cầu Check-in tại quầy!', 'info');
+    triggerRefresh();
+  });
   useSSE(token, 'customer_checked_in_via_qr', (data) => {
+    notify('✅ Khách đã quét QR Check-in thành công!', 'success');
     triggerRefresh();
     if (data?.bookingId) {
       navigate(`/manager/bookings/${data.bookingId}`);
@@ -2385,13 +2397,13 @@ export default function ManagerBookings() {
   const handleSearch = (v) => {
     setSearch(v);
     clearTimeout(debounce.current);
-    debounce.current = setTimeout(() => { setPage(1); fetch_(v, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, 1); }, 420);
+    debounce.current = setTimeout(() => { setPage(1); fetch_(v, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, 1, sortFilter); }, 420);
   };
 
-  const handleFilter = (v) => { setStatusFilter(v); setPage(1); fetch_(search, v, typeFilter, todayOnly, dateFrom, dateTo, 1); };
-  const handleTypeFilter = (v) => { setTypeFilter(v); setPage(1); fetch_(search, statusFilter, v, todayOnly, dateFrom, dateTo, 1); };
-  const handleTodayToggle = () => { const next = !todayOnly; setTodayOnly(next); setPage(1); if (next) { setDateFrom(''); setDateTo(''); } fetch_(search, statusFilter, typeFilter, next, '', '', 1); };
-  const handlePageChange = (pg) => { setPage(pg); fetch_(search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, pg); };
+  const handleFilter = (v) => { setStatusFilter(v); setPage(1); fetch_(search, v, typeFilter, todayOnly, dateFrom, dateTo, 1, sortFilter); };
+  const handleTypeFilter = (v) => { setTypeFilter(v); setPage(1); fetch_(search, statusFilter, v, todayOnly, dateFrom, dateTo, 1, sortFilter); };
+  const handleTodayToggle = () => { const next = !todayOnly; setTodayOnly(next); setPage(1); if (next) { setDateFrom(''); setDateTo(''); } fetch_(search, statusFilter, typeFilter, next, '', '', 1, sortFilter); };
+  const handlePageChange = (pg) => { setPage(pg); fetch_(search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, pg, sortFilter); };
 
   const handleUpdated = (updated) => {
     setBookings((p) => p.map((b) => {
@@ -2443,7 +2455,7 @@ export default function ManagerBookings() {
       const result = p?.data ?? p;
       notify(`Đã xác nhận ${result.confirmed} đơn`);
       if (after) after();
-      else fetch_(search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, page);
+      else fetch_(search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, page, sortFilter);
     } catch (err) {
       notify(err.message || 'Xác nhận thất bại', 'error');
     } finally {
@@ -2460,7 +2472,7 @@ export default function ManagerBookings() {
     else if (tab === 'all') tf = '';
     setTypeFilter(tf);
     setPage(1);
-    fetch_(search, statusFilter, tf, todayOnly, dateFrom, dateTo, 1);
+    fetch_(search, statusFilter, tf, todayOnly, dateFrom, dateTo, 1, sortFilter);
   };
 
   const handleClearFilters = () => {
@@ -2471,8 +2483,9 @@ export default function ManagerBookings() {
     setTodayOnly(false);
     setBookingTypeTab('all');
     setTypeFilter('');
+    setSortFilter('time_asc');
     setPage(1);
-    fetch_('', '', '', false, '', '', 1);
+    fetch_('', '', '', false, '', '', 1, 'time_asc');
   };
 
   return (
@@ -2499,8 +2512,30 @@ export default function ManagerBookings() {
                 placeholder="Tìm theo khách hàng, mã đặt…"
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors" />
             </div>
+
+            {/* Sort Dropdown */}
+            <select
+              id="manager-booking-sort"
+              value={sortFilter}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSortFilter(v);
+                setPage(1);
+                fetch_(search, statusFilter, typeFilter, todayOnly, dateFrom, dateTo, 1, v);
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors cursor-pointer"
+            >
+              <option value="time_asc">Lịch hẹn gần nhất (Sớm → Muộn)</option>
+              <option value="newest">Mới tạo nhất</option>
+              <option value="time_desc">Lịch hẹn xa nhất (Muộn → Sớm)</option>
+              <option value="price_desc">Giá trị cao nhất</option>
+              <option value="price_asc">Giá trị thấp nhất</option>
+              <option value="priority_desc">Khách hàng VIP</option>
+              <option value="oldest">Tạo cũ nhất</option>
+            </select>
+
             <select id="booking-status-filter" value={statusFilter} onChange={(e) => handleFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors">
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors cursor-pointer">
               <option value="">Tất cả trạng thái</option>
               <option value="pending">Chờ xác nhận</option>
               <option value="confirmed">Đã xác nhận</option>
@@ -2557,8 +2592,8 @@ export default function ManagerBookings() {
               id="tab-all-bookings"
               onClick={() => handleBookingTypeTab('all')}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${bookingTypeTab === 'all'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                 }`}
             >
               📋 Tất cả
@@ -2567,8 +2602,8 @@ export default function ManagerBookings() {
               id="tab-regular-bookings"
               onClick={() => handleBookingTypeTab('regular')}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${bookingTypeTab === 'regular'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                 }`}
             >
               📅 Đặt lịch thường
@@ -2577,8 +2612,8 @@ export default function ManagerBookings() {
               id="tab-recurring-bookings"
               onClick={() => handleBookingTypeTab('recurring')}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${bookingTypeTab === 'recurring'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                 }`}
             >
               🔄 Đặt lịch định kỳ
@@ -2588,7 +2623,7 @@ export default function ManagerBookings() {
           <div className="flex items-center gap-2">
             <button onClick={() => setShowWalkInModal(true)}
               className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-100 transition-all shadow-sm">
-              <Lightning size={18} weight="fill" className="text-blue-600" /> Tạo đơn tại của hàng
+              <Lightning size={18} weight="fill" className="text-blue-600" /> Tạo đơn tại cửa hàng
             </button>
             <button onClick={() => setShowQRScanner(true)}
               className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">
@@ -2617,10 +2652,10 @@ export default function ManagerBookings() {
             {total > 0 ? `${total} lịch hẹn` : ''}
           </p>
           <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${bookingTypeTab === 'recurring'
-              ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-              : bookingTypeTab === 'regular'
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
+            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+            : bookingTypeTab === 'regular'
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : 'bg-blue-50 text-blue-700 border-blue-200'
             }`}>
             {bookingTypeTab === 'recurring' ? '🔄 Đang xem: Đặt lịch định kỳ' : bookingTypeTab === 'regular' ? '📅 Đang xem: Đặt lịch thường' : '📋 Đang xem: Tất cả'}
           </span>
@@ -2650,8 +2685,7 @@ export default function ManagerBookings() {
                   <th className="px-4 py-3">Ngày / Giờ</th>
                   <th className="px-4 py-3">Thanh toán</th>
                   <th className="px-4 py-3">Trạng thái</th>
-                  <th className="px-4 py-3 text-center">QR</th>
-                  <th className="px-4 py-3" />
+                  <th className="px-4 py-3 text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -2704,7 +2738,6 @@ export default function ManagerBookings() {
                           <td className="px-4 py-3">
                             <span className="text-xs text-slate-500 italic">Xem chi tiết ở đơn lẻ</span>
                           </td>
-                          <td className="px-4 py-3 text-center"></td>
                           <td className="px-4 py-3 text-right"></td>
                         </tr>
                         {isExpanded && b.children.map(child => (
@@ -2735,9 +2768,9 @@ export default function ManagerBookings() {
                             </td>
                             <td className="px-4 py-3">
                               <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${child.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' :
-                                  child.paymentStatus === 'deposit_paid' ? 'bg-teal-50 text-teal-700' :
-                                    child.paymentStatus === 'refunded' ? 'bg-slate-100 text-slate-500' :
-                                      'bg-amber-50 text-amber-700'
+                                child.paymentStatus === 'deposit_paid' ? 'bg-teal-50 text-teal-700' :
+                                  child.paymentStatus === 'refunded' ? 'bg-slate-100 text-slate-500' :
+                                    'bg-amber-50 text-amber-700'
                                 }`}>
                                 {
                                   child.paymentStatus === 'paid' ? 'Đã thanh toán' :
@@ -2752,23 +2785,6 @@ export default function ManagerBookings() {
                               <StatusMenu bookingId={child._id} current={child.status} onUpdated={handleUpdated} notify={notify} />
                               <AtRiskNotice booking={child} onUpdated={handleUpdated} notify={notify} />
                               <WaitingSlotNotice booking={child} />
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {(() => {
-                                const m = getQrMode(child);
-                                if (!m) return <span className="text-slate-300">—</span>;
-                                const cls = m === 'active' ? 'text-blue-600 hover:bg-blue-50'
-                                  : m === 'checked_in' ? 'text-emerald-600 hover:bg-emerald-50'
-                                    : 'text-red-500 hover:bg-red-50';
-                                const title = m === 'active' ? 'Hiển thị QR để khách check-in'
-                                  : m === 'checked_in' ? 'Đã check-in — xem QR' : 'Mã đã hết hạn';
-                                return (
-                                  <button onClick={() => setQrBooking(child)} title={title}
-                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${cls}`}>
-                                    <QrCode size={18} weight="duotone" />
-                                  </button>
-                                );
-                              })()}
                             </td>
                             <td className="px-4 py-3 text-right">
                               <div className="flex items-center justify-end gap-2">
@@ -2831,9 +2847,9 @@ export default function ManagerBookings() {
                       </td>
                       <td className="px-4 py-3">
                         <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${b.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' :
-                            b.paymentStatus === 'deposit_paid' ? 'bg-teal-50 text-teal-700' :
-                              b.paymentStatus === 'refunded' ? 'bg-slate-100 text-slate-500' :
-                                'bg-amber-50 text-amber-700'
+                          b.paymentStatus === 'deposit_paid' ? 'bg-teal-50 text-teal-700' :
+                            b.paymentStatus === 'refunded' ? 'bg-slate-100 text-slate-500' :
+                              'bg-amber-50 text-amber-700'
                           }`}>
                           {
                             b.paymentStatus === 'paid' ? 'Đã thanh toán' :
@@ -2848,23 +2864,6 @@ export default function ManagerBookings() {
                         <StatusMenu bookingId={b._id} current={b.status} onUpdated={handleUpdated} notify={notify} />
                         <AtRiskNotice booking={b} onUpdated={handleUpdated} notify={notify} />
                         <WaitingSlotNotice booking={b} />
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {(() => {
-                          const m = getQrMode(b);
-                          if (!m) return <span className="text-slate-300">—</span>;
-                          const cls = m === 'active' ? 'text-blue-600 hover:bg-blue-50'
-                            : m === 'checked_in' ? 'text-emerald-600 hover:bg-emerald-50'
-                              : 'text-red-500 hover:bg-red-50';
-                          const title = m === 'active' ? 'Hiển thị QR để khách check-in'
-                            : m === 'checked_in' ? 'Đã check-in — xem QR' : 'Mã đã hết hạn';
-                          return (
-                            <button onClick={() => setQrBooking(b)} title={title}
-                              className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${cls}`}>
-                              <QrCode size={18} weight="duotone" />
-                            </button>
-                          );
-                        })()}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">

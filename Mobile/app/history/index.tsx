@@ -60,7 +60,7 @@ export default function HistoryScreen() {
     if (!isAuthenticated) return;
     
     try {
-      const response = await bookingApi.getMyBookings();
+      const response = await bookingApi.getMyBookings({ limit: 100 });
       setBookings(response.data || []);
     } catch (error) {
       console.error('Error fetching bookings:', error);

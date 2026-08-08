@@ -16,59 +16,139 @@ exports.getConfig = catchAsync(async (req, res, next) => {
 
 exports.updateConfig = catchAsync(async (req, res, next) => {
   const updatedConfig = await loyaltyService.updateLoyaltyConfig(req.body);
+  const sseService = require('../services/sse.service');
+  if (sseService && typeof sseService.broadcastToAll === 'function') {
+    sseService.broadcastToAll('config_updated', { key: 'LOYALTY_TIERS' });
+    sseService.broadcastToAll('loyalty_config_updated', updatedConfig);
+    sseService.broadcastToAll('rewards_updated');
+  }
   success(res, updatedConfig, 'Cập nhật cấu hình điểm thưởng thành công');
 });
 
 exports.getMyPointHistory = catchAsync(async (req, res, next) => {
+  const mongoose = require('mongoose');
   const { PointHistory } = require('../models');
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, type, search, startDate, endDate, sort = 'newest' } = req.query;
 
-  const filter = { userId: req.user._id, isDeleted: { $ne: true } };
+  const currentUserId = req.userId || (req.user && req.user._id);
+  const userObjectId = mongoose.Types.ObjectId.isValid(currentUserId)
+    ? new mongoose.Types.ObjectId(currentUserId)
+    : currentUserId;
 
-  const pageNum = parseInt(page, 10) || 1;
-  const limitNum = parseInt(limit, 10) || 10;
+  const filter = {
+    $or: [{ userId: userObjectId }, { userId: currentUserId }],
+    isDeleted: { $ne: true }
+  };
+
+  // Filter by transaction type
+  if (type === 'lifetime') {
+    filter.type = { $in: ['earned', 'adjustment'] };
+  } else if (type && type !== 'all') {
+    filter.type = type;
+  }
+
+  // Date range filter
+  if (startDate || endDate) {
+    filter.createdAt = {};
+    if (startDate) {
+      const start = new Date(startDate);
+      if (!isNaN(start.getTime())) {
+        start.setHours(0, 0, 0, 0);
+        filter.createdAt.$gte = start;
+      }
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      if (!isNaN(end.getTime())) {
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end;
+      }
+    }
+    if (Object.keys(filter.createdAt).length === 0) {
+      delete filter.createdAt;
+    }
+  }
+
+  // Text search filter
+  if (search && typeof search === 'string' && search.trim()) {
+    const term = search.trim();
+    filter.$and = filter.$and || [];
+    filter.$and.push({
+      $or: [
+        { description: { $regex: term, $options: 'i' } },
+        { 'snapshot.bookingCode': { $regex: term, $options: 'i' } },
+        { 'snapshot.packageName': { $regex: term, $options: 'i' } },
+        { 'snapshot.voucherCode': { $regex: term, $options: 'i' } },
+      ]
+    });
+  }
+
+  // Sorting
+  let sortOption = { createdAt: -1 };
+  if (sort === 'oldest') sortOption = { createdAt: 1 };
+  else if (sort === 'points_desc') sortOption = { points: -1, createdAt: -1 };
+  else if (sort === 'points_asc') sortOption = { points: 1, createdAt: -1 };
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.max(1, parseInt(limit, 10) || 10);
   const skip = (pageNum - 1) * limitNum;
 
   const total = await PointHistory.countDocuments(filter);
   const totalPages = Math.ceil(total / limitNum) || 1;
 
   const items = await PointHistory.find(filter)
-    .sort({ createdAt: -1 })
+    .sort(sortOption)
     .skip(skip)
     .limit(limitNum);
 
-  const statsAggregate = await PointHistory.aggregate([
-    { $match: filter },
-    {
-      $group: {
-        _id: null,
-        totalEarned: {
-          $sum: {
-            $cond: [
-              { $in: ['$type', ['earned', 'adjustment']] },
-              { $cond: [{ $gt: ['$points', 0] }, '$points', 0] },
-              0,
-            ],
-          },
+  let summary = { totalEarned: 0, totalRedeemed: 0 };
+  try {
+    const statsAggregate = await PointHistory.aggregate([
+      {
+        $match: {
+          $or: [{ userId: userObjectId }, { userId: currentUserId }],
+          isDeleted: { $ne: true },
         },
-        totalRedeemed: {
-          $sum: {
-            $cond: [
-              { $in: ['$type', ['redeemed', 'expired', 'adjustment']] },
-              { $cond: [{ $lt: ['$points', 0] }, { $abs: '$points' }, 0] },
-              0,
-            ],
+      },
+      {
+        $group: {
+          _id: null,
+          totalEarned: {
+            $sum: {
+              $cond: [
+                { $in: ['$type', ['earned', 'adjustment']] },
+                { $cond: [{ $gt: ['$points', 0] }, '$points', 0] },
+                0,
+              ],
+            },
+          },
+          totalRedeemed: {
+            $sum: {
+              $cond: [
+                { $in: ['$type', ['redeemed', 'expired', 'adjustment']] },
+                { $cond: [{ $lt: ['$points', 0] }, { $abs: '$points' }, 0] },
+                0,
+              ],
+            },
           },
         },
       },
-    },
-  ]);
-
-  const summary = statsAggregate[0] || { totalEarned: 0, totalRedeemed: 0 };
+    ]);
+    if (statsAggregate && statsAggregate[0]) {
+      summary = statsAggregate[0];
+    }
+  } catch (err) {
+    console.error('Error aggregating point stats:', err.message);
+  }
 
   success(res, items, 'Lấy lịch sử điểm thưởng thành công', 200, {
-    page: pageNum, limit: limitNum, total, totalPages,
-    hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1, summary,
+    page: pageNum,
+    limit: limitNum,
+    total,
+    totalPages,
+    hasNextPage: pageNum < totalPages,
+    hasPrevPage: pageNum > 1,
+    summary,
   });
 });
 

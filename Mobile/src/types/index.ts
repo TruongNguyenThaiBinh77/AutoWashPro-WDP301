@@ -470,6 +470,31 @@ export interface PointHistory {
   updatedAt: string;
 }
 
+export interface PhysicalReward {
+  _id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  pointCost: number;
+  stock: number;
+  requiredTier: UserTier;
+  status: 'active' | 'inactive';
+}
+
+export interface Redemption {
+  _id: string;
+  rewardSnapshot: {
+    name: string;
+    imageUrl?: string;
+    pointCost: number;
+    requiredTier: UserTier;
+  };
+  code: string;
+  pointsSpent: number;
+  status: 'claimed' | 'sent' | 'received' | 'cancelled';
+  createdAt: string;
+}
+
 export interface SlotProduct {
   _id: string;
   name: string;

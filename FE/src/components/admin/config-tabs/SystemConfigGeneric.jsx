@@ -244,6 +244,182 @@ function MapEditor({ config, formValues, updateJsonField, readOnly }) {
   );
 }
 
+// ---- Generic Visual JSON Editor for objects and arrays ----
+function GenericJsonEditor({ config, formValues, handleChange, updateJsonField, readOnly, isInvalid }) {
+  const [mode, setMode] = useState('visual'); // 'visual' | 'code'
+
+  const parsed = useMemo(() => {
+    try {
+      return JSON.parse(formValues[config.key] || 'null');
+    } catch {
+      return null;
+    }
+  }, [config.key, formValues]);
+
+  // If array of primitives / strings
+  if (Array.isArray(parsed) && (parsed.length === 0 || typeof parsed[0] !== 'object')) {
+    return (
+      <div className="mt-1 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Danh sách các giá trị</span>
+          <button
+            type="button"
+            onClick={() => setMode(m => m === 'visual' ? 'code' : 'visual')}
+            className="text-[10px] font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer"
+          >
+            {mode === 'visual' ? 'Chế độ JSON code' : 'Chế độ danh sách trực quan'}
+          </button>
+        </div>
+
+        {mode === 'code' ? (
+          <textarea
+            value={formValues[config.key] ?? ''}
+            onChange={(e) => handleChange(config.key, e.target.value)}
+            disabled={readOnly}
+            className={`w-full rounded-xl border text-xs font-mono outline-none transition-colors p-3 bg-slate-50 min-h-[120px] ${
+              isInvalid ? 'border-rose-400 bg-rose-50/40' : 'border-slate-200 focus:border-blue-500'
+            }`}
+          />
+        ) : (
+          <div className="space-y-2">
+            {parsed.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item ?? ''}
+                  onChange={(e) => {
+                    const next = [...parsed];
+                    next[idx] = e.target.value;
+                    updateJsonField(config.key, next);
+                  }}
+                  disabled={readOnly}
+                  className="flex-1 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:outline-none"
+                />
+                {!readOnly && (
+                  <button
+                    type="button"
+                    onClick={() => updateJsonField(config.key, parsed.filter((_, i) => i !== idx))}
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-rose-600 hover:bg-rose-50"
+                  >
+                    <Trash size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => updateJsonField(config.key, [...parsed, ''])}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-blue-300 bg-blue-50/50 px-3.5 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50"
+              >
+                <Plus size={13} weight="bold" /> Thêm mục mới
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // If object of key-value pairs
+  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    const entries = Object.entries(parsed);
+    return (
+      <div className="mt-1 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình thuộc tính (Key - Giá trị)</span>
+          <button
+            type="button"
+            onClick={() => setMode(m => m === 'visual' ? 'code' : 'visual')}
+            className="text-[10px] font-bold text-blue-600 hover:text-blue-700 underline cursor-pointer"
+          >
+            {mode === 'visual' ? 'Chế độ JSON code' : 'Chế độ bảng trực quan'}
+          </button>
+        </div>
+
+        {mode === 'code' ? (
+          <textarea
+            value={formValues[config.key] ?? ''}
+            onChange={(e) => handleChange(config.key, e.target.value)}
+            disabled={readOnly}
+            className={`w-full rounded-xl border text-xs font-mono outline-none transition-colors p-3 bg-slate-50 min-h-[120px] ${
+              isInvalid ? 'border-rose-400 bg-rose-50/40' : 'border-slate-200 focus:border-blue-500'
+            }`}
+          />
+        ) : (
+          <div className="space-y-2">
+            {entries.map(([k, v], idx) => (
+              <div key={idx} className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-2.5">
+                <input
+                  type="text"
+                  value={k}
+                  placeholder="Tên thuộc tính"
+                  onChange={(e) => {
+                    const next = entries.map(([ek, ev], i) => (i === idx ? [e.target.value, ev] : [ek, ev]));
+                    updateJsonField(config.key, Object.fromEntries(next));
+                  }}
+                  disabled={readOnly}
+                  className="w-36 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:border-blue-500 focus:outline-none"
+                />
+                <span className="text-slate-400 font-bold">:</span>
+                <input
+                  type="text"
+                  value={typeof v === 'object' ? JSON.stringify(v) : String(v ?? '')}
+                  placeholder="Giá trị"
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    if (!isNaN(Number(val)) && val.trim() !== '') val = Number(val);
+                    const next = entries.map(([ek, ev], i) => (i === idx ? [ek, val] : [ek, ev]));
+                    updateJsonField(config.key, Object.fromEntries(next));
+                  }}
+                  disabled={readOnly}
+                  className="flex-1 min-w-[140px] rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-blue-500 focus:outline-none"
+                />
+                {!readOnly && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = entries.filter((_, i) => i !== idx);
+                      updateJsonField(config.key, Object.fromEntries(next));
+                    }}
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-rose-600 hover:bg-rose-50"
+                  >
+                    <Trash size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => {
+                  const keyName = `key_${entries.length + 1}`;
+                  updateJsonField(config.key, { ...parsed, [keyName]: '' });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-dashed border-blue-300 bg-blue-50/50 px-3.5 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50"
+              >
+                <Plus size={13} weight="bold" /> Thêm thuộc tính
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback
+  return (
+    <textarea
+      value={formValues[config.key] ?? ''}
+      onChange={(e) => handleChange(config.key, e.target.value)}
+      disabled={readOnly}
+      className={`w-full rounded-xl border text-xs font-mono outline-none transition-colors p-3 bg-slate-50 min-h-[140px] ${
+        isInvalid ? 'border-rose-400 bg-rose-50/40 focus:border-rose-500' : 'border-slate-200 focus:border-blue-500'
+      } disabled:bg-slate-100 disabled:text-slate-500`}
+    />
+  );
+}
+
 const DEFAULT_CATEGORIES = [];
 const DEFAULT_EXCLUDE_KEYS = [];
 
@@ -340,18 +516,153 @@ export default function SystemConfigGeneric({ categories = DEFAULT_CATEGORIES, k
 
   const hasInvalidJson = () => Object.keys(invalidJson).some(k => invalidJson[k]);
 
-  const formatValForDiff = (val, type, unit) => {
-    if (val === null || val === undefined) return 'Trống';
-    if (type === 'boolean' || typeof val === 'boolean') return val ? 'Bật (True)' : 'Tắt (False)';
-    if (type === 'json' || typeof val === 'object') {
-      try {
-        return JSON.stringify(val);
-      } catch (e) {
-        return String(val);
-      }
+  const renderVisualDiffValue = (val, key, type, unit, isOld) => {
+    if (val === null || val === undefined || val === '') {
+      return <span className="italic text-slate-400 font-normal">Trống</span>;
     }
+
+    if (type === 'boolean' || typeof val === 'boolean') {
+      return val ? (
+        <span className={`inline-flex items-center gap-1.5 font-bold ${isOld ? 'text-rose-700' : 'text-emerald-700'}`}>
+          <span className={`h-2 w-2 rounded-full ${isOld ? 'bg-rose-500' : 'bg-emerald-500'}`} /> Bật (Kích hoạt)
+        </span>
+      ) : (
+        <span className={`inline-flex items-center gap-1.5 font-bold ${isOld ? 'text-rose-600' : 'text-slate-500'}`}>
+          <span className="h-2 w-2 rounded-full bg-slate-400" /> Tắt (Vô hiệu hóa)
+        </span>
+      );
+    }
+
+    // Special visual format for SLOT_PACK_DISCOUNTS
+    if (key === 'SLOT_PACK_DISCOUNTS' && Array.isArray(val)) {
+      if (val.length === 0) return <span className="italic text-slate-400">Không có mức chiết khấu nào</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {val.map((tier, idx) => (
+            <span
+              key={idx}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                isOld
+                  ? 'bg-rose-50 text-rose-800 border-rose-200 line-through'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+            >
+              <span className="text-slate-600">Từ <strong className="font-bold text-slate-800">{tier.minSlots}</strong> lượt:</span>
+              <span className="rounded bg-emerald-100 text-emerald-800 px-1.5 py-0.5 font-bold text-[11px]">
+                Giảm {tier.discountPercent}%
+              </span>
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // Special visual format for SLOT_PACK_VIP_BONUS_DISCOUNTS
+    if (key === 'SLOT_PACK_VIP_BONUS_DISCOUNTS' && typeof val === 'object' && !Array.isArray(val)) {
+      const entries = Object.entries(val || {});
+      if (entries.length === 0) return <span className="italic text-slate-400">Không có cấu hình</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {entries.map(([tier, bonus], idx) => (
+            <span
+              key={idx}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                isOld
+                  ? 'bg-rose-50 text-rose-800 border-rose-200 line-through'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+            >
+              <span className="uppercase text-[10px] font-black tracking-wider text-slate-700 bg-slate-200/80 px-1.5 py-0.5 rounded">
+                {tier}
+              </span>
+              <span className="font-bold text-emerald-700">+{bonus}%</span>
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // Special visual format for ADVANCE_BOOKING_LIMITS
+    if (key === 'ADVANCE_BOOKING_LIMITS' && typeof val === 'object' && !Array.isArray(val)) {
+      const entries = Object.entries(val || {});
+      if (entries.length === 0) return <span className="italic text-slate-400">Không có cấu hình</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {entries.map(([tier, days], idx) => (
+            <span
+              key={idx}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                isOld
+                  ? 'bg-rose-50 text-rose-800 border-rose-200 line-through'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+            >
+              <span className="uppercase text-[10px] font-black tracking-wider text-slate-700 bg-slate-200/80 px-1.5 py-0.5 rounded">
+                {tier}
+              </span>
+              <span className="font-bold text-slate-800">{days} ngày</span>
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // Generic array of objects/primitives
+    if (Array.isArray(val)) {
+      if (val.length === 0) return <span className="italic text-slate-400">Danh sách trống</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {val.map((item, idx) => (
+            <span
+              key={idx}
+              className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                isOld
+                  ? 'bg-rose-50 text-rose-800 border-rose-200 line-through'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+            >
+              {typeof item === 'object'
+                ? Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(' • ')
+                : String(item)}
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // Generic Object
+    if (typeof val === 'object' && val !== null) {
+      const entries = Object.entries(val || {});
+      if (entries.length === 0) return <span className="italic text-slate-400">Đối tượng trống</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {entries.map(([k, v], idx) => (
+            <span
+              key={idx}
+              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold border ${
+                isOld
+                  ? 'bg-rose-50 text-rose-800 border-rose-200 line-through'
+                  : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+              }`}
+            >
+              <span className="font-bold text-slate-700">{k}:</span>
+              <span>{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // Numeric / String with unit
     const cleanUnit = unit ? unit.replace(/\s*\([^)]*\)/g, '').trim() : '';
-    return `${val}${cleanUnit ? `${cleanUnit}` : ''}`;
+    const formattedVal = typeof val === 'number' ? val.toLocaleString('vi-VN') : String(val);
+
+    return (
+      <span className="font-bold text-sm">
+        {formattedVal}
+        {cleanUnit ? <span className="ml-1 text-xs font-semibold text-slate-500">{cleanUnit}</span> : ''}
+      </span>
+    );
   };
 
   const handleSave = async () => {
@@ -388,27 +699,39 @@ export default function SystemConfigGeneric({ categories = DEFAULT_CATEGORIES, k
     const isConfirmed = await confirmDialog({
       title: 'Xác nhận thay đổi cấu hình',
       message: `Bạn đang chuẩn bị cập nhật ${changesWithDiff.length} giá trị cấu hình dưới đây:`,
-      maxWidth: '680px',
+      maxWidth: '720px',
       content: (
-        <div className="max-h-80 overflow-y-auto space-y-3 pr-1">
+        <div className="max-h-96 overflow-y-auto space-y-3.5 pr-1 py-1">
           {changesWithDiff.map(item => (
-            <div key={item.key} className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-2">
-                <span className="font-bold text-slate-900 text-xs tracking-wide">{item.key}</span>
+            <div key={item.key} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-slate-100 pb-2.5 mb-3">
+                <span className="font-bold text-slate-900 text-xs font-mono tracking-wide">{item.key}</span>
                 {item.description && (
                   <span className="text-[11px] text-slate-500 font-normal leading-snug">
                     {item.description}
                   </span>
                 )}
               </div>
-              <div className="mt-3 flex items-center gap-2.5 font-mono text-xs flex-wrap">
-                <span className="rounded-lg bg-rose-50 px-3 py-1 text-rose-700 line-through border border-rose-200/60 font-semibold">
-                  {formatValForDiff(item.oldValue, item.type, item.unit)}
-                </span>
-                <span className="text-slate-400 font-bold text-base">→</span>
-                <span className="rounded-lg bg-emerald-50 px-3 py-1 font-bold text-emerald-700 border border-emerald-200/60">
-                  {formatValForDiff(item.newValue, item.type, item.unit)}
-                </span>
+              <div className="flex flex-col md:flex-row md:items-center gap-2.5 text-xs">
+                {/* Giá trị cũ */}
+                <div className="flex-1 rounded-xl bg-rose-50/70 border border-rose-100 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-rose-500 mb-1.5 flex items-center gap-1">
+                    <span>🔴 Giá trị cũ</span>
+                  </div>
+                  <div className="text-rose-900">{renderVisualDiffValue(item.oldValue, item.key, item.type, item.unit, true)}</div>
+                </div>
+
+                <div className="flex items-center justify-center text-slate-400 font-bold text-base px-0.5">
+                  →
+                </div>
+
+                {/* Giá trị mới */}
+                <div className="flex-1 rounded-xl bg-emerald-50/80 border border-emerald-200/80 p-3">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1.5 flex items-center gap-1">
+                    <span>🟢 Giá trị mới</span>
+                  </div>
+                  <div className="text-emerald-950">{renderVisualDiffValue(item.newValue, item.key, item.type, item.unit, false)}</div>
+                </div>
               </div>
             </div>
           ))}
@@ -571,15 +894,13 @@ export default function SystemConfigGeneric({ categories = DEFAULT_CATEGORIES, k
                     <span className="text-sm font-medium text-slate-700">Kích hoạt</span>
                   </div>
                 ) : config.type === 'json' ? (
-                  <textarea
-                    value={formValues[config.key] ?? ''}
-                    onChange={(e) => handleChange(config.key, e.target.value)}
-                    disabled={readOnly}
-                    className={`w-full max-w-2xl rounded-lg border text-sm font-mono outline-none transition-colors focus:ring-1 p-2.5 bg-slate-50 min-h-[150px] ${
-                      isInvalid
-                        ? 'border-rose-400 bg-rose-50/40 focus:border-rose-500 focus:ring-rose-100'
-                        : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500'
-                    } disabled:bg-slate-100 disabled:text-slate-500`}
+                  <GenericJsonEditor
+                    config={config}
+                    formValues={formValues}
+                    handleChange={handleChange}
+                    updateJsonField={updateJsonField}
+                    readOnly={readOnly}
+                    isInvalid={isInvalid}
                   />
                 ) : config.type === 'number' ? (
                   <div className="relative flex items-center max-w-sm">

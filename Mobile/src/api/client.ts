@@ -131,7 +131,11 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     // Handle 401 Unauthorized
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // List of auth endpoints that are public and should NOT trigger token refresh on 401
+    const publicAuthRoutes = ['/auth/login', '/auth/register', '/auth/google', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-otp'];
+    const isAuthRequest = publicAuthRoutes.some(route => originalRequest.url?.includes(route));
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       if (isRefreshing) {
         // Wait for token refresh to complete
         return new Promise((resolve, reject) => {
@@ -154,7 +158,10 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = await getRefreshToken();
         if (!refreshToken) {
-          throw new Error('No refresh token');
+          // If there's no refresh token, we can't refresh.
+          // Reject with the original 401 error so the caller can read its payload.
+          isRefreshing = false;
+          return Promise.reject(error);
         }
 
 // Call refresh token endpoint

@@ -69,8 +69,65 @@ exports.deleteReward = async (id) => {
   if (!reward) throw Object.assign(new Error('Reward not found'), { statusCode: 404 });
 };
 
-exports.getUserRewards = async (userId) => {
-  return Redemption.find({ user: userId }).sort({ createdAt: -1 }).populate('reward', 'name imageUrl');
+exports.getUserRewards = async (userId, query = {}) => {
+  const { page = 1, limit = 10, search, status, startDate, endDate, sort = 'newest' } = query;
+  const filter = { user: userId };
+
+  if (status && status !== 'all') {
+    filter.status = status;
+  }
+
+  if (search && search.trim()) {
+    const term = search.trim();
+    filter.$or = [
+      { code: { $regex: term, $options: 'i' } },
+      { 'rewardSnapshot.name': { $regex: term, $options: 'i' } },
+    ];
+  }
+
+  if (startDate || endDate) {
+    filter.createdAt = {};
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      filter.createdAt.$gte = start;
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      filter.createdAt.$lte = end;
+    }
+  }
+
+  let sortOption = { createdAt: -1 };
+  if (sort === 'oldest') sortOption = { createdAt: 1 };
+  else if (sort === 'points_desc') sortOption = { pointsSpent: -1, createdAt: -1 };
+  else if (sort === 'points_asc') sortOption = { pointsSpent: 1, createdAt: -1 };
+
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 10;
+  const skip = (pageNum - 1) * limitNum;
+
+  const [data, total] = await Promise.all([
+    Redemption.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNum)
+      .populate('reward', 'name imageUrl'),
+    Redemption.countDocuments(filter),
+  ]);
+
+  return {
+    data,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages: Math.ceil(total / limitNum) || 1,
+      hasNextPage: pageNum * limitNum < total,
+      hasPrevPage: pageNum > 1,
+    },
+  };
 };
 
 /**

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Copy, Check, Sun, Sunset, X, AlertCircle, Clock } from 'lucide-react';
 import { showToast } from '@/lib/toast';
 import useSSE from '@/hooks/useSSE';
+import CustomerPagination from '@/components/ui/CustomerPagination';
 import CustomerBookingDetail from './CustomerBookingDetail.jsx';
 import QuickBookModal from '../../widgets/QuickBookModal.jsx';
 import VoucherPicker from '../../../VoucherPicker.jsx';
@@ -2338,52 +2339,13 @@ export default function CustomerHistoryPage({ onBack, apiBase, token, vehicles: 
             )}
 
             {/* Pagination Controls */}
-            {pagination && pagination.totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-4 border-t border-slate-200">
-                <p className="text-xs font-medium text-slate-500">
-                  Hiển thị <span className="font-bold text-slate-800">{(page - 1) * limit + 1}–{Math.min(page * limit, pagination.total)}</span> trên tổng số <span className="font-bold text-emerald-600">{pagination.total}</span> lịch hẹn
-                </p>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    disabled={!pagination.hasPrevPage}
-                    onClick={() => setPage(p => p - 1)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  >
-                    ‹ Trang trước
-                  </button>
-
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                    .filter(p => p === 1 || p === pagination.totalPages || Math.abs(p - page) <= 1)
-                    .map((p, idx, arr) => {
-                      const showEllipsis = idx > 0 && p - arr[idx - 1] > 1;
-                      return (
-                        <React.Fragment key={p}>
-                          {showEllipsis && <span className="px-1 text-xs text-slate-400 font-bold">...</span>}
-                          <button
-                            onClick={() => setPage(p)}
-                            className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
-                              page === p
-                                ? 'bg-emerald-600 text-white shadow-sm scale-105'
-                                : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        </React.Fragment>
-                      );
-                    })}
-
-                  <button
-                    disabled={!pagination.hasNextPage}
-                    onClick={() => setPage(p => p + 1)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                  >
-                    Trang sau ›
-                  </button>
-                </div>
-              </div>
-            )}
+            <CustomerPagination
+              pagination={pagination}
+              page={page}
+              limit={limit}
+              setPage={setPage}
+              itemName="lịch hẹn"
+            />
           </>
         )}
 

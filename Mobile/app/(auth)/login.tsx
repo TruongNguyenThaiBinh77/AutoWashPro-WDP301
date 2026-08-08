@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from 'expo-router';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { AlertDialog, GoogleLogo, Input, Button, ScreenContainer, Text } from '../../src/components/common';
 import { colors } from '../../src/theme/colors';
@@ -26,6 +27,23 @@ export default function LoginScreen() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const loadSavedCredentials = async () => {
+      try {
+        const savedEmail = await SecureStore.getItemAsync('aw_saved_email');
+        const savedPassword = await SecureStore.getItemAsync('aw_saved_password');
+        if (savedEmail && savedPassword) {
+          setFormData({ email: savedEmail, password: savedPassword });
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.error('Failed to load credentials', error);
+      }
+    };
+    loadSavedCredentials();
+  }, []);
 
   const emailRef    = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
@@ -53,6 +71,14 @@ export default function LoginScreen() {
     if (!validateForm()) return;
     try {
       await login(formData.email.trim(), formData.password);
+      
+      if (rememberMe) {
+        await SecureStore.setItemAsync('aw_saved_email', formData.email.trim());
+        await SecureStore.setItemAsync('aw_saved_password', formData.password);
+      } else {
+        await SecureStore.deleteItemAsync('aw_saved_email');
+        await SecureStore.deleteItemAsync('aw_saved_password');
+      }
     } catch (error: any) {
       AlertDialog.error('Đăng nhập thất bại', parseLoginError(error));
     }
@@ -152,13 +178,30 @@ export default function LoginScreen() {
           onSubmitEditing={handleLogin}
         />
 
-        <TouchableOpacity 
-          style={s.forgot} 
-          activeOpacity={0.7}
-          onPress={() => router.push('/(auth)/forgot-password')}
-        >
-          <Text variant="body" weight="600" color="primary">Quên mật khẩu?</Text>
-        </TouchableOpacity>
+        <View style={s.optionsRow}>
+          <TouchableOpacity 
+            style={s.rememberMe} 
+            activeOpacity={0.7}
+            onPress={() => setRememberMe(!rememberMe)}
+          >
+            <Ionicons 
+              name={rememberMe ? "checkbox" : "square-outline"} 
+              size={20} 
+              color={rememberMe ? colors.primary : colors.textTertiary} 
+            />
+            <Text variant="bodySmall" color="textSecondary" style={{ marginLeft: 8 }}>
+              Ghi nhớ tài khoản
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={s.forgot} 
+            activeOpacity={0.7}
+            onPress={() => router.push('/(auth)/forgot-password')}
+          >
+            <Text variant="body" weight="600" color="primary">Quên mật khẩu?</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Actions */}
@@ -240,7 +283,9 @@ const s = StyleSheet.create({
   subtitle: { lineHeight: 24 },
   
   form: { marginBottom: 8 },
-  forgot: { alignSelf: 'flex-end', marginTop: 4, paddingVertical: 8 },
+  optionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingVertical: 8 },
+  rememberMe: { flexDirection: 'row', alignItems: 'center' },
+  forgot: { },
 
   actions: { marginTop: 16 },
   

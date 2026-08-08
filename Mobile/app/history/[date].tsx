@@ -87,7 +87,13 @@ export default function HistoryDayScreen() {
       setRecurringLoading(true);
       try {
         const result = await bookingApi.getMyBookings({ recurringGroupId: groupId } as any);
-        setRecurringGroupBookings(result.data || []);
+        const sortedBookings = (result.data || []).sort((a: any, b: any) => {
+          const dateA = new Date(a.bookingDate).getTime();
+          const dateB = new Date(b.bookingDate).getTime();
+          if (dateA !== dateB) return dateA - dateB;
+          return (a.startTime || '').localeCompare(b.startTime || '');
+        });
+        setRecurringGroupBookings(sortedBookings);
       } catch {
         toast.error('Không thể tải nhóm định kỳ');
       } finally {
@@ -166,8 +172,13 @@ export default function HistoryDayScreen() {
   );
 
   const fetchBookings = useCallback(async () => {
+    if (!date) return;
     try {
-      const result = await bookingApi.getMyBookings();
+      const result = await bookingApi.getMyBookings({
+        dateFrom: date,
+        dateTo: date,
+        limit: 100, // Make sure we get all bookings for the day
+      });
       setBookings(result.data || []);
     } catch {
       toast.error('Không thể tải dữ liệu');
@@ -175,7 +186,7 @@ export default function HistoryDayScreen() {
       setIsLoading(false);
       setRefreshing(false);
     }
-  }, [toast]);
+  }, [toast, date]);
 
   useEffect(() => {
     fetchBookings();
@@ -340,21 +351,41 @@ export default function HistoryDayScreen() {
                 <Icon name={Icons.close} size={18} color={colors.textTertiary} />
               </TouchableOpacity>
             </View>
-            <View style={[styles.modalBody, { maxHeight: 400 }]}>
+            <View style={[styles.modalBody, { maxHeight: 500 }]}>
               {recurringLoading ? (
                 <ActivityIndicator size="large" color={colors.primary} />
               ) : (
-                <ScrollView>
-                  {recurringGroupBookings.map((b, i) => (
-                    <View key={b._id} style={styles.recurringRow}>
-                      <View style={{ flex: 1 }}>
-                        <AppText variant="bodySmall" color="textPrimary">
-                          Lần {i + 1}: {new Date(b.bookingDate).toLocaleDateString('vi-VN')} {b.startTime}
-                        </AppText>
+                <ScrollView contentContainerStyle={styles.timelineContainer} showsVerticalScrollIndicator={false}>
+                  {recurringGroupBookings.map((b, i) => {
+                    const isLast = i === recurringGroupBookings.length - 1;
+                    return (
+                      <View key={b._id} style={styles.timelineItem}>
+                        {/* Timeline Graphic */}
+                        <View style={styles.timelineGraphic}>
+                          <View style={[styles.timelineDot, { backgroundColor: getStatusFg(b.status, colors) }]} />
+                          {!isLast && <View style={[styles.timelineLine, { backgroundColor: colors.border }]} />}
+                        </View>
+                        
+                        {/* Timeline Content */}
+                        <View style={styles.timelineContent}>
+                          <AppText variant="caption" color="textSecondary" style={styles.timelineStepLabel}>
+                            Lần {i + 1}
+                          </AppText>
+                          <View style={styles.timelineContentHeader}>
+                            <AppText variant="body" weight="600" color="textPrimary">
+                              {new Date(b.bookingDate).toLocaleDateString('vi-VN', {
+                                weekday: 'short',
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                              })} · {b.startTime}
+                            </AppText>
+                            <BookingStatusBadge status={b.status} />
+                          </View>
+                        </View>
                       </View>
-                      <BookingStatusBadge status={b.status} />
-                    </View>
-                  ))}
+                    );
+                  })}
                 </ScrollView>
               )}
             </View>
@@ -538,13 +569,45 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     gap: spacing.sm,
   },
-  recurringRow: {
+  timelineContainer: {
+    paddingVertical: spacing.sm,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: spacing.md,
+  },
+  timelineGraphic: {
+    width: 24,
+    alignItems: 'center',
+    marginRight: spacing.md,
+  },
+  timelineDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    marginTop: 4,
+    marginBottom: -spacing.md,
+  },
+  timelineContent: {
+    flex: 1,
+    paddingBottom: spacing.sm,
+  },
+  timelineContentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.06)',
+    alignItems: 'flex-start',
+    marginTop: 4,
+  },
+  timelineStepLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontSize: 11,
+    fontWeight: '700',
   },
   otpCard: {
     width: '90%',

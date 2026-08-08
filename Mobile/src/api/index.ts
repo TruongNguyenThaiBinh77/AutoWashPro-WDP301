@@ -18,5 +18,7 @@ export { chatbotApi } from './chatbot';
 export { feedbackApi } from './feedback';
 export type { FeedbackType, FeedbackPayload, FeedbackResponse } from './feedback';
 export { giftApi } from './gift';
+export { rewardApi } from './reward';
+export { loyaltyApi } from './loyalty';
 export { refundApi } from './refund';
 export { walletApi } from './wallet';

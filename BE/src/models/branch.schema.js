@@ -9,6 +9,26 @@ const branchSchema = new mongoose.Schema(
     email: { type: String, trim: true, lowercase: true },
     openingTime: { type: String, default: '07:00' },
     closingTime: { type: String, default: '18:00' },
+    scheduleConfig: {
+      morning: {
+        start: { type: String, default: '07:00' },
+        end: { type: String, default: '11:30' }
+      },
+      afternoon: {
+        start: { type: String, default: '13:00' },
+        end: { type: String, default: '18:00' }
+      },
+      daysOff: [{ type: String }], // format YYYY-MM-DD
+      blockedSlots: [
+        {
+          date: { type: String },
+          startTime: { type: String },
+          endTime: { type: String },
+          reason: { type: String }
+        }
+      ],
+      slotInterval: { type: Number, default: 30 }
+    },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
     image: { type: String },
     location: {

@@ -163,11 +163,12 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    // We only need the total count, so limit=1 is enough to get the pagination metadata.
     bookingApi
-      .getMyBookings()
+      .getMyBookings({ limit: 1 })
       .then((d) => {
         const list = Array.isArray(d) ? d : d?.data || [];
-        setBookingCount(list.length);
+        setBookingCount(d?.pagination?.total ?? list.length);
       })
       .catch(() => setBookingCount(0));
   }, [isAuthenticated]);

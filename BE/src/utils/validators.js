@@ -91,6 +91,7 @@ const branchValidators = {
     body('status').optional().isIn(['active', 'inactive']),
     body('image').optional().trim(),
     body('location.coordinates').optional().isArray(),
+    body('scheduleConfig').optional().isObject(),
   ],
   updateStatus: [
     param('id').isMongoId().withMessage('ID chi nhánh không hợp lệ'),

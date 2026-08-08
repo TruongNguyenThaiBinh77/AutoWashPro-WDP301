@@ -8,6 +8,7 @@ import {
 import Navbar from '../layout/Navbar';
 import Footer from '../layout/Footer';
 import DirectionsMap from '../widgets/DirectionsMap';
+import { useSystemConfig } from '@/hooks/useSystemConfig';
 
 const API_BASE = getApiBaseUrl() || 'http://localhost:5000/api';
 
@@ -21,6 +22,8 @@ const VOUCHER_TYPE_MAP = {
 };
 
 export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToProfile, onGoToHistory, onGoToPayments, onGoToNotifications }) {
+  const configs = useSystemConfig();
+  const vatRate = configs?.VAT_PERCENT ? Math.round(configs.VAT_PERCENT) : 10;
   const location = useLocation();
   const navigate = useNavigate();
   const id = location.pathname.split('/').filter(Boolean).pop();
@@ -315,7 +318,7 @@ export default function BranchDetailPage({ onOpenAuth, user, onLogout, onGoToPro
                     <span className="text-base font-bold text-emerald-600">{fmtCurrency(pkg.price)}</span>
                     {pkg.duration && <span className="text-xs text-slate-400">{pkg.duration} phút</span>}
                   </div>
-                  <p className="text-[10px] font-medium text-slate-400 mt-1">* Giá đã bao gồm VAT 10%</p>
+                  <p className="text-[10px] font-medium text-slate-400 mt-1">* Giá đã bao gồm VAT {vatRate}%</p>
                   {pkg.rating && (
                     <div className="flex items-center gap-1 mt-2 text-xs text-amber-500">
                       <Star size={12} weight="fill" />

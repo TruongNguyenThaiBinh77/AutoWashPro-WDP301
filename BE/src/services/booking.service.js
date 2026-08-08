@@ -104,16 +104,53 @@ const getBookingStartDateTime = (bookingDate, startTime) => {
 
 const isSlotOverlap = (s1, e1, s2, e2) => !(e1 <= s2 || s1 >= e2);
 
-const buildSlots = (packageDuration, openTime = '07:00', closeTime = '20:00') => {
+const buildSlots = (packageDuration, openTime = '07:00', closeTime = '20:00', scheduleConfig = null) => {
+  const slots = [];
+  
+  if (scheduleConfig && (scheduleConfig.morning || scheduleConfig.afternoon)) {
+    const { morning, afternoon } = scheduleConfig;
+    const interval = scheduleConfig.slotInterval || 30;
+    
+    if (morning && morning.start && morning.end) {
+      const mOpen = parseTime(morning.start);
+      const mClose = parseTime(morning.end);
+      if (mOpen !== null && mClose !== null) {
+        for (let current = mOpen; current + packageDuration <= mClose; current += interval) {
+          const start = `${String(Math.floor(current / 60)).padStart(2, '0')}:${String(current % 60).padStart(2, '0')}`;
+          const endH = Math.floor((current + packageDuration) / 60);
+          const endM = (current + packageDuration) % 60;
+          const end = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+          slots.push({ startTime: start, endTime: end });
+        }
+      }
+    }
+    
+    if (afternoon && afternoon.start && afternoon.end) {
+      const aOpen = parseTime(afternoon.start);
+      const aClose = parseTime(afternoon.end);
+      if (aOpen !== null && aClose !== null) {
+        for (let current = aOpen; current + packageDuration <= aClose; current += interval) {
+          const start = `${String(Math.floor(current / 60)).padStart(2, '0')}:${String(current % 60).padStart(2, '0')}`;
+          const endH = Math.floor((current + packageDuration) / 60);
+          const endM = (current + packageDuration) % 60;
+          const end = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+          slots.push({ startTime: start, endTime: end });
+        }
+      }
+    }
+    
+    return slots;
+  }
+
+  const interval = (scheduleConfig && scheduleConfig.slotInterval) ? scheduleConfig.slotInterval : 30;
   const open = parseTime(openTime);
   const close = parseTime(closeTime);
   if (open === null || close === null) return [];
-  const slots = [];
-  for (let current = open; current + packageDuration <= close; current += 30) {
+  for (let current = open; current + packageDuration <= close; current += interval) {
     const start = `${String(Math.floor(current / 60)).padStart(2, '0')}:${String(current % 60).padStart(2, '0')}`;
     const endH = Math.floor((current + packageDuration) / 60);
     const endM = (current + packageDuration) % 60;
-    const end = `${String(endH).padStart(2, '0')}:${String(endM % 60).padStart(2, '0')}`;
+    const end = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
     slots.push({ startTime: start, endTime: end });
   }
   return slots;
@@ -160,7 +197,7 @@ const findNearestAvailableSlot = async ({ branchId, bookingDateStr, duration, af
   }).select('startTime endTime');
 
   const capacity = await resolveBranchCapacity(branch);
-  const slots = buildSlots(duration, branch.openingTime || '07:00', branch.closingTime || '20:00');
+  const slots = buildSlots(duration, branch.openingTime || '07:00', branch.closingTime || '20:00', branch.scheduleConfig);
 
   for (const slot of slots) {
     const sns = parseTime(slot.startTime);
@@ -371,7 +408,7 @@ exports.createBooking = async (data) => {
     const booking = new Booking({
       userId, branchId, packageId, vehicleId,
       bookingDate: bd, startTime: finalStartTime, endTime: finalEndTime, note,
-      status: data.status || 'pending',
+      status: (data.isWalkIn && finalStartTime !== startTime) ? 'confirmed' : (data.status || 'pending'),
       isWalkIn: data.isWalkIn || false,
       isNewCustomerWalkIn: data.isNewCustomerWalkIn || false,
       bookingCode: generateBookingCode(),
@@ -537,10 +574,15 @@ exports.getAllBookings = async (filters = {}, userRole, userId) => {
   const limit = Math.min(100, Math.max(1, parseInt(filters.limit, 10) || 10));
   const skip = (page - 1) * limit;
 
-  let sortObj = { bookingDate: -1, startTime: -1 };
+  let sortObj = { createdAt: -1 };
   if (filters.sort) {
-    if (filters.sort === '-createdAt') sortObj = { createdAt: -1 };
-    else if (filters.sort === 'createdAt') sortObj = { createdAt: 1 };
+    if (filters.sort === '-createdAt' || filters.sort === 'newest') sortObj = { createdAt: -1 };
+    else if (filters.sort === 'createdAt' || filters.sort === 'oldest') sortObj = { createdAt: 1 };
+    else if (filters.sort === 'booking_asc' || filters.sort === 'bookingDate' || filters.sort === 'time_asc') sortObj = { bookingDate: 1, startTime: 1 };
+    else if (filters.sort === 'booking_desc' || filters.sort === '-bookingDate' || filters.sort === 'time_desc') sortObj = { bookingDate: -1, startTime: -1 };
+    else if (filters.sort === 'price_desc' || filters.sort === '-finalPrice') sortObj = { finalPrice: -1 };
+    else if (filters.sort === 'price_asc' || filters.sort === 'finalPrice') sortObj = { finalPrice: 1 };
+    else if (filters.sort === 'priority_desc' || filters.sort === '-priority') sortObj = { priority: -1, createdAt: -1 };
   }
 
   if (filters.groupByRecurring === 'true') {
@@ -2038,6 +2080,11 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
   const duration = pkg ? pkg.duration : 30;
 
   const dateStr = date instanceof Date ? date.toISOString().split('T')[0] : date;
+  
+  if (branch.scheduleConfig?.daysOff?.includes(dateStr)) {
+    return [];
+  }
+
   const { gte, lte } = getDayBounds(dateStr);
   const existing = await Booking.find({
     branchId,
@@ -2045,7 +2092,7 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
     status: { $in: ACTIVE_SLOT_STATUSES },
   }).select('startTime endTime priority');
 
-  const slots = buildSlots(duration, branch.openingTime || '07:00', branch.closingTime || '20:00');
+  const slots = buildSlots(duration, branch.openingTime || '07:00', branch.closingTime || '20:00', branch.scheduleConfig);
   const capacity = await resolveBranchCapacity(branch);
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
@@ -2081,7 +2128,28 @@ exports.getAvailableSlots = async (branchId, date, packageId) => {
         if (!vipBooked) vipOnly = false;
       }
     }
-    return { ...s, available, vipOnly, vipBooked };
+    
+    // Check blocked slots
+    const ns = parseTime(s.startTime);
+    const ne = parseTime(s.endTime);
+    let reason = null;
+    const isBlocked = branch.scheduleConfig?.blockedSlots?.some(bs => {
+      if (bs.date !== dateStr) return false;
+      const bStart = parseTime(bs.startTime);
+      const bEnd = parseTime(bs.endTime);
+      if (bStart !== null && bEnd !== null && isSlotOverlap(ns, ne, bStart, bEnd)) {
+        reason = bs.reason || 'Chi nhánh tạm nghỉ giờ này';
+        return true;
+      }
+      return false;
+    });
+
+    if (isBlocked) {
+      available = false;
+      vipOnly = false;
+    }
+
+    return { ...s, available, vipOnly, vipBooked, reason };
   });
 };
 

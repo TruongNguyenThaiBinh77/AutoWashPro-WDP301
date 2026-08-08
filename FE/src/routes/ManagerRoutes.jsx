@@ -103,7 +103,7 @@ export default function ManagerRoutes() {
         <Route path="packages" element={<ManagerPackages user={user} />} />
         <Route path="slot-packs" element={<ManagerSlotPacks user={user} />} />
         <Route path="policies" element={<ManagerPolicies />} />
-        <Route path="system-config" element={<ManagerSystemConfig />} />
+        <Route path="system-config" element={<ManagerSystemConfig user={user} />} />
         <Route path="profile" element={<ManagerProfile user={user} />} />
         <Route path="*" element={<Navigate to="/manager" replace />} />
       </Route>

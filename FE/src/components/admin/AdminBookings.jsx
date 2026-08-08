@@ -436,6 +436,7 @@ export default function AdminBookings() {
   const [statusFilter, setStatusFilter] = useState('');
   const [branchId, setBranchId] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [sortFilter, setSortFilter] = useState('newest');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [todayOnly, setTodayOnly] = useState(false);
@@ -487,6 +488,7 @@ export default function AdminBookings() {
       if (statusFilter) params.set('status', statusFilter);
       if (branchId) params.set('branchId', branchId);
       if (typeFilter) params.set('bookingType', typeFilter);
+      if (sortFilter) params.set('sort', sortFilter);
       if (todayOnly) {
         const todayStr = new Date().toISOString().split('T')[0];
         params.set('dateFrom', todayStr);
@@ -506,12 +508,26 @@ export default function AdminBookings() {
       setPage(pg);
     } catch (e) { setError(e.message); }
     finally { setLoading(false); }
-  }, [search, statusFilter, branchId, typeFilter, todayOnly, dateFrom, dateTo, page]);
+  }, [search, statusFilter, branchId, typeFilter, sortFilter, todayOnly, dateFrom, dateTo, page]);
 
-  useEffect(() => { loadBookings(1); }, [search, statusFilter, branchId, typeFilter, todayOnly, dateFrom, dateTo]);
+  useEffect(() => { loadBookings(1); }, [search, statusFilter, branchId, typeFilter, sortFilter, todayOnly, dateFrom, dateTo]);
 
+  // Real-time SSE listeners
   useSSE(token, 'slots_updated', () => loadBookings(page));
   useSSE(token, 'payment_new', () => loadBookings(page));
+  useSSE(token, 'booking_new', () => {
+    notify('🔔 Có đơn đặt lịch mới từ khách hàng!', 'info');
+    loadBookings(page);
+  });
+  useSSE(token, 'customer_checkin_request', () => {
+    notify('⚡ Khách hàng vừa gửi yêu cầu Check-in!', 'info');
+    loadBookings(page);
+  });
+  useSSE(token, 'customer_checked_in_via_qr', () => {
+    notify('✅ Khách đã quét QR Check-in thành công!', 'success');
+    loadBookings(page);
+  });
+  useSSE(token, 'refund_requests_updated', () => loadBookings(page));
 
   const handleOpenDetail = (booking) => {
     if (booking._id && !viewedBookings.includes(booking._id)) {
@@ -580,7 +596,7 @@ export default function AdminBookings() {
       {/* Header Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         {/* Search */}
-        <div className="relative flex-1 min-w-[220px]">
+        <div className="relative flex-1 min-w-[200px]">
           <MagnifyingGlass size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             value={search}
@@ -589,6 +605,21 @@ export default function AdminBookings() {
             className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 shadow-2xs transition-colors"
           />
         </div>
+
+        {/* Sort Dropdown */}
+        <select
+          value={sortFilter}
+          onChange={(e) => setSortFilter(e.target.value)}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 shadow-2xs transition-colors cursor-pointer"
+        >
+          <option value="newest">Mới tạo nhất</option>
+          <option value="time_asc">Lịch hẹn gần nhất (Sớm → Muộn)</option>
+          <option value="time_desc">Lịch hẹn xa nhất (Muộn → Sớm)</option>
+          <option value="price_desc">Giá trị cao nhất</option>
+          <option value="price_asc">Giá trị thấp nhất</option>
+          <option value="priority_desc">Khách hàng VIP</option>
+          <option value="oldest">Tạo cũ nhất</option>
+        </select>
 
         {/* Branch Filter Dropdown */}
         <select

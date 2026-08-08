@@ -85,7 +85,7 @@ const WEEKDAY_OPTIONS = [
   { value: 0, short: 'CN', long: 'Chủ Nhật' },
 ];
 
-const WEEK_PRESETS = [1, 2, 3, 4, 6, 8, 12]; // match landing page (WEEKS_OPTIONS)
+const WEEK_PRESETS = [2, 3, 4, 6, 8, 12]; // match landing page (WEEKS_OPTIONS)
 
 // Loyalty point multiplier per tier — mirrors FE RecurringBookingFlow.jsx.
 function getPointMultiplier(tier?: string, loyaltyTiersConfig?: any): number {

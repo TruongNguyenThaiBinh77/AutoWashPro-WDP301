@@ -97,7 +97,14 @@ exports.createWalkInBooking = catchAsync(async (req, res) => {
   if (targetBranchId) sseService.broadcastToManagers(targetBranchId, 'customer_checked_in_via_qr', { bookingId: booking._id });
   sseService.broadcastToAll('customer_checked_in_via_qr', { bookingId: booking._id });
 
-  success(res, booking, 'Tạo đơn vãng lai thành công', 201);
+  let msg = 'Tạo đơn vãng lai thành công';
+  if (booking.status === 'confirmed') {
+    msg = `Tạo đơn thành công. Tuy nhiên hiện tại đang đầy, khách được xếp vào khung giờ trống gần nhất: ${booking.startTime}`;
+  } else {
+    msg = 'Tạo đơn và Check-in khách vãng lai thành công';
+  }
+
+  success(res, booking, msg, 201);
 });
 
 exports.checkRecurringConflicts = catchAsync(async (req, res) => {

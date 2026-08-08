@@ -184,7 +184,12 @@ export default function BookingScreen() {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const dateOptions = useMemo(() => generateDateOptions(), []);
+  const dateOptions = useMemo(() => {
+    const userTier = user?.tier || 'bronze';
+    const limits = configs?.ADVANCE_BOOKING_LIMITS || { bronze: 14, silver: 14, gold: 30, diamond: 60 };
+    const maxDays = limits[userTier] || 14;
+    return generateDateOptions(maxDays);
+  }, [user?.tier, configs?.ADVANCE_BOOKING_LIMITS]);
 
   useEffect(() => {
     setSelectedSubServices([]);
@@ -1274,8 +1279,22 @@ export default function BookingScreen() {
                       const isVipOnly = !!slot.vipOnly;
                       const canBookVip = user?.tier === 'gold' || user?.tier === 'diamond';
                       const lockVip = isVipOnly && !canBookVip;
-                      const isUnavailable = !slot.available;
-                      const canBook = slot.available && !lockVip;
+                      
+                      let isPast = false;
+                      const now = new Date();
+                      const advanceMin = configs?.MIN_ADVANCE_BOOKING_MINUTES || 30;
+                      const effectiveNow = new Date(now.getTime() + advanceMin * 60000);
+                      const localEffectiveDate = new Date(effectiveNow.getTime() - effectiveNow.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                      
+                      if (selectedDate < localEffectiveDate) {
+                        isPast = true;
+                      } else if (selectedDate === localEffectiveDate && slot.startTime) {
+                        const [hours, minutes] = slot.startTime.split(':').map(Number);
+                        isPast = effectiveNow.getHours() > hours || (effectiveNow.getHours() === hours && effectiveNow.getMinutes() > minutes);
+                      }
+
+                      const isUnavailable = !slot.available || isPast;
+                      const canBook = !isUnavailable && !lockVip;
                       return (
                         <PressableScale
                           key={`${slot.startTime}-${idx}`}
@@ -1949,11 +1968,11 @@ function dedupePackages<T>(
   return result;
 }
 
-function generateDateOptions() {
+function generateDateOptions(limit: number = 7) {
   const dates: { value: string; label: string; dayOfWeek: string }[] = [];
   const today = new Date();
   const labels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < limit; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     // Build the YYYY-MM-DD key from LOCAL date parts, not toISOString().

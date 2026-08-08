@@ -32,8 +32,8 @@ exports.deleteReward = catchAsync(async (req, res) => {
 });
 
 exports.getUserRewards = catchAsync(async (req, res) => {
-  const rewards = await rewardService.getUserRewards(req.userId);
-  success(res, rewards, 'Đã lấy danh sách phần thưởng của tôi');
+  const result = await rewardService.getUserRewards(req.userId, req.query);
+  success(res, result.data, 'Đã lấy danh sách phần thưởng của tôi', 200, result.pagination);
 });
 
 exports.redeemReward = catchAsync(async (req, res) => {

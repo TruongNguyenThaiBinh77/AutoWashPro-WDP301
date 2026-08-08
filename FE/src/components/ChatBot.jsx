@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, User, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -8,6 +9,13 @@ import { sendChatMessage } from '../lib/chatbotService.js';
 const WELCOME = 'Xin chào! Tôi là trợ lý AI của AutoWashPro 🚗\nTôi có thể tư vấn dịch vụ và giúp bạn đặt lịch rửa xe. Bạn cần hỗ trợ gì?';
 
 export default function ChatBot() {
+  const location = useLocation();
+
+  // Hide chatbot on Admin and Manager portal routes
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/manager')) {
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([{ role: 'bot', text: WELCOME }]);
   const [input, setInput] = useState('');

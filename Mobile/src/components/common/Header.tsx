@@ -184,7 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </View>
 
-      <View style={styles.titleContainer}>
+      <View style={[styles.titleContainer, { top: insets.top, bottom: 16 }]} pointerEvents="none">
         <Text
           style={[styles.title, { color: colors.textPrimary }]}
           numberOfLines={1}
@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
   standardContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 16,
     minHeight: 56,
@@ -217,9 +218,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   titleContainer: {
-    flex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    paddingHorizontal: 8,
+    justifyContent: 'center',
+    paddingHorizontal: 80, // prevent overlap with left/right buttons
   },
   rightContainer: {
     minWidth: 44,

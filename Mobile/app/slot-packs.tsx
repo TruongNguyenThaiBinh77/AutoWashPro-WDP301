@@ -23,6 +23,7 @@ import {
   vehicleApi,
   paymentApi,
 } from '../src/api';
+import { useSystemConfig } from '../src/contexts/ConfigContext';
 import { sseService } from '../src/services/sse';
 import {
   Card,
@@ -51,15 +52,7 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DISCOUNT_TIERS = [
-  { min: 1, max: 4, pct: 0, label: 'Giá gốc' },
-  { min: 5, max: 9, pct: 5, label: 'Tiết kiệm 5%' },
-  { min: 10, max: 19, pct: 10, label: 'Tiết kiệm 10%' },
-  { min: 20, max: 50, pct: 15, label: 'Tiết kiệm 15%' },
-];
-
-function getDiscountPct(n: number) { return DISCOUNT_TIERS.find(t => n >= t.min && t.max ? n <= t.max : true)?.pct || 0; }
-function getDiscountLabel(n: number) { return DISCOUNT_TIERS.find(t => n >= t.min && t.max ? n <= t.max : true)?.label || ''; }
+// Tiers and discount helpers are now dynamically built inside the component
 
 const STEP_META = [
   { key: 1, label: 'Chi nhánh', icon: Icons.locationOutline },
@@ -73,8 +66,47 @@ export default function SlotPacksScreen() {
   const params = useLocalSearchParams();
   const colors = useColors();
   const { isAuthenticated, user } = useAuth();
+  const configs = useSystemConfig();
   const toast = useToast();
   const insets = useSafeAreaInsets();
+
+  const DISCOUNT_TIERS = useMemo(() => {
+    if (!configs?.SLOT_PACK_DISCOUNTS || !Array.isArray(configs.SLOT_PACK_DISCOUNTS) || configs.SLOT_PACK_DISCOUNTS.length === 0) {
+      return [
+        { min: 1, max: 4, pct: 0, label: 'Giá gốc' },
+        { min: 5, max: 9, pct: 5, label: 'Tiết kiệm 5%' },
+        { min: 10, max: 19, pct: 10, label: 'Tiết kiệm 10%' },
+        { min: 20, max: 50, pct: 15, label: 'Tiết kiệm 15%' },
+      ];
+    }
+    const sorted = [...configs.SLOT_PACK_DISCOUNTS].sort((a, b) => a.minSlots - b.minSlots);
+    const tiers = [];
+    tiers.push({
+      min: 1,
+      max: sorted[0].minSlots - 1,
+      pct: 0,
+      label: 'Giá gốc'
+    });
+    for (let i = 0; i < sorted.length; i++) {
+      const min = sorted[i].minSlots;
+      const max = i < sorted.length - 1 ? sorted[i + 1].minSlots - 1 : 50;
+      tiers.push({
+        min,
+        max,
+        pct: sorted[i].discountPercent,
+        label: `Tiết kiệm ${sorted[i].discountPercent}%`
+      });
+    }
+    return tiers;
+  }, [configs?.SLOT_PACK_DISCOUNTS]);
+
+  const getDiscountPct = useCallback((n: number) => {
+    return DISCOUNT_TIERS.find(t => n >= t.min && t.max ? n <= t.max : true)?.pct || 0;
+  }, [DISCOUNT_TIERS]);
+
+  const getDiscountLabel = useCallback((n: number) => {
+    return DISCOUNT_TIERS.find(t => n >= t.min && t.max ? n <= t.max : true)?.label || '';
+  }, [DISCOUNT_TIERS]);
 
   const [slotPacks, setSlotPacks] = useState<SlotPack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -739,6 +771,19 @@ export default function SlotPacksScreen() {
       </Card>
     );
   };
+
+  // Calculate VIP bonus directly from configs
+  const getVipBonusDiscount = useCallback(() => {
+    if (!user?.tier || !configs?.SLOT_PACK_VIP_BONUS_DISCOUNTS) return 0;
+    return configs.SLOT_PACK_VIP_BONUS_DISCOUNTS[user.tier] || 0;
+  }, [user?.tier, configs?.SLOT_PACK_VIP_BONUS_DISCOUNTS]);
+
+  const subTotal = selectedPackage ? (packages.find(p => p._id === selectedPackage)?.price || 0) * slotCount : 0;
+  const baseDiscountPct = getDiscountPct(slotCount);
+  const vipBonusPct = getVipBonusDiscount();
+  const totalDiscountPct = baseDiscountPct + vipBonusPct;
+  const discountAmount = Math.floor(subTotal * (totalDiscountPct / 100));
+  const finalPrice = subTotal - discountAmount;
 
   if (!isAuthenticated) {
     return (

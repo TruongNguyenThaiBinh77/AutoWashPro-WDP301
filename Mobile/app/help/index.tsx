@@ -23,6 +23,7 @@ import {
   AlertDialog,
   useToast,
 } from '../../src/components/common';
+import { useSystemConfig } from '../../src/contexts/ConfigContext';
 import { useColors } from '../../src/theme/ThemeContext';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme/spacing';
@@ -33,46 +34,52 @@ interface FAQItem {
   answer: string;
 }
 
-const FAQS: FAQItem[] = [
-  {
-    id: '1',
-    question: 'Làm sao để đặt lịch rửa xe?',
-    answer: 'Bạn có thể đặt lịch rửa xe bằng cách: 1) Chọn chi nhánh gần bạn, 2) Chọn gói dịch vụ phù hợp, 3) Chọn phương tiện, 4) Chọn ngày và giờ, 5) Xác nhận đặt lịch.',
-  },
-  {
-    id: '2',
-    question: 'Tôi có thể hủy đặt lịch không?',
-    answer: 'Bạn có thể hủy đặt lịch trước giờ hẹn ít nhất 2 giờ. Để hủy, vào mục "Lịch sử đặt lịch" và chọn "Hủy đặt lịch".',
-  },
-  {
-    id: '3',
-    question: 'Làm sao để thanh toán?',
-    answer: 'AutoWashPro hỗ trợ thanh toán qua: Tiền mặt khi đến chi nhánh, Ví MoMo, và VNPay. Bạn có thể chọn phương thức thanh toán khi xác nhận đặt lịch.',
-  },
-  {
-    id: '4',
-    question: 'Tôi quên mật khẩu, làm sao?',
-    answer: 'Bạn có thể khôi phục mật khẩu bằng cách nhấn "Quên mật khẩu" trên màn hình đăng nhập và làm theo hướng dẫn.',
-  },
-  {
-    id: '5',
-    question: 'Điểm tích lũy là gì?',
-    answer: 'Mỗi lần sử dụng dịch vụ, bạn sẽ tích lũy điểm dựa trên giá trị đơn hàng. Điểm có thể đổi voucher và quà tặng tại mục "Phần thưởng".',
-  },
-  {
-    id: '6',
-    question: 'Làm sao liên hệ với AutoWashPro?',
-    answer: 'Bạn có thể liên hệ qua hotline 1900 xxxx, email support@autowashpro.vn, hoặc chat trực tiếp với chúng tôi.',
-  },
-];
-
 export default function HelpScreen() {
   const colors = useColors();
+  const configs = useSystemConfig();
   const toast = useToast();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
+
+  const cancelThresholdMinutes = configs?.LATE_CANCEL_THRESHOLD_MINUTES || 120;
+  const cancelThresholdText = cancelThresholdMinutes >= 60 
+    ? `${Math.floor(cancelThresholdMinutes / 60)} giờ` 
+    : `${cancelThresholdMinutes} phút`;
+
+  const FAQS: FAQItem[] = [
+    {
+      id: '1',
+      question: 'Làm sao để đặt lịch rửa xe?',
+      answer: 'Bạn có thể đặt lịch rửa xe bằng cách: 1) Chọn chi nhánh gần bạn, 2) Chọn gói dịch vụ phù hợp, 3) Chọn phương tiện, 4) Chọn ngày và giờ, 5) Xác nhận đặt lịch.',
+    },
+    {
+      id: '2',
+      question: 'Tôi có thể hủy đặt lịch không?',
+      answer: `Bạn có thể hủy đặt lịch miễn phí trước giờ hẹn ít nhất ${cancelThresholdText}. Nếu hủy muộn hơn thời gian này, bạn có thể phải chịu phí phạt theo quy định. Để hủy, vào mục "Lịch sử đặt lịch" và chọn "Hủy đặt lịch".`,
+    },
+    {
+      id: '3',
+      question: 'Làm sao để thanh toán?',
+      answer: 'AutoWashPro hỗ trợ thanh toán qua: Tiền mặt khi đến chi nhánh, Ví MoMo, và VNPay. Bạn có thể chọn phương thức thanh toán khi xác nhận đặt lịch.',
+    },
+    {
+      id: '4',
+      question: 'Tôi quên mật khẩu, làm sao?',
+      answer: 'Bạn có thể khôi phục mật khẩu bằng cách nhấn "Quên mật khẩu" trên màn hình đăng nhập và làm theo hướng dẫn.',
+    },
+    {
+      id: '5',
+      question: 'Điểm tích lũy là gì?',
+      answer: 'Mỗi lần sử dụng dịch vụ, bạn sẽ tích lũy điểm dựa trên giá trị đơn hàng. Điểm có thể đổi voucher và quà tặng tại mục "Phần thưởng".',
+    },
+    {
+      id: '6',
+      question: 'Làm sao liên hệ với AutoWashPro?',
+      answer: 'Bạn có thể liên hệ qua hotline 1900 xxxx, email support@autowashpro.vn, hoặc chat trực tiếp với chúng tôi.',
+    },
+  ];
 
   const filteredFAQs = FAQS.filter(faq =>
     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||

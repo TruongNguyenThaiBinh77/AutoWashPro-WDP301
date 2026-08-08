@@ -13,11 +13,18 @@ import {
   ScreenContainer,
   Header,
 } from '../../src/components/common';
+import { useSystemConfig } from '../../src/contexts/ConfigContext';
 import { useColors } from '../../src/theme/ThemeContext';
 import { spacing } from '../../src/theme/spacing';
 
 export default function TermsScreen() {
   const colors = useColors();
+  const configs = useSystemConfig();
+
+  const cancelThresholdMinutes = configs?.LATE_CANCEL_THRESHOLD_MINUTES || 120;
+  const cancelThresholdText = cancelThresholdMinutes >= 60 
+    ? `${Math.floor(cancelThresholdMinutes / 60)} giờ` 
+    : `${cancelThresholdMinutes} phút`;
 
   const sections = [
     {
@@ -34,7 +41,7 @@ export default function TermsScreen() {
     },
     {
       title: '4. Đặt lịch và hủy đặt lịch',
-      content: 'Khi đặt lịch qua AutoWashPro, bạn đồng ý đến đúng giờ đã đặt. Bạn có thể hủy đặt lịch trước giờ hẹn ít nhất 2 giờ. Nếu không đến mà không hủy trước, chúng tôi có thể áp dụng các biện pháp phù hợp.',
+      content: `Khi đặt lịch qua AutoWashPro, bạn đồng ý đến đúng giờ đã đặt. Bạn có thể hủy đặt lịch miễn phí trước giờ hẹn ít nhất ${cancelThresholdText}. Nếu hủy muộn hoặc không đến, chúng tôi có thể áp dụng các biện pháp phạt theo chính sách.`,
     },
     {
       title: '5. Thanh toán',

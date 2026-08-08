@@ -114,10 +114,10 @@ exports.getLoyaltyConfig = async () => {
  */
 exports.updateLoyaltyConfig = async (data) => {
   if (data.baseEarningRate !== undefined) {
-    await configService.set({ key: 'LOYALTY_BASE_EARNING_RATE', value: Number(data.baseEarningRate), type: 'number', category: 'loyalty' });
+    await configService.set({ key: 'LOYALTY_BASE_EARNING_RATE', value: Number(data.baseEarningRate), type: 'number', category: 'loyalty', isPublic: true });
   }
   if (data.pointExpirationMonths !== undefined) {
-    await configService.set({ key: 'LOYALTY_EXPIRATION_MONTHS', value: Number(data.pointExpirationMonths), type: 'number', category: 'loyalty' });
+    await configService.set({ key: 'LOYALTY_EXPIRATION_MONTHS', value: Number(data.pointExpirationMonths), type: 'number', category: 'loyalty', isPublic: true });
   }
   if (Array.isArray(data.tiers)) {
     const newTiers = data.tiers.map((t) => {

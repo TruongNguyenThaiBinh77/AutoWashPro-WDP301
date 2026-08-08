@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CustomerPagination from '@/components/ui/CustomerPagination';
 import { showToast } from '@/lib/toast';
 import useSSE from '@/hooks/useSSE';
 
@@ -182,18 +183,7 @@ export default function CustomerNotificationsPage({ onBack, apiBase, token }) {
           </div>
         )}
 
-        {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
-            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">‹ Trước</button>
-            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(p => (
-              <button key={p} onClick={() => setPage(p)}
-                className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-emerald-600 text-white shadow-sm' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>{p}</button>
-            ))}
-            <button disabled={page >= pagination.totalPages} onClick={() => setPage(p => p + 1)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Sau ›</button>
-          </div>
-        )}
+        <CustomerPagination pagination={pagination} page={page} setPage={setPage} itemName="thông báo" />
       </main>
     </div>
   );

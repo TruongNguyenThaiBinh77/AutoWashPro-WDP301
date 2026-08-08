@@ -14,12 +14,14 @@ import {
   Animated,
   Pressable,
   LayoutChangeEvent,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { voucherApi, giftApi } from '../../src/api';
+import { useSystemConfig } from '../../src/contexts/ConfigContext';
+import { voucherApi, giftApi, rewardApi } from '../../src/api';
 import {
   Text as AppText,
   Card,
@@ -37,7 +39,7 @@ import { useColors } from '../../src/theme/ThemeContext';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius, shadows, layout } from '../../src/theme/spacing';
 import { formatCurrency, translateDynamicText } from '../../src/utils';
-import type { Voucher, UserVoucher, UserTier, Gift } from '../../src/types';
+import type { Voucher, UserVoucher, UserTier, Gift, PhysicalReward } from '../../src/types';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 type TabKey = 'available' | 'my';
@@ -64,22 +66,41 @@ const TIER_GRADIENTS: Record<UserTier, [string, string, string]> = {
 };
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-function nextTier(t: UserTier): string {
-  if (t === 'bronze') return 'Silver';
-  if (t === 'silver') return 'Gold';
-  if (t === 'gold')   return 'Diamond';
-  return '';
-}
+function computePointsToNext(tier: UserTier, points: number, loyaltyTiersConfig?: any[]) {
+  if (!Array.isArray(loyaltyTiersConfig) || loyaltyTiersConfig.length === 0) {
+    const thresholds: Record<UserTier, number> = { bronze: 100000, silver: 500000, gold: 1000000, diamond: 1000000 };
+    const prev: Record<UserTier, number>       = { bronze: 0,      silver: 100000, gold: 500000,  diamond: 1000000 };
+    if (tier === 'diamond') return null;
+    const next     = thresholds[tier];
+    const from     = prev[tier];
+    const progress = Math.min(1, Math.max(0, (points - from) / (next - from)));
+    const remaining = Math.max(0, next - points);
+    
+    let nextTierName = '';
+    if (tier === 'bronze') nextTierName = 'Silver';
+    else if (tier === 'silver') nextTierName = 'Gold';
+    else if (tier === 'gold') nextTierName = 'Diamond';
+    
+    return { progress, remaining, target: next, nextTierName };
+  }
 
-function computePointsToNext(tier: UserTier, points: number) {
-  const thresholds: Record<UserTier, number> = { bronze: 100000, silver: 500000, gold: 1000000, diamond: 1000000 };
-  const prev: Record<UserTier, number>       = { bronze: 0,      silver: 100000, gold: 500000,  diamond: 1000000 };
-  if (tier === 'diamond') return null;
-  const next     = thresholds[tier];
-  const from     = prev[tier];
-  const progress = Math.min(1, Math.max(0, (points - from) / (next - from)));
+  const sorted = [...loyaltyTiersConfig].sort((a, b) => (a.minPoints || 0) - (b.minPoints || 0));
+  const currentIndex = sorted.findIndex(t => t.id === tier);
+  
+  if (currentIndex === -1 || currentIndex === sorted.length - 1) {
+    return null;
+  }
+
+  const currentTierConfig = sorted[currentIndex];
+  const nextTierConfig = sorted[currentIndex + 1];
+  
+  const from = currentTierConfig.minPoints || 0;
+  const next = nextTierConfig.minPoints || 0;
+  
+  const progress = next > from ? Math.min(1, Math.max(0, (points - from) / (next - from))) : 1;
   const remaining = Math.max(0, next - points);
-  return { progress, remaining, target: next };
+  
+  return { progress, remaining, target: next, nextTierName: nextTierConfig.name };
 }
 
 function formatDate(dateStr?: string) {
@@ -300,7 +321,7 @@ const RewardHeroCard: React.FC<{
         <>
           <ProgressBar progress={pointsToNext.progress} />
           <Text style={hero.hint}>
-            {t('rewards.points_to_next', { points: pointsToNext.remaining.toLocaleString('vi-VN'), tier: nextTier(tier) })}
+            {t('rewards.points_to_next', { points: pointsToNext.remaining.toLocaleString('vi-VN'), tier: pointsToNext.nextTierName })}
           </Text>
         </>
       )}
@@ -745,6 +766,7 @@ const vc = StyleSheet.create({
 export default function RewardsScreen() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
+  const configs = useSystemConfig();
   const { t, i18n } = useTranslation();
   const colors = useColors();
 
@@ -830,7 +852,7 @@ export default function RewardsScreen() {
   const tier           = (user?.tier || 'bronze') as UserTier;
   const points         = user?.loyaltyPoints || 0;
   const lifetimePoints = user?.lifetimePoints || 0;
-  const pointsToNext   = computePointsToNext(tier, lifetimePoints);
+  const pointsToNext   = computePointsToNext(tier, lifetimePoints, configs?.LOYALTY_TIERS);
 
   return (
     <ScreenContainer background="subtle">
@@ -954,6 +976,39 @@ export default function RewardsScreen() {
             </ScrollView>
           </>
         )}
+
+        {/* ── Cửa hàng Đổi điểm ── */}
+        <SectionHeader
+          title="Cửa hàng quà tặng"
+          subtitle="Dùng điểm tích luỹ đổi phần quà độc quyền"
+        />
+        <PressableScale
+          onPress={() => router.push('/rewards/store' as any)}
+          style={{
+            marginHorizontal: 20, // matching other sections
+            marginBottom: 32,
+            borderRadius: 16,
+            overflow: 'hidden',
+            backgroundColor: colors.primary + '10', // soft tinted background
+            borderWidth: 1,
+            borderColor: colors.primary + '20',
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, gap: 16 }}>
+             <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }}>
+                <Icon name={Icons.giftOutline} size={24} color="#FFFFFF" />
+             </View>
+             <View style={{ flex: 1 }}>
+                <AppText variant="label" style={{ color: colors.primary, fontWeight: '700', fontSize: 16 }}>
+                  Vào Cửa Hàng Quà Vật Lý
+                </AppText>
+                <AppText variant="caption" style={{ color: colors.primary + 'CC', marginTop: 2 }}>
+                  Khám phá danh sách quà tặng
+                </AppText>
+             </View>
+             <Icon name={Icons.forward} size={20} color={colors.primary} />
+          </View>
+        </PressableScale>
 
         {/* ── Coupon Section ── */}
         <SectionHeader

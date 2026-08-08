@@ -16,7 +16,7 @@ const getDayBounds = (dateStr) => ({
   lte: new Date(`${dateStr}T23:59:59.999+07:00`),
 });
 
-const ACTIVE_SLOT_STATUSES = ['pending', 'confirmed', 'checked_in'];
+const ACTIVE_SLOT_STATUSES = ['pending', 'confirmed', 'checked_in', 'in_progress'];
 
 /**
  * Kiểm tra và bảo đảm sức chứa cho một branch trước khi tạo booking.
@@ -37,6 +37,26 @@ exports.checkCapacity = async ({ branch, bookingStr, startTime, endTime, userId,
 
   // 1. Pessimistic Lock trên Branch
   await Branch.findByIdAndUpdate(branchId, { $set: { _lastBookingLock: new Date() } }, { session });
+
+  // 1.5 Kiểm tra cấu hình lịch của chi nhánh (ngày nghỉ, khóa khung giờ)
+  if (branch.scheduleConfig) {
+    if (branch.scheduleConfig.daysOff && branch.scheduleConfig.daysOff.includes(bookingStr)) {
+      return { hasConflict: true, conflictReason: 'BRANCH_OFF', conflictingBookings: [] };
+    }
+    if (branch.scheduleConfig.blockedSlots && branch.scheduleConfig.blockedSlots.length > 0) {
+      const ns = parseTime(startTime);
+      const ne = parseTime(endTime);
+      const isBlocked = branch.scheduleConfig.blockedSlots.some(bs => {
+        if (bs.date !== bookingStr) return false;
+        const bStart = parseTime(bs.startTime);
+        const bEnd = parseTime(bs.endTime);
+        return bStart !== null && bEnd !== null && isSlotOverlap(ns, ne, bStart, bEnd);
+      });
+      if (isBlocked) {
+        return { hasConflict: true, conflictReason: 'SLOT_BLOCKED', conflictingBookings: [] };
+      }
+    }
+  }
 
   // 2. Query booking đang hoạt động trong ngày
   const { gte, lte } = getDayBounds(bookingStr);

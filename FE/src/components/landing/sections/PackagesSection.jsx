@@ -16,6 +16,7 @@ export default function PackagesSection() {
   const [loading, setLoading] = useState(true);
   const configs = useSystemConfig();
   const depositPercent = configs?.DEPOSIT_RATE ? Math.round(configs.DEPOSIT_RATE) : 0;
+  const vatRate = configs?.VAT_PERCENT ? Math.round(configs.VAT_PERCENT) : 10;
 
   useEffect(() => {
     async function fetchPackages() {
@@ -471,7 +472,7 @@ export default function PackagesSection() {
                                 )}
                               </div>
                               <p className={`text-[11px] font-medium -mt-4 ${pkg.popular || i === 1 ? 'text-emerald-100/80' : 'text-slate-400'}`}>
-                                * Giá đã bao gồm VAT 10%
+                                * Giá đã bao gồm VAT {vatRate}%
                               </p>
 
                               {pkg.slots && (

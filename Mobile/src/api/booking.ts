@@ -65,6 +65,7 @@ export const getMyBookings = async (params?: {
   dateFrom?: string;
   dateTo?: string;
   branchId?: string;
+  recurringGroupId?: string;
 }): Promise<{ data: Booking[]; pagination?: any }> => {
   const response = await apiClient.get('/bookings/my', { params });
   // Backend wraps list endpoints as { bookings: [...], pagination: {...} }
